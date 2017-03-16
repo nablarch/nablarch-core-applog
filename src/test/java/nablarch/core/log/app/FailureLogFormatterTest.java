@@ -1,7 +1,6 @@
 package nablarch.core.log.app;
 
 import nablarch.core.ThreadContext;
-import nablarch.core.db.util.DbUtil;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.message.MessageUtil;
 import nablarch.core.message.MockStringResourceHolder;
@@ -424,10 +423,10 @@ public class FailureLogFormatterTest extends LogTestSupport {
         // プロパティファイルに存在するパッケージの場合
 
         try {
-            DbUtil.getArraySize("");
+            nablarch.dummy.ExceptionThrower.throwException();
             fail("must throw exception.");
         } catch (Throwable e) {
-            error = new RuntimeException("dummy error", e);
+            error = new RuntimeException("nablarch.dummy error", e);
         }
 
         message = formatter.formatNotificationMessage(error, null, failureCode, new Object[] {"notification"});
@@ -490,7 +489,7 @@ public class FailureLogFormatterTest extends LogTestSupport {
         // 例外の発生元がフレームワークでない場合
 
         try {
-            DateUtil.getDate("dummy");
+            DateUtil.getDate("nablarch/dummy");
             fail("must throw exception.");
         } catch (Throwable e) {
             error = e;
