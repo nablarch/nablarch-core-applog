@@ -693,11 +693,6 @@ public class SynchronousFileLogWriterTest extends LogTestSupport {
         String lockFilePath = System.getProperty("java.io.tmpdir") + "/test.lock";
         new File(lockFilePath).delete();
 
-        Thread childThread = new Thread(new ChildThread(monitorFile, lockFilePath, 50));
-        childThread.start();
-
-        Thread.sleep(10);
-
 
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("monitorFile.filePath", "./log/lock-app.log");
@@ -712,9 +707,13 @@ public class SynchronousFileLogWriterTest extends LogTestSupport {
         writer.initialize(
                 new ObjectSettings(new MockLogSettings(settings), "monitorFile"));
 
+
+        Thread childThread = new Thread(new ChildThread(monitorFile, lockFilePath, 50));
+        childThread.start();
+
+        Thread.sleep(10);
         assertTrue(new File(lockFilePath).exists()); // ロックファイルは存在する！
-        writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[parentLog]]]",
-                null));
+        writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[parentLog]]]", null));
         assertFalse(new File(lockFilePath).exists()); // ロックファイルは存在しない！（存在するロックファイルが強制的に削除される）
 
         writer.terminate();
@@ -755,13 +754,6 @@ public class SynchronousFileLogWriterTest extends LogTestSupport {
         File monitorFile = LogTestUtil.cleanupLog("/lock-app.log");
         String lockFilePath = System.getProperty("java.io.tmpdir") + "/test.lock";
         new File(lockFilePath).delete();
-
-        Thread childThread = new Thread(new ChildThread(monitorFile, lockFilePath, 300));
-        childThread.start();
-
-        Thread.sleep(50);
-
-
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("monitorFile.filePath", "./log/lock-app.log");
         settings.put("monitorFile.encoding", "UTF-8");
@@ -774,6 +766,13 @@ public class SynchronousFileLogWriterTest extends LogTestSupport {
 
         writer.initialize(
                 new ObjectSettings(new MockLogSettings(settings), "monitorFile"));
+
+
+        Thread childThread = new Thread(new ChildThread(monitorFile, lockFilePath, 300));
+        childThread.start();
+
+        Thread.sleep(50);
+
 
         assertTrue(new File(lockFilePath).exists()); // ロックファイルは存在する！
         writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[parentLog]]]",
