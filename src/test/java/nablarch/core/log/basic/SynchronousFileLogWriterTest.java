@@ -474,7 +474,7 @@ public class SynchronousFileLogWriterTest extends LogTestSupport {
      * <p>
      * 想定動作：<br/>
      *  メインスレッドは以下のとおり動作する。<br/>
-     *  ・1回目の実行時（約10ミリ秒経過時）には、子スレッドがロックしているので、リトライを行う。<br/>
+     *  ・1回目の実行時（約25ミリ秒経過時）には、子スレッドがロックしているので、リトライを行う。<br/>
      *  ・3回目の実行時（約60ミリ秒経過時）には、子スレッドのロックが解除されているので、ロックの取得に成功し、ログを出力する。
      * </p>
      */
@@ -484,12 +484,6 @@ public class SynchronousFileLogWriterTest extends LogTestSupport {
         File monitorFile = LogTestUtil.cleanupLog("/lock-app.log");
         String lockFilePath = System.getProperty("java.io.tmpdir") + "/test.lock";
         new File(lockFilePath).delete();
-
-        Thread childThread = new Thread(new ChildThread(monitorFile, lockFilePath, 50));
-        childThread.start();
-
-        Thread.sleep(10);
-
 
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("monitorFile.filePath", "./log/lock-app.log");
@@ -504,6 +498,10 @@ public class SynchronousFileLogWriterTest extends LogTestSupport {
         writer.initialize(
                 new ObjectSettings(new MockLogSettings(settings), "monitorFile"));
 
+        Thread childThread = new Thread(new ChildThread(monitorFile, lockFilePath, 50));
+        childThread.start();
+        Thread.sleep(25);
+        
         assertTrue(new File(lockFilePath).exists()); // ロックファイルは存在する！
         writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[parentLog]]]",
                 null));
@@ -534,10 +532,10 @@ public class SynchronousFileLogWriterTest extends LogTestSupport {
      * <p>
      * 想定動作：<br/>
      *  メインスレッドは以下のとおり動作する。<br/>
-     *  ・1回目の実行時（約10ミリ秒経過時）には、子スレッドがロックしているので、リトライを行う。<br/>
-     *  ・2回目の実行時（約60ミリ秒経過時）には、子スレッドがロックしているので、リトライを行う。<br/>
-     *  ・3回目の実行時（約110ミリ秒経過時）には、子スレッドがロックしているので、リトライを行う。<br/>
-     *  ・3回目の実行時（約160ミリ秒経過時）には、子スレッドのロックが解除されているので、ロックの取得に成功し、ログを出力する。
+     *  ・1回目の実行時（約30ミリ秒経過時）には、子スレッドがロックしているので、リトライを行う。<br/>
+     *  ・2回目の実行時（約90ミリ秒経過時）には、子スレッドがロックしているので、リトライを行う。<br/>
+     *  ・3回目の実行時（約140ミリ秒経過時）には、子スレッドがロックしているので、リトライを行う。<br/>
+     *  ・3回目の実行時（約190ミリ秒経過時）には、子スレッドのロックが解除されているので、ロックの取得に成功し、ログを出力する。
      * </p>
      */
     @Test
@@ -547,10 +545,6 @@ public class SynchronousFileLogWriterTest extends LogTestSupport {
         String lockFilePath = System.getProperty("java.io.tmpdir") + "/test.lock";
         new File(lockFilePath).delete();
 
-        Thread childThread = new Thread(new ChildThread(monitorFile, lockFilePath, 150));
-        childThread.start();
-
-        Thread.sleep(10);
 
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("monitorFile.filePath", "./log/lock-app.log");
@@ -562,6 +556,10 @@ public class SynchronousFileLogWriterTest extends LogTestSupport {
 
         MockLockableFileLogWriter writer = new MockLockableFileLogWriter();
 
+        Thread childThread = new Thread(new ChildThread(monitorFile, lockFilePath, 150));
+        childThread.start();
+
+        Thread.sleep(30);
         writer.initialize(
                 new ObjectSettings(new MockLogSettings(settings), "monitorFile"));
 
