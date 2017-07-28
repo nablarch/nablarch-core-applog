@@ -55,7 +55,6 @@ test {
       '-XX:-UseSplitVerifier'
   )
 
-  ignoreFailures = true
 }
 
 task wrapper(type: Wrapper) {
