@@ -29,7 +29,6 @@
     <dependency>
       <groupId>com.nablarch.dev</groupId>
       <artifactId>nablarch-test-support</artifactId>
-      <version>0.0.8</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
