@@ -73,7 +73,7 @@ public class BasicLogFormatterTest extends LogTestSupport {
         
         for (LogLevel level : LogLevel.values()) {
             
-            String message = formatter.format(new LogContext("root", level, "想定していない例外が発生しました。",
+            String message = formatter.format(new LogContext("root", level, "想定していない例外が発生しました。\uD83D\uDE0E",
                                                              new IllegalArgumentException("userId was null."),
                                                              user, userId, name, price, c, date));
             
@@ -97,7 +97,7 @@ public class BasicLogFormatterTest extends LogTestSupport {
             assertThat(splitMsgs[index++], is("usr_id"));
             assertThat(splitMsgs[index++], is("="));
             assertThat(splitMsgs[index++], is("[0000000001]"));
-            assertThat(splitMsgs[index++], is("想定していない例外が発生しました。"));
+            assertThat(splitMsgs[index++], is("想定していない例外が発生しました。\uD83D\uDE0E"));
 
             assertThat(message, containsString("Object Information[0]: Class Name = [nablarch.core.log.basic.User]"));
             assertThat(message, containsString("id = [null]"));

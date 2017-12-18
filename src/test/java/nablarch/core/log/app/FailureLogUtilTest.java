@@ -29,7 +29,7 @@ public class FailureLogUtilTest extends LogTestSupport {
     private static final String[][] MESSAGES = {
         { "FW000001", "ja", "FW000001メッセージ{0}", "en","FW000001Message{0}"},
         { "FW000002", "ja", "FW000002メッセージ{0}", "en","FW000002Message{0}" },
-        { "FW000003", "ja", "FW000003メッセージ{0}" , "en","FW000003Message{0}" },
+        { "FW000003", "ja", "FW000003メッセージ{0}:\uD83D\uDE0E\uD83D\uDE0E" , "en","FW000003Message{0}" },
         { "FW000004", "ja", "FW000004メッセージ{0}", "en","FW000004Message{0}"},
         { "FW000005", "ja", "FW000005メッセージ{0}", "en","FW000005Message{0}" },
         { "FW000006", "ja", "FW000006メッセージ{0}" , "en","FW000006Message{0}" },
@@ -88,7 +88,7 @@ public class FailureLogUtilTest extends LogTestSupport {
         // ERROR
         FailureLogUtil.logError(new IllegalArgumentException("error_full_error"), data, "FW000001", new Object[] {"error_full_messageOption"}, new Object[] {"error_full_logOption"});
         FailureLogUtil.logError(new IllegalArgumentException("error_short_error"), data, "FW000002", "error_short_messageOption");
-        FailureLogUtil.logError(data, "FW000003", "error_min_messageOption");
+        FailureLogUtil.logError(data, "FW000003", "error_min_messageOption-\uD83D\uDE0E\uD83D\uDE0E");
 
         // WARN
         FailureLogUtil.logWarn(new IllegalArgumentException("warn_short_error"), data, "FW000002", "warn_short_messageOption");
@@ -114,7 +114,7 @@ public class FailureLogUtilTest extends LogTestSupport {
 
         index++;
 
-        assertThat(monitorFile.get(index), is("FATAL fail_code = [FW000003] FW000003メッセージfatal_min_messageOption" + Logger.LS));
+        assertThat(monitorFile.get(index), is("FATAL fail_code = [FW000003] FW000003メッセージfatal_min_messageOption:\uD83D\uDE0E\uD83D\uDE0E" + Logger.LS));
         assertThat(appFile.get(index), containsString("FATAL ROO fail_code = [FW000003] FW000003メッセージfatal_min_messageOption"));
 
         // error_full
@@ -135,7 +135,7 @@ public class FailureLogUtilTest extends LogTestSupport {
 
         index++;
 
-        assertThat(monitorFile.get(index), is("ERROR fail_code = [FW000003] FW000003メッセージerror_min_messageOption" + Logger.LS));
+        assertThat(monitorFile.get(index), is("ERROR fail_code = [FW000003] FW000003メッセージerror_min_messageOption-\uD83D\uDE0E\uD83D\uDE0E:\uD83D\uDE0E\uD83D\uDE0E" + Logger.LS));
         assertThat(appFile.get(index), containsString("ERROR ROO fail_code = [FW000003] FW000003メッセージerror_min_messageOption"));
 
         // warn_short
