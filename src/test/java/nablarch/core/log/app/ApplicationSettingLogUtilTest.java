@@ -50,7 +50,7 @@ public class ApplicationSettingLogUtilTest extends LogTestSupport {
                 loadData.put("threadCount", "1000");
                 loadData.put("key1", "name1");
                 loadData.put("key2", "name2");
-                loadData.put("key3", "name3");
+                loadData.put("key3", "name3\uD83D\uDE0E\uD83D\uDE0E");
                 return loadData;
             }
         });
@@ -82,7 +82,7 @@ public class ApplicationSettingLogUtilTest extends LogTestSupport {
                 + "\tsystem settings = {\n"
                 + "\t\tfile.encoding = [utf-8]\n"
                 + "\t\tkey1 = [name1]\n"
-                + "\t\tkey3 = [name3]\n"
+                + "\t\tkey3 = [name3\uD83D\uDE0E\uD83D\uDE0E]\n"
                 + "\t\tnull = [null]\n"         // リポジトリに存在しない値はnullとなる。
                 + "\t}"));
     }
@@ -197,10 +197,10 @@ public class ApplicationSettingLogUtilTest extends LogTestSupport {
 
         assertThat(ApplicationSettingLogUtil.getAppSettingsLogMsg(),
                 equalToIgnoringWhiteSpace(
-                        "#### settings #### \n\t\tkey3 = [name3]:hogehogeSettings"));
+                        "#### settings #### \n\t\tkey3 = [name3\uD83D\uDE0E\uD83D\uDE0E]:hogehogeSettings"));
         assertThat(ApplicationSettingLogUtil.getAppSettingsWithDateLogMsg(),
                 equalToIgnoringWhiteSpace("#### date & settings ####"
-                        + " 20111201:\n\t\tkey3 = [name3]:hogehogeSettings"));
+                        + " 20111201:\n\t\tkey3 = [name3\uD83D\uDE0E\uD83D\uDE0E]:hogehogeSettings"));
     }
 
     public static class TestFormatter extends ApplicationSettingLogFormatter {
