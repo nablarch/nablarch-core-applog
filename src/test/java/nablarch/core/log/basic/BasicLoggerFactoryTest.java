@@ -284,7 +284,37 @@ public class BasicLoggerFactoryTest extends LogTestSupport {
         assertFalse(monitoringLog.contains(
                 "LOGGER = [root] NAME REGEX = [.*] LEVEL = [WARN]"));
     }
-    
+
+    /**
+     * 実行時ロガー名が出力されること。
+     */
+    @Test
+    public void testRuntimeLoggerName() {
+
+        File appFile = LogTestUtil.cleanupLog("/default-app.log");
+        File sqlFile = LogTestUtil.createFile("/default-sql.log");
+        File monitorFile = LogTestUtil.createFile("/default-monitoring.log");
+
+        LogSettings settings = new MockLogSettings("classpath:nablarch/core/log/basic/log-with-rutime-logger-name.properties");
+        factory = new BasicLoggerFactory();
+        factory.initialize(settings);
+        Logger logger = factory.get("TEST");
+        Logger anotherLogger = factory.get("TEST2");
+        logger.logWarn("実行時ロガー名がTESTで出力");
+        anotherLogger.logWarn("実行時ロガー名がTEST2で出力");
+        logger.logWarn("実行時ロガーがそれぞれ使えること");
+        factory.terminate();
+
+        String appLog = LogTestUtil.getLog(appFile);
+
+        assertTrue(appLog.contains(
+                "[root] [TEST] 実行時ロガー名がTESTで出力"));
+        assertTrue(appLog.contains(
+                "[root] [TEST2] 実行時ロガー名がTEST2で出力"));
+        assertTrue(appLog.contains(
+                "[root] [TEST] 実行時ロガーがそれぞれ使えること"));
+    }
+
     /**
      * 2ファイルへ書き込みできる。
      */

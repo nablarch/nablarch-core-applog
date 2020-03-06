@@ -379,7 +379,7 @@ public class BasicLogFormatterTest extends LogTestSupport {
         long price = 2000000;
         
         Map<String, String> settings = new HashMap<String, String>();
-        settings.put("formatter.format", "$date$ <$logLevel$> $loggerName$ [$executionId$]"
+        settings.put("formatter.format", "$date$ <$logLevel$> $loggerName$ $runtimeLoggerName$ [$executionId$]"
                                          + " boot_proc : [$bootProcess$] proc_sys : [$processingSystem$]"
                                          + " req_id : [$requestId$] usr_id : [$userId$]"
                                          + " $message$$stackTrace$$information$");
@@ -391,7 +391,7 @@ public class BasicLogFormatterTest extends LogTestSupport {
         
         for (LogLevel level : LogLevel.values()) {
             
-            String message = formatter.format(new LogContext("root", level, "想定していない例外が発生しました。",
+            String message = formatter.format(new LogContext("root", "nablarch.core.log.basic.BasicLogFormatterTest", level, "想定していない例外が発生しました。",
                                                              new IllegalArgumentException("userId was null."),
                                                              user, userId, name, price));
             
@@ -402,6 +402,7 @@ public class BasicLogFormatterTest extends LogTestSupport {
             assertNotNull(new SimpleDateFormat("HH-mm-ss[SSS]").parse(splitMsgs[index++]));
             assertThat(splitMsgs[index++], is("<" + level.name() + ">"));
             assertThat(splitMsgs[index++], is("root"));
+            assertThat(splitMsgs[index++], is("nablarch.core.log.basic.BasicLogFormatterTest"));
             assertTrue(Pattern.matches("^\\[.*\\]$", splitMsgs[index++]));
             assertThat(splitMsgs[index++], is("boot_proc"));
             assertThat(splitMsgs[index++], is(":"));
@@ -431,7 +432,7 @@ public class BasicLogFormatterTest extends LogTestSupport {
             assertThat(message, containsString("toString() = [2000000]"));
         }
     }
-    
+
     /**
      * 末尾にLFが追加されること。
      */
