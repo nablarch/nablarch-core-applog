@@ -66,7 +66,7 @@ public class LogContext {
     }
 
     /**
-     * 実行時ロガー名をコンストラクタ。
+     * 実行時ロガー名を付与するコンストラクタ。
      * @param loggerName ロガー名
      * @param runtimeLoggerName 実行時ロガー名
      * @param level {@link LogLevel}
@@ -96,8 +96,8 @@ public class LogContext {
     }
 
     /**
-     * 実行時にロガーを取得したときの名称を取得する。
-     * @return 実行時にロガーを取得したときの名称
+     * ロガーを取得したときの名称を実行時ロガー名として取得する。
+     * @return ロガーを取得したときの名称
      */
     public String getRuntimeLoggerName() {
         return runtimeLoggerName;

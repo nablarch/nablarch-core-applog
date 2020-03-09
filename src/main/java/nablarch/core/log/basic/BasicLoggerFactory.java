@@ -347,6 +347,7 @@ public class BasicLoggerFactory implements LoggerFactory {
 
         /**
          * この{@link Logger}定義を使用して生成した{@link Logger}を取得する。
+         * @param runtimeName ロガーに付与する実行時名称
          * @return {@link Logger}
          */
         private Logger getLogger(String runtimeName) {
