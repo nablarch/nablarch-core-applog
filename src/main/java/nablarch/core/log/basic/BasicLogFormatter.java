@@ -71,7 +71,7 @@ import nablarch.core.util.annotation.Published;
  *     エラー情報に指定された例外オブジェクトのスタックトレース。
  *     エラー情報の指定がない場合は表示しない。
  * </pre>
- * デフォルトのフォーマットを下記に示す。
+ * フォーマット指定が無い場合に使用するフォーマットを下記に示す。
  * <br>
  * $date$ -$logLevel$- $loggerName$ [$executionId$]
  * boot_proc = [$bootProcess$] proc_sys = [$processingSystem$]
@@ -98,7 +98,7 @@ public class BasicLogFormatter implements LogFormatter {
     /** デフォルトの日時フォーマット */
     private static final DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     
-    /** デフォルトのフォーマット */
+    /** フォーマット指定が無い場合に使用するフォーマット */
     private static final String DEFAULT_FORMAT
         = "$date$ -$logLevel$- $loggerName$ [$executionId$]"
             + " boot_proc = [$bootProcess$] proc_sys = [$processingSystem$]"
