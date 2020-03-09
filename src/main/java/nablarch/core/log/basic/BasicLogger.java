@@ -58,11 +58,8 @@ public class BasicLogger implements Logger {
      * @param runtimeName 実行時ロガー名
      */
     BasicLogger(BasicLogger src, String runtimeName) {
-        this.name = src.name;
-        this.baseLevel = src.baseLevel;
-        this.writers = src.writers;
+        this(src.name, src.baseLevel, src.writers);
         this.runtimeName = runtimeName;
-        initializeLogLevelEnabled();
     }
 
     /**
