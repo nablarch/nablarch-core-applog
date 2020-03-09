@@ -42,8 +42,9 @@ import nablarch.core.util.annotation.Published;
  *     このログ出力が対応するロガー設定の名称。
  *     プロパティファイルでロガー設定を行う際に指定した名称となる。
  * $runtimeLoggerName$
- *     このログ出力を呼び出したクラス名。
- *     {@link nablarch.core.log.LoggerManager#get(Class)}で指定したクラス名となる。
+ *     実行時にこのログ出力を呼び出したロガーの名称。
+ *     {@link nablarch.core.log.LoggerManager#get(Class)}で指定したクラス名
+ *     または{@link nablarch.core.log.LoggerManager#get(String)}で指定した名称となる。
  * $bootProcess$
  *     起動プロセスを識別する名前。
  *     起動プロセスは、システムプロパティ"nablarch.bootProcess"から取得する。

@@ -54,15 +54,7 @@ public class LogContext {
      * @param options オプション情報(nullでも可)
      */
     public LogContext(String loggerName, LogLevel level, String message, Throwable error, Object... options) {
-        this.loggerName = loggerName;
-        this.level = level;
-        this.message = message;
-        this.error = error;
-        this.options = options;
-        this.date = new Date();
-        this.userId = ThreadContext.getUserId();
-        this.requestId = ThreadContext.getRequestId();
-        this.executionId = ThreadContext.getExecutionId();
+        this(loggerName, null, level, message, error, options);
     }
 
     /**
