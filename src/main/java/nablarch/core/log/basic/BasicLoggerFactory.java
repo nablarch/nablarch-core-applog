@@ -294,9 +294,6 @@ public class BasicLoggerFactory implements LoggerFactory {
         /** ロガー名 */
         private String name;
 
-        /** 実行ロガー名 */
-        private String runtimeName;
-        
         /** {@link Logger}名に対するマッチングに使用する正規表現 */
         private String nameRegex;
         
