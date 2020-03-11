@@ -40,7 +40,11 @@ import nablarch.core.util.annotation.Published;
  *     文言はプロパティファイルの設定で変更することができる。
  * $loggerName$
  *     このログ出力が対応するロガー設定の名称。
- *     プロパティファイルでロガー設定を行う際に指定した名称となる。
+ *     このログ出力を呼び出した箇所に関わらず、プロパティファイル(log.properties)に記載したロガー名となる。
+ * $runtimeLoggerName$
+ *     実行時に、{@link nablarch.core.log.LoggerManager}からロガー取得に指定した名称。
+ *     このログ出力を呼び出した際に{@link nablarch.core.log.LoggerManager#get(Class)}で指定したクラス名
+ *     または{@link nablarch.core.log.LoggerManager#get(String)}で指定した名称となる。
  * $bootProcess$
  *     起動プロセスを識別する名前。
  *     起動プロセスは、システムプロパティ"nablarch.bootProcess"から取得する。
@@ -68,7 +72,7 @@ import nablarch.core.util.annotation.Published;
  *     エラー情報に指定された例外オブジェクトのスタックトレース。
  *     エラー情報の指定がない場合は表示しない。
  * </pre>
- * デフォルトのフォーマットを下記に示す。
+ * フォーマット指定が無い場合に使用するフォーマットを下記に示す。
  * <br>
  * $date$ -$logLevel$- $loggerName$ [$executionId$]
  * boot_proc = [$bootProcess$] proc_sys = [$processingSystem$]
@@ -95,7 +99,7 @@ public class BasicLogFormatter implements LogFormatter {
     /** デフォルトの日時フォーマット */
     private static final DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     
-    /** デフォルトのフォーマット */
+    /** フォーマット指定が無い場合に使用するフォーマット */
     private static final String DEFAULT_FORMAT
         = "$date$ -$logLevel$- $loggerName$ [$executionId$]"
             + " boot_proc = [$bootProcess$] proc_sys = [$processingSystem$]"
@@ -124,6 +128,7 @@ public class BasicLogFormatter implements LogFormatter {
     protected Map<String, LogItem<LogContext>> getLogItems(ObjectSettings settings) {
         Map<String, LogItem<LogContext>> logItemCandidates = new HashMap<String, LogItem<LogContext>>();
         logItemCandidates.put("$loggerName$", new LoggerNameItem());
+        logItemCandidates.put("$runtimeLoggerName$", new RuntimeLoggerNameItem());
         logItemCandidates.put("$bootProcess$", new BootProcessItem());
         logItemCandidates.put("$processingSystem$", new ProcessingSystemItem(settings.getLogSettings().getProps().get("nablarch.processingSystem")));
         logItemCandidates.put("$requestId$", new RequestIdItem());
@@ -231,7 +236,20 @@ public class BasicLogFormatter implements LogFormatter {
          */
         public String get(LogContext context) { return context.getLoggerName(); }
     }
-    
+
+    /**
+     * 実行時ロガー名を取得するクラス。
+     * @author Yutaka Kanayama
+     */
+    public static class RuntimeLoggerNameItem implements LogItem<LogContext> {
+        /**
+         * 実行時ロガー名を取得する。
+         * @param context ログコンテキスト
+         * @return 実行時ロガー名
+         */
+        public String get(LogContext context) { return context.getRuntimeLoggerName(); }
+    }
+
     /**
      * 起動プロセスを取得するクラス。
      * @author Kiyohito Itoh

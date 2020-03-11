@@ -17,7 +17,10 @@ public class LogContext {
     
     /** ロガー名 */
     private String loggerName;
-    
+
+    /**実行時ロガー名 */
+    private String runtimeLoggerName;
+
     /** {@link LogLevel} */
     private LogLevel level;
     
@@ -51,7 +54,21 @@ public class LogContext {
      * @param options オプション情報(nullでも可)
      */
     public LogContext(String loggerName, LogLevel level, String message, Throwable error, Object... options) {
+        this(loggerName, null, level, message, error, options);
+    }
+
+    /**
+     * 実行時ロガー名を付与するコンストラクタ。
+     * @param loggerName ロガー名
+     * @param runtimeLoggerName 実行時ロガー名
+     * @param level {@link LogLevel}
+     * @param message メッセージ
+     * @param error エラー情報(nullでも可)
+     * @param options オプション情報(nullでも可)
+     */
+    public LogContext(String loggerName, String runtimeLoggerName, LogLevel level, String message, Throwable error, Object... options) {
         this.loggerName = loggerName;
+        this.runtimeLoggerName = runtimeLoggerName;
         this.level = level;
         this.message = message;
         this.error = error;
@@ -68,6 +85,14 @@ public class LogContext {
      */
     public String getLoggerName() {
         return loggerName;
+    }
+
+    /**
+     * ロガーを取得したときの名称を実行時ロガー名として取得する。
+     * @return ロガーを取得したときの名称
+     */
+    public String getRuntimeLoggerName() {
+        return runtimeLoggerName;
     }
 
     /**

@@ -12,6 +12,9 @@ public class BasicLogger implements Logger {
 
     /** ロガー名 */
     private String name;
+
+    /** 実行時のロガー名 */
+    private String runtimeName;
     
     /** ログの出力制御の基準とする{@link LogLevel} */
     private LogLevel baseLevel;
@@ -49,7 +52,16 @@ public class BasicLogger implements Logger {
         this.writers = writers;
         initializeLogLevelEnabled();
     }
-    
+    /**
+     * {@link BasicLogger}をコピーし実行時ロガー名を付与するコンストラクタ。
+     * @param src コピー元{@link BasicLogger}
+     * @param runtimeName 実行時ロガー名
+     */
+    BasicLogger(BasicLogger src, String runtimeName) {
+        this(src.name, src.baseLevel, src.writers);
+        this.runtimeName = runtimeName;
+    }
+
     /**
      * ロガー定義が存在しないロガー名が指定された場合に、
      * 何もしない{@link Logger}を生成するためのコンストラクタ。
@@ -200,7 +212,7 @@ public class BasicLogger implements Logger {
      * @param options オプション情報(nullでも可)
      */
     private void log(LogLevel level, String message, Throwable error, Object... options) {
-        LogContext context = new LogContext(name, level, message, error, options);
+        LogContext context = new LogContext(name, runtimeName,level, message, error, options);
         for (LogWriter writer : writers) {
             try {
                 writer.write(context);

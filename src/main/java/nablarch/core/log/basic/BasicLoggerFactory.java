@@ -229,7 +229,7 @@ public class BasicLoggerFactory implements LoggerFactory {
         }
         for (LoggerDefinition loggerDefinition : loggerDefinitions) {
             if (loggerDefinition.matches(name)) {
-                return loggerDefinition.getLogger();
+                return loggerDefinition.getLogger(name);
             }
         }
         return NULL_LOGGER;
@@ -293,7 +293,7 @@ public class BasicLoggerFactory implements LoggerFactory {
         
         /** ロガー名 */
         private String name;
-        
+
         /** {@link Logger}名に対するマッチングに使用する正規表現 */
         private String nameRegex;
         
@@ -341,7 +341,16 @@ public class BasicLoggerFactory implements LoggerFactory {
         private Logger getLogger() {
             return logger;
         }
-        
+
+        /**
+         * この{@link Logger}定義を使用して生成した{@link Logger}を取得する。
+         * @param runtimeName ロガーに付与する実行時名称
+         * @return {@link Logger}
+         */
+        private Logger getLogger(String runtimeName) {
+            return new BasicLogger((BasicLogger) logger, runtimeName);
+        }
+
         /**
          * ログの出力先となる{@link LogWriter}を取得する。
          * @return ログの出力先となる{@link LogWriter}
