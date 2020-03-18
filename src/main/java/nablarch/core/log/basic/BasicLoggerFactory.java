@@ -333,14 +333,6 @@ public class BasicLoggerFactory implements LoggerFactory {
         private boolean matches(String loggerName) {
             return pattern.matcher(loggerName).matches();
         }
-        
-        /**
-         * この{@link Logger}定義を使用して生成した{@link Logger}を取得する。
-         * @return {@link Logger}
-         */
-        private Logger getLogger() {
-            return logger;
-        }
 
         /**
          * この{@link Logger}定義を使用して生成した{@link Logger}を取得する。
