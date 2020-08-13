@@ -41,7 +41,7 @@ public class BasicCommitLogger implements CommitLogger {
      * {@inheritDoc}
      * コミット件数及び、総コミット件数を初期化(0クリア)する。
      */
-    public void initialize() {
+    public synchronized void initialize() {
         commitCount = 0;
         totalCommitCount = 0;
         initialized = true;
