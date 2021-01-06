@@ -11,6 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author Tanaka Tomoyuki
  */
 public class LogPublisher implements LogWriter {
+    /** ログの公開先となる{@link LogListener}のリスト。 */
     private static final CopyOnWriteArrayList<LogListener> LISTENERS = new CopyOnWriteArrayList<LogListener>();
 
     /**
