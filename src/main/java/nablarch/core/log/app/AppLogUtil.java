@@ -19,7 +19,7 @@ public final class AppLogUtil {
     /** {@link LogSettings}を生成する{@link ObjectCreator} */
     private static final ObjectCreator<LogSettings> LOG_SETTINGS_CREATOR = new ObjectCreator<LogSettings>() {
         public LogSettings create() {
-            String filePath = System.getProperty("nablarch.appLog.filePath", "classpath:app-log.properties");
+            String filePath = getFilePath();
             return new LogSettings(filePath);
         }
     };
@@ -34,5 +34,9 @@ public final class AppLogUtil {
     public static Map<String, String> getProps() {
         LogSettings settings = LogUtil.getObjectBoundToClassLoader(LOG_SETTINGS_CREATOR);
         return settings.getProps();
+    }
+
+    public static final String getFilePath() {
+        return System.getProperty("nablarch.appLog.filePath", "classpath:app-log.properties");
     }
 }
