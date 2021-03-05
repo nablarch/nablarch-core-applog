@@ -61,7 +61,7 @@ public class ObjectSettings {
      * オブジェクトに対する設定を取得する。
      * @return オブジェクトに対する設定
      */
-    private Map<String, String> getProps() {
+    protected Map<String, String> getProps() {
         return props;
     }
     
