@@ -27,17 +27,17 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
     /** 連絡先の項目名 */
     private static final String TARGET_NAME_CONTACT = "contact";
 
-    /** リクエスト処理開始時の出力項目を取得する際に使用するプロパティ名 */
+    /** 障害通知ログの出力項目を取得する際に使用するプロパティ名 */
     private static final String PROPS_NOTIFICATION_TARGETS = PROPS_PREFIX + "notificationTargets";
-    /** hiddenパラメータ復号後の出力項目を取得する際に使用するプロパティ名 */
+    /** 障害解析ログの出力項目を取得する際に使用するプロパティ名 */
     private static final String PROPS_ANALYSIS_TARGETS = PROPS_PREFIX + "analysisTargets";
 
-    /** フォーマット指定が無い場合に使用する出力項目のデフォルト値 */
+    /** 出力項目のデフォルト値 */
     private static final String DEFAULT_TARGETS = "failureCode,message";
 
-    /** ログ出力項目 */
-    private List<JsonLogObjectBuilder<FailureLogContext>> notificationstructuredTargets;
-    /** ログ出力項目 */
+    /** 障害通知ログの出力項目 */
+    private List<JsonLogObjectBuilder<FailureLogContext>> notificationStructuredTargets;
+    /** 障害解析ログの出力項目 */
     private List<JsonLogObjectBuilder<FailureLogContext>> analysisStructuredTargets;
 
     /** 各種ログのJSONフォーマット支援オブジェクト */
@@ -50,7 +50,7 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
     protected void initializeFormat(Map<String, String> props) {
         support = new JsonLogFormatterSupport(PROPS_PREFIX);
 
-        notificationstructuredTargets = getStructuredTargets(AppLogUtil.getProps(), PROPS_NOTIFICATION_TARGETS);
+        notificationStructuredTargets = getStructuredTargets(AppLogUtil.getProps(), PROPS_NOTIFICATION_TARGETS);
         analysisStructuredTargets = getStructuredTargets(AppLogUtil.getProps(), PROPS_ANALYSIS_TARGETS);
     }
 
@@ -75,10 +75,10 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
             String key = target.trim();
             if (!StringUtil.isNullOrEmpty(key) && !keys.contains(key)) {
                 keys.add(key);
-                if (TARGET_NAME_FAILURE_CODE.equals(target)) { structuredTargets.add(new FailureCodeBuilder()); }
-                else if (TARGET_NAME_MESSAGE.equals(target)) { structuredTargets.add(new MessageBuilder()); }
-                else if (TARGET_NAME_DATA.equals(target)) { structuredTargets.add(new DataBuilder()); }
-                else if (TARGET_NAME_CONTACT.equals(target)) {
+                if (TARGET_NAME_FAILURE_CODE.equals(key)) { structuredTargets.add(new FailureCodeBuilder()); }
+                else if (TARGET_NAME_MESSAGE.equals(key)) { structuredTargets.add(new MessageBuilder()); }
+                else if (TARGET_NAME_DATA.equals(key)) { structuredTargets.add(new DataBuilder()); }
+                else if (TARGET_NAME_CONTACT.equals(key)) {
                     List<Map.Entry<String, String>> contactList = getContactList(props);
                     structuredTargets.add(new ContactBuilder(contactList));
                 } else {
@@ -106,7 +106,7 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
      * @return フォーマット済みのメッセージ
      */
     public String formatNotificationMessage(Throwable error, Object data, String failureCode, Object[] messageOptions) {
-        return format(notificationstructuredTargets, error, data, failureCode, messageOptions);
+        return format(notificationStructuredTargets, error, data, failureCode, messageOptions);
     }
 
     /**

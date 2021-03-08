@@ -59,7 +59,7 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
      */
     @Test
     public void testFormatWithTargets() {
-        System.setProperty("performanceLogFormatter.targets", "point,, point");
+        System.setProperty("performanceLogFormatter.targets", "point ,, point");
 
         PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
 

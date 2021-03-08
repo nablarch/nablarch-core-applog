@@ -1,5 +1,6 @@
 package nablarch.core.log.app;
 
+import nablarch.core.log.basic.FormatErrorSupport;
 import nablarch.core.log.basic.JsonLogObjectBuilder;
 import nablarch.core.text.json.JsonSerializationManager;
 import nablarch.core.text.json.JsonSerializationSettings;
@@ -7,7 +8,7 @@ import nablarch.core.util.FileUtil;
 import nablarch.core.util.ObjectUtil;
 import nablarch.core.util.StringUtil;
 
-import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.Map;
  * 各種ログのJSONフォーマットを支援するクラスです。
  * @author Shuji Kitamura
  */
-public class JsonLogFormatterSupport {
+public class JsonLogFormatterSupport implements FormatErrorSupport {
 
     /** 出力項目のプロパティ名 */
     private static final String PROPS_TARGETS = "targets";
@@ -142,13 +143,25 @@ public class JsonLogFormatterSupport {
             writer.write(getStructuredMessagePrefix());
             getSerializationManager().getSerializer(o).serialize(writer, o);
             return writer.toString();
-        } catch (IOException e) {
-            // StringWriterはIOExceptionをスローしない
-            e.printStackTrace();
+        } catch (Exception e) {
+            StringWriter sw;
+            PrintWriter pw = null;
+            try {
+                sw = new StringWriter();
+                pw = new PrintWriter(sw);
+                e.printStackTrace(pw);
+                outputFormatError(sw.toString());
+            } finally {
+                FileUtil.closeQuietly(pw);
+            }
         } finally {
             FileUtil.closeQuietly(writer);
         }
         return "format error";
     }
 
+    @Override
+    public void outputFormatError(String message) {
+        System.err.println(message);
+    }
 }

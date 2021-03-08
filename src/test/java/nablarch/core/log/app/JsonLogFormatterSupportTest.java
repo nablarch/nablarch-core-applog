@@ -1,10 +1,14 @@
 package nablarch.core.log.app;
 
 import nablarch.core.log.LogTestSupport;
+import nablarch.core.log.basic.CustomJsonSerializationManager;
 import nablarch.core.text.json.JsonSerializationManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.core.Is.is;
@@ -88,9 +92,9 @@ public class JsonLogFormatterSupportTest extends LogTestSupport {
     @Test
     public void testGetSerializationManagerClassName() {
         System.setProperty("xxxFormatter.jsonSerializationManagerClassName",
-                "nablarch.core.log.app.CustomJsonSerializationManager");
+                "nablarch.core.log.basic.CustomJsonSerializationManager");
         JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
-        assertThat(support.getSerializationManagerClassName(), is("nablarch.core.log.app.CustomJsonSerializationManager"));
+        assertThat(support.getSerializationManagerClassName(), is("nablarch.core.log.basic.CustomJsonSerializationManager"));
     }
 
     /**
@@ -110,7 +114,7 @@ public class JsonLogFormatterSupportTest extends LogTestSupport {
     @Test
     public void testgetSerializationManager() {
         System.setProperty("xxxFormatter.jsonSerializationManagerClassName",
-                "nablarch.core.log.app.CustomJsonSerializationManager");
+                "nablarch.core.log.basic.CustomJsonSerializationManager");
         JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
         assertThat(support.getSerializationManager(), is(instanceOf(CustomJsonSerializationManager.class)));
     }
@@ -131,11 +135,13 @@ public class JsonLogFormatterSupportTest extends LogTestSupport {
     @Test
     public void testSerializeError() {
         System.setProperty("xxxFormatter.jsonSerializationManagerClassName",
-                "nablarch.core.log.app.CustomJsonSerializationManager");
+                "nablarch.core.log.basic.CustomJsonSerializationManager");
         JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
         assertThat(support.getSerializationManager(), is(instanceOf(CustomJsonSerializationManager.class)));
 
-        assertThat(support.getStructuredMessage("test"), is("format error"));
+        Map<String, Object> structuredObject = new HashMap<String, Object>();
+        structuredObject.put("key", true);
+        assertThat(support.getStructuredMessage(structuredObject), is("format error"));
     }
 
 

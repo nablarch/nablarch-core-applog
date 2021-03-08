@@ -71,24 +71,24 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
             String key = target.trim();
             if (!StringUtil.isNullOrEmpty(key) && !keys.contains(key)) {
                 keys.add(key);
-                if (TARGET_NAME_POINT.equals(target)) { structuredTargets.add(new PerformanceJsonLogFormatter.PointBuilder()); }
-                else if (TARGET_NAME_RESULT.equals(target)) { structuredTargets.add(new PerformanceJsonLogFormatter.ResultBuilder()); }
-                else if (TARGET_NAME_START_TIME.equals(target)) { structuredTargets.add(new PerformanceJsonLogFormatter.StartTimeBuilder()); }
-                else if (TARGET_NAME_END_TIME.equals(target)) { structuredTargets.add(new PerformanceJsonLogFormatter.EndTimeBuilder()); }
-                else if (TARGET_NAME_EXECUTION_TIME.equals(target)) { structuredTargets.add(new PerformanceJsonLogFormatter.ExecutionTimeBuilder()); }
-                else if (TARGET_NAME_MAX_MEMORY.equals(target)) {
+                if (TARGET_NAME_POINT.equals(key)) { structuredTargets.add(new PerformanceJsonLogFormatter.PointBuilder()); }
+                else if (TARGET_NAME_RESULT.equals(key)) { structuredTargets.add(new PerformanceJsonLogFormatter.ResultBuilder()); }
+                else if (TARGET_NAME_START_TIME.equals(key)) { structuredTargets.add(new PerformanceJsonLogFormatter.StartTimeBuilder()); }
+                else if (TARGET_NAME_END_TIME.equals(key)) { structuredTargets.add(new PerformanceJsonLogFormatter.EndTimeBuilder()); }
+                else if (TARGET_NAME_EXECUTION_TIME.equals(key)) { structuredTargets.add(new PerformanceJsonLogFormatter.ExecutionTimeBuilder()); }
+                else if (TARGET_NAME_MAX_MEMORY.equals(key)) {
                     structuredTargets.add(new PerformanceJsonLogFormatter.MaxMemoryBuilder());
                     hasMemoryItem = true;
-                } else if (TARGET_NAME_START_FREE_MEMORY.equals(target)) {
+                } else if (TARGET_NAME_START_FREE_MEMORY.equals(key)) {
                     structuredTargets.add(new PerformanceJsonLogFormatter.StartFreeMemoryBuilder());
                     hasMemoryItem = true;
-                } else if (TARGET_NAME_END_FREE_MEMORY.equals(target)) {
+                } else if (TARGET_NAME_END_FREE_MEMORY.equals(key)) {
                     structuredTargets.add(new PerformanceJsonLogFormatter.EndFreeMemoryBuilder());
                     hasMemoryItem = true;
-                } else if (TARGET_NAME_START_USED_MEMORY.equals(target)) {
+                } else if (TARGET_NAME_START_USED_MEMORY.equals(key)) {
                     structuredTargets.add(new PerformanceJsonLogFormatter.StartUsedMemoryBuilder());
                     hasMemoryItem = true;
-                } else if (TARGET_NAME_END_USED_MEMORY.equals(target)) {
+                } else if (TARGET_NAME_END_USED_MEMORY.equals(key)) {
                     structuredTargets.add(new PerformanceJsonLogFormatter.EndUsedMemoryBuilder());
                     hasMemoryItem = true;
                 } else {
