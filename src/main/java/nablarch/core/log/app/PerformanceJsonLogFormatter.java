@@ -58,6 +58,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
      * フォーマットの初期化
      * @param props 各種ログ出力の設定情報
      */
+    @Override
     protected void initializeFormat(Map<String, String> props) {
         support = new JsonLogFormatterSupport(PROPS_PREFIX, DEFAULT_TARGETS);
 
@@ -105,6 +106,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
      * @param context パフォーマンスログのコンテキスト情報
      * @return フォーマット済みのメッセージ
      */
+    @Override
     protected String formatMessage(PerformanceLogContext context) {
         return support.getStructuredMessage(structuredTargets, context);
     }

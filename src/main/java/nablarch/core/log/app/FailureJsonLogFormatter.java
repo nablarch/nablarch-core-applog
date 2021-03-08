@@ -47,6 +47,7 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
      * フォーマットの初期化
      * @param props 各種ログ出力の設定情報
      */
+    @Override
     protected void initializeFormat(Map<String, String> props) {
         support = new JsonLogFormatterSupport(PROPS_PREFIX);
 
@@ -105,6 +106,7 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
      * @param messageOptions 障害コードからメッセージを取得する際に使用するオプション情報
      * @return フォーマット済みのメッセージ
      */
+    @Override
     public String formatNotificationMessage(Throwable error, Object data, String failureCode, Object[] messageOptions) {
         return format(notificationStructuredTargets, error, data, failureCode, messageOptions);
     }
@@ -123,6 +125,7 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
      * @param messageOptions 障害コードからメッセージを取得する際に使用するオプション情報
      * @return フォーマット済みのメッセージ
      */
+    @Override
     public String formatAnalysisMessage(Throwable error, Object data, String failureCode, Object[] messageOptions) {
         return format(analysisStructuredTargets, error, data, failureCode, messageOptions);
     }

@@ -10,6 +10,7 @@ public class JsonCommitLogger extends BasicCommitLogger {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected String formatForIncrement(long count) {
         return "$JSON${\"commitCount\":" + count + '}';
     }
@@ -17,6 +18,7 @@ public class JsonCommitLogger extends BasicCommitLogger {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected String formatForTerminate(long count) {
         return "$JSON${\"totalCommitCount\":" + count + '}';
     }

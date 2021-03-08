@@ -3,6 +3,7 @@ package nablarch.core.log.app;
 import nablarch.core.date.BusinessDateUtil;
 import nablarch.core.repository.SystemRepository;
 import nablarch.core.util.StringUtil;
+import nablarch.core.util.annotation.Published;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +40,7 @@ public class ApplicationSettingJsonLogFormatter extends ApplicationSettingLogFor
      * システムプロパティで指定されたパスを使用する。
      * @return 生成したアプリケーション設定ログ
      */
+    @Override
     public String getAppSettingsLogMsg() {
         Map<String, Object> appSettings = new HashMap<String, Object>();
         appSettings.put("systemSettings", getSystemSettings());
@@ -51,6 +53,7 @@ public class ApplicationSettingJsonLogFormatter extends ApplicationSettingLogFor
      * 業務日付は{@link BusinessDateUtil#getDate()}を利用して取得する。
      * @return 生成したアプリケーション設定ログ
      */
+    @Override
     public String getAppSettingsWithDateLogMsg() {
         Map<String, Object> appSettings = new HashMap<String, Object>();
         appSettings.put("systemSettings", getSystemSettings());
