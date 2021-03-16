@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -19,6 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThrows;
 
 /**
  * {@link FailureJsonLogFormatter}のテストクラス。
@@ -205,9 +207,17 @@ public class FailureJsonLogFormatterTest extends LogTestSupport {
     /**
      * 不正なターゲットのテスト。
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testIllegalTargets() {
         System.setProperty("failureLogFormatter.notificationTargets", "failureCode,message,dummy,contact");
-        FailureLogFormatter formatter = new FailureJsonLogFormatter();
+
+        Exception e = assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
+            @Override
+            public void run() throws Throwable {
+                FailureLogFormatter formatter = new FailureJsonLogFormatter();
+            }
+        });
+
+        assertThat(e.getMessage(), is("[dummy] is unknown target. property name = [failureLogFormatter.notificationTargets]"));
     }
 }

@@ -4,11 +4,13 @@ import nablarch.core.log.LogTestSupport;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThrows;
 
 /**
  * {@link PerformanceJsonLogFormatter}のテストクラス。
@@ -84,9 +86,16 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
     /**
      * 不正なターゲットのテスト。
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testIllegalTargets() {
         System.setProperty("performanceLogFormatter.targets", "executionTime,dummy");
-        PerformanceJsonLogFormatter formatter = new PerformanceJsonLogFormatter();
+
+        Exception e = assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
+            @Override
+            public void run() throws Throwable {
+                PerformanceJsonLogFormatter formatter = new PerformanceJsonLogFormatter();            }
+        });
+
+        assertThat(e.getMessage(), is("[dummy] is unknown target. property name = [performanceLogFormatter.targets]"));
     }
 }
