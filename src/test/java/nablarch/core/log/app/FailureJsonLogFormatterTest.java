@@ -15,11 +15,15 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
+/**
+ * {@link FailureJsonLogFormatter}のテストクラス。
+ * @author Shuji Kitamura
+ */
 public class FailureJsonLogFormatterTest extends LogTestSupport {
 
     @Rule

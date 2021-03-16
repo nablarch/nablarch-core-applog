@@ -2,6 +2,7 @@ package nablarch.core.log.app;
 
 import nablarch.core.log.basic.JsonLogObjectBuilder;
 import nablarch.core.util.StringUtil;
+import nablarch.core.util.annotation.Published;
 
 import java.util.*;
 
@@ -21,6 +22,7 @@ import java.util.*;
  * </pre>
  * @author Shuji Kitamura
  */
+@Published(tag = "architect")
 public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
 
     /** ポイントの項目名 */
@@ -120,6 +122,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, PerformanceLogContext context) {
             structuredObject.put(TARGET_NAME_POINT, context.getPoint());
         }
@@ -134,6 +137,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, PerformanceLogContext context) {
             structuredObject.put(TARGET_NAME_RESULT, context.getResult());
         }
@@ -148,6 +152,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, PerformanceLogContext context) {
             structuredObject.put(TARGET_NAME_START_TIME, context.getStartTime());
         }
@@ -162,6 +167,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, PerformanceLogContext context) {
             structuredObject.put(TARGET_NAME_END_TIME, context.getEndTime());
         }
@@ -176,6 +182,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, PerformanceLogContext context) {
             structuredObject.put(TARGET_NAME_EXECUTION_TIME, context.getExecutionTime());
         }
@@ -190,6 +197,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, PerformanceLogContext context) {
             structuredObject.put(TARGET_NAME_MAX_MEMORY, context.getMaxMemory());
         }
@@ -204,6 +212,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, PerformanceLogContext context) {
             structuredObject.put(TARGET_NAME_START_FREE_MEMORY, context.getStartFreeMemory());
         }
@@ -218,6 +227,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, PerformanceLogContext context) {
             structuredObject.put(TARGET_NAME_END_FREE_MEMORY, context.getEndFreeMemory());
         }
@@ -232,6 +242,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, PerformanceLogContext context) {
             structuredObject.put(TARGET_NAME_START_USED_MEMORY, context.getStartUsedMemory());
         }
@@ -246,6 +257,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, PerformanceLogContext context) {
             structuredObject.put(TARGET_NAME_END_USED_MEMORY, context.getEndUsedMemory());
         }

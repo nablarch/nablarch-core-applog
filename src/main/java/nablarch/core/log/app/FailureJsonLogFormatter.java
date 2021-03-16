@@ -3,6 +3,7 @@ package nablarch.core.log.app;
 import nablarch.core.ThreadContext;
 import nablarch.core.log.basic.JsonLogObjectBuilder;
 import nablarch.core.util.StringUtil;
+import nablarch.core.util.annotation.Published;
 
 import java.util.*;
 
@@ -16,6 +17,7 @@ import java.util.*;
  * </pre>
  * @author Shuji Kitamura
  */
+@Published(tag = "architect")
 public class FailureJsonLogFormatter extends FailureLogFormatter {
 
     /** 障害コードの項目名 */
@@ -162,6 +164,7 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, FailureLogContext context) {
             structuredObject.put(TARGET_NAME_FAILURE_CODE, context.getFailureCode());
         }
@@ -176,6 +179,7 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, FailureLogContext context) {
             structuredObject.put(TARGET_NAME_MESSAGE, context.getMessage());
         }
@@ -190,6 +194,7 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, FailureLogContext context) {
             structuredObject.put(TARGET_NAME_DATA, context.getData());
         }
@@ -215,6 +220,7 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, FailureLogContext context) {
             String requestId = ThreadContext.getRequestId();
             structuredObject.put(TARGET_NAME_CONTACT, findEntryValue(contacts, requestId));

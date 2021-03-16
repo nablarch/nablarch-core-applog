@@ -11,11 +11,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
 /**
- * {@link JsonLogFormatterSupport}のテスト。
+ * {@link JsonLogFormatterSupport}のテストクラス。
  * @author Shuji Kitamura
  */
 public class JsonLogFormatterSupportTest extends LogTestSupport {

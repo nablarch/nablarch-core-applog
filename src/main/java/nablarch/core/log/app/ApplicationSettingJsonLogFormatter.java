@@ -27,6 +27,7 @@ import java.util.Map;
  *
  * @author Shuji Kitamura
  */
+@Published(tag = "architect")
 public class ApplicationSettingJsonLogFormatter extends ApplicationSettingLogFormatter {
 
     private final JsonLogFormatterSupport support = new JsonLogFormatterSupport(PROPS_PREFIX);

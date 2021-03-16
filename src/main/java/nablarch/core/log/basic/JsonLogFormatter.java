@@ -9,6 +9,7 @@ import nablarch.core.text.json.JsonSerializer;
 import nablarch.core.util.FileUtil;
 import nablarch.core.util.ObjectUtil;
 import nablarch.core.util.StringUtil;
+import nablarch.core.util.annotation.Published;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -84,6 +85,7 @@ import java.util.*;
  *
  * @author Shuji Kitamura
  */
+@Published(tag = "architect")
 public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
 
     /** 出力日時の項目名 */
@@ -141,6 +143,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
      * <br>
      * 出力項目を初期化する。
      */
+    @Override
     public void initialize(ObjectSettings settings) {
         serializationManager = createSerializationManager(settings);
         structuredTargets = createStructuredTargets(settings);
@@ -219,6 +222,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String format(LogContext context) {
         Map<String, Object> structuredObject = createStructuredObject(context);
         JsonSerializer serializer = serializationManager.getSerializer(structuredObject);
@@ -262,6 +266,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void outputFormatError(String message) {
         System.err.println(message);
     }
@@ -275,6 +280,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, LogContext context) {
             structuredObject.put(TARGET_NAME_DATE, context.getDate());
         }
@@ -300,6 +306,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, LogContext context) {
             structuredObject.put(TARGET_NAME_LOG_LEVEL,
                 levelLabelProvider.getLevelLabel(context.getLevel()));
@@ -315,6 +322,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, LogContext context) {
             structuredObject.put(TARGET_NAME_LOGGER_NAME, context.getLoggerName());
         }
@@ -329,6 +337,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, LogContext context) {
             structuredObject.put(TARGET_NAME_RUNTIME_LOGGER_NAME, context.getRuntimeLoggerName());
         }
@@ -343,6 +352,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, LogContext context) {
             structuredObject.put(TARGET_NAME_BOOT_PROCESS, LogUtil.getBootProcess());
         }
@@ -368,6 +378,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, LogContext context) {
             structuredObject.put(TARGET_NAME_PROCESSING_SYSTEM, processingSystem);
         }
@@ -382,6 +393,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, LogContext context) {
             structuredObject.put(TARGET_NAME_REQUEST_ID, context.getRequestId());
         }
@@ -396,6 +408,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, LogContext context) {
             structuredObject.put(TARGET_NAME_EXECUTION_ID, context.getExecutionId());
         }
@@ -410,6 +423,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, LogContext context) {
             structuredObject.put(TARGET_NAME_USER_ID, context.getUserId());
         }
@@ -435,6 +449,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, LogContext context) {
             if (context.getMessage() == null) {
                 structuredObject.put(TARGET_NAME_MESSAGE, null);
@@ -457,6 +472,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, LogContext context) {
             Throwable error = context.getError();
             if (error == null) {
@@ -494,6 +510,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void build(Map<String, Object> structuredObject, LogContext context) {
             if (context.getOptions() != null) {
                 boolean isIllegalObject;
@@ -518,6 +535,5 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
             }
         }
     }
-
 
 }

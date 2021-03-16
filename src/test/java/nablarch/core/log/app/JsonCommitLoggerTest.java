@@ -3,11 +3,10 @@ package nablarch.core.log.app;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * {@link nablarch.core.log.app.JsonCommitLogger}のテストクラス。
- *
  * @author Shuji Kitamura
  */
 public class JsonCommitLoggerTest {
