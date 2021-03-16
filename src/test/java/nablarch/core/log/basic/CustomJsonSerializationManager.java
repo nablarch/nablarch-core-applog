@@ -5,6 +5,8 @@ import nablarch.core.text.json.*;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * テスト用にカスタマイズしたシリアライズ管理クラス。
@@ -14,14 +16,17 @@ import java.io.Writer;
  */
 public class CustomJsonSerializationManager extends JsonSerializationManager {
 
-    protected void enlistSerializer(JsonSerializationSettings settings) {
-        addSerializer(new StringToJsonSerializer());
-        addSerializer(new DateToJsonSerializer());
-        addSerializer(new CustomMapToJsonSerializer(this));
-        addSerializer(new ListToJsonSerializer(this));
-        addSerializer(new ArrayToJsonSerializer(this));
-        addSerializer(new CustomBooleanToJsonSerializer());
-        addSerializer(new LocalDateTimeToJsonSerializer());
+    @Override
+    protected List<JsonSerializer> createSerializers(JsonSerializationSettings settings) {
+        return Arrays.asList(
+                new StringToJsonSerializer(),
+                new DateToJsonSerializer(this),
+                new CustomMapToJsonSerializer(this),
+                new ListToJsonSerializer(this),
+                new ArrayToJsonSerializer(this),
+                new CustomBooleanToJsonSerializer(),
+                new CalendarToJsonSerializer(this),
+                new LocalDateTimeToJsonSerializer(this));
     }
 
     public class CustomMapToJsonSerializer extends MapToJsonSerializer {
