@@ -65,22 +65,23 @@ import java.util.*;
  * requestId,userId,message,payload,stackTrace
  * <br>
  * <br>
- * プロパティファイルの記述ルールを下記に示す。
+ * プロパティファイルの記述ルールを下記に示す。<br>
+ * <br>
  * <dl>
- *   <dt>writer.&lt;{@link LogWriter}の名称&gt;.formatter.label.&lt;{@link LogLevel}の名称の小文字&gt;
+ *   <dt>writer.&lt;{@link LogWriter}の名称&gt;.formatter.label.&lt;{@link LogLevel}の名称の小文字&gt;<dt/>
  *   <dd>{@link LogLevel}に使用するラベル。オプション。<br>
- *       指定しなければ{@link LogLevel}の名称を使用する。
- *   <dt>writer.&lt;{@link LogWriter}の名称&gt;.formatter.targets
- *   <dd>出力項目。オプション。
- *   <dt>writer.&lt;{@link LogWriter}の名称&gt;.formatter.datePattern
+ *       指定しなければ{@link LogLevel}の名称を使用する。<dd/>
+ *   <dt>writer.&lt;{@link LogWriter}の名称&gt;.formatter.targets<dt/>
+ *   <dd>出力項目。オプション。<dd/>
+ *   <dt>writer.&lt;{@link LogWriter}の名称&gt;.formatter.datePattern<dt/>
  *   <dd>日時のフォーマットに使用するパターン。オプション。<br>
- *       指定しなければyyyy-MM-dd HH:mm:ss.SSSを使用する。
- *   <dt>writer.&lt;{@link LogWriter}の名称&gt;.formatter.jsonSerializationManagerClassName
+ *       指定しなければyyyy-MM-dd HH:mm:ss.SSSを使用する。<dd/>
+ *   <dt>writer.&lt;{@link LogWriter}の名称&gt;.formatter.jsonSerializationManagerClassName<dt/>
  *   <dd>JSONへのシリアライズを管理するクラス。オプション。<br>
- *       指定しなければ{@link nablarch.core.text.json.JsonSerializationManager}を使用する。
- *   <dt>writer.&lt;{@link LogWriter}の名称&gt;.formatter.structuredMessagePrefix
+ *       指定しなければ{@link nablarch.core.text.json.JsonSerializationManager}を使用する。<dd/>
+ *   <dt>writer.&lt;{@link LogWriter}の名称&gt;.formatter.structuredMessagePrefix<dt/>
  *   <dd>各種ログで使用される組み込み処理用の接頭区。オプション。<br>
- *       指定しなければ$JSON$を使用する。
+ *       指定しなければ$JSON$を使用する。<dd/>
  * </dl>
  *
  * @author Shuji Kitamura
