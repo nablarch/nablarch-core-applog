@@ -2,10 +2,10 @@ package nablarch.core.log.basic;
 
 import nablarch.core.log.LogUtil;
 import nablarch.core.log.Logger;
-import nablarch.core.text.json.InplaceMapEntries;
 import nablarch.core.text.json.JsonSerializationManager;
 import nablarch.core.text.json.JsonSerializationSettings;
 import nablarch.core.text.json.JsonSerializer;
+import nablarch.core.text.json.RawJsonObjectMembers;
 import nablarch.core.util.FileUtil;
 import nablarch.core.util.ObjectUtil;
 import nablarch.core.util.StringUtil;
@@ -457,7 +457,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
             } else if (context.getMessage().startsWith(structuredMessagePrefix)) {
                 String message = context.getMessage();
                 structuredObject.put(TARGET_NAME_MESSAGE,
-                        new InplaceMapEntries(message.substring(structuredMessagePrefix.length() + 1, message.length() - 1)));
+                        new RawJsonObjectMembers(message.substring(structuredMessagePrefix.length() + 1, message.length() - 1)));
             } else {
                 structuredObject.put(TARGET_NAME_MESSAGE, context.getMessage());
             }
