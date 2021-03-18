@@ -33,7 +33,7 @@ public class JsonLogFormatterSupport implements FormatErrorSupport {
     private static final String PROPS_SERIALIZATION_MANAGER_CLASS_NAME = "jsonSerializationManagerClassName";
 
     /** Jsonのシリアライズに使用する管理クラス名のデフォルト値 */
-    private static final String DEFAULT_SERIALIZATION_MANAGER_CLASS_NAME = "nablarch.core.text.json.JsonSerializationManager";
+    private static final String DEFAULT_SERIALIZATION_MANAGER_CLASS_NAME = "nablarch.core.text.json.BasicJsonSerializationManager";
 
     /** 各種ログの設定内容から値と取得するのに使用するプロパティ名のプリフィックス */
     private final String prefix;

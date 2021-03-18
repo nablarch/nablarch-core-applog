@@ -104,7 +104,7 @@ public class JsonLogFormatterSupportTest extends LogTestSupport {
     @Test
     public void testGetSerializationManagerClassNameFromDefault() {
         JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
-        assertThat(support.getSerializationManagerClassName(), is("nablarch.core.text.json.JsonSerializationManager"));
+        assertThat(support.getSerializationManagerClassName(), is("nablarch.core.text.json.BasicJsonSerializationManager"));
     }
 
     /**

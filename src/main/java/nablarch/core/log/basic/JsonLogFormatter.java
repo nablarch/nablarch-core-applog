@@ -78,7 +78,7 @@ import java.util.*;
  *       指定しなければyyyy-MM-dd HH:mm:ss.SSSを使用する。<dd/>
  *   <dt>writer.&lt;{@link LogWriter}の名称&gt;.formatter.jsonSerializationManagerClassName<dt/>
  *   <dd>JSONへのシリアライズを管理するクラス。オプション。<br>
- *       指定しなければ{@link nablarch.core.text.json.JsonSerializationManager}を使用する。<dd/>
+ *       指定しなければ{@link nablarch.core.text.json.BasicJsonSerializationManager}を使用する。<dd/>
  *   <dt>writer.&lt;{@link LogWriter}の名称&gt;.formatter.structuredMessagePrefix<dt/>
  *   <dd>各種ログで使用される組み込み処理用の接頭区。オプション。<br>
  *       指定しなければ$JSON$を使用する。<dd/>
@@ -131,7 +131,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
     /** Jsonのシリアライズに使用する管理クラス名のプロパティ名 */
     private static final String PROPS_SERIALIZATION_MANAGER_CLASS_NAME = "jsonSerializationManagerClassName";
     /** Jsonのシリアライズに使用する管理クラス名のデフォルト値 */
-    private static final String DEFAULT_SERIALIZATION_MANAGER_CLASS_NAME = "nablarch.core.text.json.JsonSerializationManager";
+    private static final String DEFAULT_SERIALIZATION_MANAGER_CLASS_NAME = "nablarch.core.text.json.BasicJsonSerializationManager";
 
     /** Jsonのシリアライズに使用する管理クラス */
     private JsonSerializationManager serializationManager;
