@@ -27,7 +27,7 @@ public class JsonLogFormatterSupport implements FormatErrorSupport {
     private static final String PROPS_STRUCTURED_MESSAGE_PREFIX = "structuredMessagePrefix";
 
     /** messageを構造化されていることを示す接頭区のデフォルト値 */
-    private static final String DEFAULT_STRUCTURED_MESSAGE_PREFIX = "$JSON$";
+    /* package-private */ static final String DEFAULT_STRUCTURED_MESSAGE_PREFIX = "$JSON$";
 
     /** Jsonのシリアライズに使用する管理クラス名のプロパティ名 */
     private static final String PROPS_SERIALIZATION_MANAGER_CLASS_NAME = "jsonSerializationManagerClassName";

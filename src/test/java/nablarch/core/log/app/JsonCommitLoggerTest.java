@@ -32,4 +32,18 @@ public class JsonCommitLoggerTest {
 
         assertThat(logger.formatForTerminate(10), is("$JSON${\"totalCommitCount\":10}"));
     }
+
+    /**
+     * {@link JsonCommitLogger#setStructuredMessagePrefix(String)}のテスト。
+     */
+    @Test
+    public void testSetStructuredMessagePrefix() {
+
+        JsonCommitLogger logger = new JsonCommitLogger();
+
+        logger.setStructuredMessagePrefix("@JSON@");
+
+        assertThat(logger.formatForIncrement(100), is("@JSON@{\"commitCount\":100}"));
+        assertThat(logger.formatForTerminate(1000), is("@JSON@{\"totalCommitCount\":1000}"));
+    }
 }
