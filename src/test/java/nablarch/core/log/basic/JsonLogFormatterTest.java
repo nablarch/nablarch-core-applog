@@ -307,7 +307,7 @@ public class JsonLogFormatterTest extends LogTestSupport {
     }
 
     /**
-     * 構造化済みメッセージの接頭区の変更ができること。
+     * 構造化済みメッセージの接頭辞の変更ができること。
      */
     @Test
     public void testFormatWithOtherStructuredMessage() {

@@ -23,10 +23,10 @@ public class JsonLogFormatterSupport implements FormatErrorSupport {
     /** 出力項目のプロパティ名 */
     private static final String PROPS_TARGETS = "targets";
 
-    /** messageを構造化されていることを示す接頭区のプロパティ名 */
+    /** messageを構造化されていることを示す接頭辞のプロパティ名 */
     private static final String PROPS_STRUCTURED_MESSAGE_PREFIX = "structuredMessagePrefix";
 
-    /** messageを構造化されていることを示す接頭区のデフォルト値 */
+    /** messageを構造化されていることを示す接頭辞のデフォルト値 */
     /* package-private */ static final String DEFAULT_STRUCTURED_MESSAGE_PREFIX = "$JSON$";
 
     /** Jsonのシリアライズに使用する管理クラス名のプロパティ名 */
@@ -84,8 +84,8 @@ public class JsonLogFormatterSupport implements FormatErrorSupport {
     }
 
     /**
-     * 各種ログの設定情報から構造化済みメッセージを示す接頭区を取得する。
-     * @return 構造化済みメッセージを示す接頭区
+     * 各種ログの設定情報から構造化済みメッセージを示す接頭辞を取得する。
+     * @return 構造化済みメッセージを示す接頭辞
      */
     public String getStructuredMessagePrefix() {
         String messagePrefix = AppLogUtil.getProps().get(prefix + PROPS_STRUCTURED_MESSAGE_PREFIX);

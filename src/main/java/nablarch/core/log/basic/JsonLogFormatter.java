@@ -80,7 +80,7 @@ import java.util.*;
  *   <dd>JSONへのシリアライズを管理するクラス。オプション。<br>
  *       指定しなければ{@link nablarch.core.text.json.BasicJsonSerializationManager}を使用する。<dd/>
  *   <dt>writer.&lt;{@link LogWriter}の名称&gt;.formatter.structuredMessagePrefix<dt/>
- *   <dd>各種ログで使用される組み込み処理用の接頭区。オプション。<br>
+ *   <dd>各種ログで使用される組み込み処理用の接頭辞。オプション。<br>
  *       指定しなければ$JSON$を使用する。<dd/>
  * </dl>
  *
@@ -123,9 +123,9 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
     private static final String DEFAULT_TARGETS = "date,logLevel,loggerName,executionId"
             + ",bootProcess,processingSystem,requestId,userId,message,payload,stackTrace";
 
-    /** messageを構造化されていることを示す接頭区のプロパティ名 */
+    /** messageを構造化されていることを示す接頭辞のプロパティ名 */
     private static final String PROPS_STRUCTURED_MESSAGE_PREFIX = "structuredMessagePrefix";
-    /** messageを構造化されていることを示す接頭区のデフォルト値 */
+    /** messageを構造化されていることを示す接頭辞のデフォルト値 */
     private static final String DEFAULT_STRUCTURED_MESSAGE_PREFIX = "$JSON$";
 
     /** Jsonのシリアライズに使用する管理クラス名のプロパティ名 */
@@ -204,9 +204,9 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
     }
 
     /**
-     * 構造化済みメッセージを示す接頭区を取得する。
+     * 構造化済みメッセージを示す接頭辞を取得する。
      * @param settings LogFormatterの設定
-     * @return 構造化済みメッセージを示す接頭区
+     * @return 構造化済みメッセージを示す接頭辞
      */
     public String getStructuredMessagePrefix(ObjectSettings settings) {
         String prefix = settings.getProp(PROPS_STRUCTURED_MESSAGE_PREFIX);
@@ -438,12 +438,12 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
      */
     private static class MessageBuilder implements JsonLogObjectBuilder<LogContext> {
 
-        /** 構造化済みメッセージであることを示す接頭区 */
+        /** 構造化済みメッセージであることを示す接頭辞 */
         private final String structuredMessagePrefix;
 
         /**
          * コンストラクタ。
-         * @param structuredMessagePrefix 構造化済みメッセージであることを示す接頭区
+         * @param structuredMessagePrefix 構造化済みメッセージであることを示す接頭辞
          */
         public MessageBuilder(String structuredMessagePrefix) {
             this.structuredMessagePrefix = structuredMessagePrefix;
