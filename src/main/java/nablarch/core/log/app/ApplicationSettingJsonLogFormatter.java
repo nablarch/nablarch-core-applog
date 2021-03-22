@@ -22,13 +22,7 @@ public class ApplicationSettingJsonLogFormatter extends ApplicationSettingLogFor
     private final JsonLogFormatterSupport support = new JsonLogFormatterSupport(PROPS_PREFIX);
 
     /**
-     * アプリケーション設定に関するログメッセージを生成する。
-     * <p/>
-     * ログ出力対象は、アプリケーション設定はプロパティファイル("classpath:app-log.properties")
-     * に記載されている項目となる。<br>
-     * システムプロパティ("nablarch.appLog.filePath")が指定されている場合は、
-     * システムプロパティで指定されたパスを使用する。
-     * @return 生成したアプリケーション設定ログ
+     * {@inheritDoc}
      */
     @Override
     public String getAppSettingsLogMsg() {
@@ -38,10 +32,7 @@ public class ApplicationSettingJsonLogFormatter extends ApplicationSettingLogFor
     }
 
     /**
-     * アプリケーション設定及び業務日付に関するログメッセージを生成する。
-     * <p/>
-     * 業務日付は{@link BusinessDateUtil#getDate()}を利用して取得する。
-     * @return 生成したアプリケーション設定ログ
+     * {@inheritDoc}
      */
     @Override
     public String getAppSettingsWithDateLogMsg() {

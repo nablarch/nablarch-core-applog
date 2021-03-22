@@ -51,8 +51,7 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
     private JsonLogFormatterSupport support;
 
     /**
-     * フォーマットの初期化
-     * @param props 各種ログ出力の設定情報
+     * {@inheritDoc}
      */
     @Override
     protected void initializeFormat(Map<String, String> props) {
@@ -102,18 +101,7 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
     }
 
     /**
-     * 障害通知ログのメッセージをフォーマットする。
-     * <pre>
-     * フォーマット対象の出力項目を下記に示す。
-     * 障害コード
-     * 障害コードから取得したメッセージ
-     * 派生元実行時ID
-     * </pre>
-     * @param error エラー情報
-     * @param data 処理対象データ
-     * @param failureCode 障害コード
-     * @param messageOptions 障害コードからメッセージを取得する際に使用するオプション情報
-     * @return フォーマット済みのメッセージ
+     * {@inheritDoc}
      */
     @Override
     public String formatNotificationMessage(Throwable error, Object data, String failureCode, Object[] messageOptions) {
@@ -121,18 +109,7 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
     }
 
     /**
-     * 障害解析ログのメッセージをフォーマットする。
-     * <pre>
-     * フォーマット対象の出力項目を下記に示す。
-     * 障害コード
-     * 障害コードから取得したメッセージ
-     * 派生元実行時ID
-     * </pre>
-     * @param error エラー情報
-     * @param data 処理対象データ
-     * @param failureCode 障害コード
-     * @param messageOptions 障害コードからメッセージを取得する際に使用するオプション情報
-     * @return フォーマット済みのメッセージ
+     * {@inheritDoc}
      */
     @Override
     public String formatAnalysisMessage(Throwable error, Object data, String failureCode, Object[] messageOptions) {

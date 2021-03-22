@@ -62,8 +62,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
     private JsonLogFormatterSupport support;
 
     /**
-     * フォーマットの初期化
-     * @param props 各種ログ出力の設定情報
+     * {@inheritDoc}
      */
     @Override
     protected void initializeFormat(Map<String, String> props) {
@@ -109,9 +108,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
     }
 
     /**
-     * パフォーマンスログのメッセージをフォーマットする。
-     * @param context パフォーマンスログのコンテキスト情報
-     * @return フォーマット済みのメッセージ
+     * {@inheritDoc}
      */
     @Override
     protected String formatMessage(PerformanceLogContext context) {

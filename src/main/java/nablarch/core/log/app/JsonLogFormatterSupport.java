@@ -160,6 +160,9 @@ public class JsonLogFormatterSupport implements FormatErrorSupport {
         return "format error";
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void outputFormatError(String message) {
         System.err.println(message);
