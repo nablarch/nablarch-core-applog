@@ -67,7 +67,9 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
             Map<String, String> props, String targetsPropName) {
 
         String targetsStr = props.get(targetsPropName);
-        if (StringUtil.isNullOrEmpty(targetsStr)) targetsStr = DEFAULT_TARGETS;
+        if (StringUtil.isNullOrEmpty(targetsStr)) {
+            targetsStr = DEFAULT_TARGETS;
+        }
 
         List<JsonLogObjectBuilder<FailureLogContext>> structuredTargets
                 = new ArrayList<JsonLogObjectBuilder<FailureLogContext>>();
