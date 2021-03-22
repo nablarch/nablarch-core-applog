@@ -30,6 +30,7 @@ import java.util.Map;
 @Published(tag = "architect")
 public class ApplicationSettingJsonLogFormatter extends ApplicationSettingLogFormatter {
 
+    /** 各種ログのJSONフォーマット支援オブジェクト */
     private final JsonLogFormatterSupport support = new JsonLogFormatterSupport(PROPS_PREFIX);
 
     /**
