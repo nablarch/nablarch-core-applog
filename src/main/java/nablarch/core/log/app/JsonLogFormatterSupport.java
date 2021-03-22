@@ -46,7 +46,7 @@ public class JsonLogFormatterSupport implements FormatErrorSupport {
 
     /**
      * コンストラクタ。
-     * @param prefix 各種ログの設定内容から値と取得するのに使用するプロパティ名のプリフィックス、
+     * @param prefix 各種ログの設定内容から値を取得するのに使用するプロパティ名のプリフィックス
      */
     public JsonLogFormatterSupport(String prefix) {
         this(prefix, null);
@@ -54,8 +54,8 @@ public class JsonLogFormatterSupport implements FormatErrorSupport {
 
     /**
      * コンストラクタ。
-     * @param prefix 各種ログの設定内容から値と取得するのに使用するプロパティ名のプリフィックス、
-     * @param defaultTargets デフォルトの出力項目。
+     * @param prefix 各種ログの設定内容から値を取得するのに使用するプロパティ名のプリフィックス
+     * @param defaultTargets デフォルトの出力項目
      */
     public JsonLogFormatterSupport(String prefix, String defaultTargets) {
         this.prefix = prefix;
@@ -68,7 +68,7 @@ public class JsonLogFormatterSupport implements FormatErrorSupport {
 
     /**
      * 出力項目のプロパティ名を取得する。
-     * @return 出力項目
+     * @return 出力項目のプロパティ名
      */
     public String getTargetsProperty() {
         return prefix + PROPS_TARGETS;
