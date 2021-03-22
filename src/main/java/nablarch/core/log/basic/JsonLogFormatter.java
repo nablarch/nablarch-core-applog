@@ -174,7 +174,9 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
         List<JsonLogObjectBuilder<LogContext>> list = new ArrayList<JsonLogObjectBuilder<LogContext>>();
 
         String targetsStr = settings.getProp(PROPS_TARGETS);
-        if (StringUtil.isNullOrEmpty(targetsStr)) targetsStr = DEFAULT_TARGETS;
+        if (StringUtil.isNullOrEmpty(targetsStr)) {
+            targetsStr = DEFAULT_TARGETS;
+        }
         String[] targets = targetsStr.split(",");
 
         Set<String> keys = new HashSet<String>(targets.length);
