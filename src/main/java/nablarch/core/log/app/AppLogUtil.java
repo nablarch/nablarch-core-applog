@@ -36,7 +36,11 @@ public final class AppLogUtil {
         return settings.getProps();
     }
 
-    public static final String getFilePath() {
+    /**
+     * 各種ログ設定のファイルパスを取得する。
+     * @return 各種ログ設定のファイルパス
+     */
+    public static String getFilePath() {
         return System.getProperty("nablarch.appLog.filePath", "classpath:app-log.properties");
     }
 }
