@@ -11,20 +11,8 @@ import java.util.Map;
 /**
  * アプリケーション設定に関するメッセージをJSON形式でフォーマットするクラス。
  * <p/>
- * 主に、{@link nablarch.core.repository.SystemRepository}内の設定値をログ出力する際に使用する。
+ * 基本的な仕様については、継承元クラスの{@link ApplicationSettingLogFormatter}を参照。
  * <p/>
- * ログ出力対象の設定値は、ログ設定ファイルに設定されたキー値によって決定される。
- * {@link SystemRepository}に格納されている値が、{@link String}以外のオブジェクトの場合には、文字列への変換({@code toString()})を行った結果の値をログに出力する。
- * <p/>
- * 以下に例を示す。
- * <pre>
- * ◆ログ設定ファイル
- * {@code
- * # 複数の設定値をログ出力したい場合には、以下のようにカンマ区切りで複数項目を列挙する。
- * applicationSettingLogFormatter.systemSettingItems = dbUser, dbUrl, threadCount
- * }
- * </pre>
- *
  * @author Shuji Kitamura
  */
 @Published(tag = "architect")

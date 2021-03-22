@@ -9,12 +9,17 @@ import java.util.*;
 
 /**
  * 障害通知ログと障害解析ログのメッセージをJSON形式でフォーマットするクラス。
- * <pre>
- *   failureCode: 障害コード
- *   message: メッセージ
- *   data: 処理対象データ
- *   contact: 連絡先
- * </pre>
+ * <p>
+ * {@link FailureLogFormatter}では、フォーマットとして出力内容をs呈するが、
+ * 本クラスでは、 notificationTargets および、analysisTargets プロパティにて、
+ * 出力項目を指定する。指定可能な出力項目は下記の通り。
+ * <ul>
+ * <li>failureCode: 障害コード</li>
+ * <li>message: メッセージ</li>
+ * <li>data: 処理対象データ</li>
+ * <li>contact: 連絡先</li>
+ * </ul>
+ * </p>
  * @author Shuji Kitamura
  */
 @Published(tag = "architect")

@@ -8,18 +8,23 @@ import java.util.*;
 
 /**
  *パフォーマンスログのメッセージをJSON形式でフォーマットするクラス。
- * <pre>
- *   point: ポイント
- *   result: 処理結果
- *   startTime: 開始日時
- *   endTime: 終了日時
- *   executionTime: 実行時間
- *   maxMemory: 最大メモリ量
- *   startFreeMemory: 開始時の空きメモリ量
- *   endFreeMemory: 終了時の空きメモリ量
- *   startUsedMemory: 開始時の使用メモリ量
- *   endUsedMemory: 終了時の使用メモリ量
- * </pre>
+ * <p>
+ * {@link PerformanceLogFormatter}では、フォーマットとして出力内容をs呈するが、
+ * 本クラスでは、 notificationTargets および、analysisTargets プロパティにて、
+ * 出力項目を指定する。指定可能な出力項目は下記の通り。
+ * <ul>
+ * <li>point: ポイント</li>
+ * <li>result: 処理結果</li>
+ * <li>startTime: 開始日時</li>
+ * <li>endTime: 終了日時</li>
+ * <li>executionTime: 実行時間</li>
+ * <li>maxMemory: 最大メモリ量</li>
+ * <li>startFreeMemory: 開始時の空きメモリ量</li>
+ * <li>endFreeMemory: 終了時の空きメモリ量</li>
+ * <li>startUsedMemory: 開始時の使用メモリ量</li>
+ * <li>endUsedMemory: 終了時の使用メモリ量</li>
+ * </ul>
+ * </p>
  * @author Shuji Kitamura
  */
 @Published(tag = "architect")
