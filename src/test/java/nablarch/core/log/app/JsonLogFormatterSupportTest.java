@@ -134,10 +134,10 @@ public class JsonLogFormatterSupportTest extends LogTestSupport {
      */
     @Test
     public void testSerializeError() {
+        // note CustomJsonSerializationManagerはbooleanを処理する際に、必ずIOExceptionをスローする
         System.setProperty("xxxFormatter.jsonSerializationManagerClassName",
                 "nablarch.core.log.basic.CustomJsonSerializationManager");
         JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
-        assertThat(support.getSerializationManager(), is(instanceOf(CustomJsonSerializationManager.class)));
 
         Map<String, Object> structuredObject = new HashMap<String, Object>();
         structuredObject.put("key", true);
