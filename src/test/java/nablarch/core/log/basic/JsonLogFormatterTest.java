@@ -41,32 +41,6 @@ public class JsonLogFormatterTest extends LogTestSupport {
     }
 
     /**
-     * Json形式で正しくフォーマットできること。
-     */
-    @Test
-    public void testFormat() {
-        System.setProperty("nablarch.bootProcess", "APP001");
-        System.setProperty("nablarch.processingSystem", "1");
-
-        ThreadContext.setUserId("0000000001");
-        ThreadContext.setRequestId("USERS00302");
-        ThreadContext.setExecutionId(LogUtil.generateExecutionId());
-
-        Logger logger = LoggerManager.get(JsonLogFormatterTest.class);
-
-        OnMemoryLogWriter.clear();
-
-        logger.logInfo("test_message");
-
-        List<String> messages = OnMemoryLogWriter.getMessages("writer.jsonLog");
-
-        assertThat(messages.get(0), isJson(allOf(
-                withJsonPath("$", hasEntry("bootProcess", "APP001")),
-                withJsonPath("$", hasEntry("logLevel", "INFO")),
-                withJsonPath("$", hasEntry("loggerName", "ROO")))));
-    }
-
-    /**
      * デフォルト設定で出力ができること。
      */
     @Test
