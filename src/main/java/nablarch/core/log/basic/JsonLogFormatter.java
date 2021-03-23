@@ -156,8 +156,10 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
      * @return Jsonのシリアライズに使用する管理クラス
      */
     protected JsonSerializationManager createSerializationManager(ObjectSettings settings) {
-        String prefix = settings.getProp(PROPS_SERIALIZATION_MANAGER_CLASS_NAME);
-        String className = !StringUtil.isNullOrEmpty(prefix) ? prefix : DEFAULT_SERIALIZATION_MANAGER_CLASS_NAME;
+        String className = settings.getProp(PROPS_SERIALIZATION_MANAGER_CLASS_NAME);
+        if (StringUtil.isNullOrEmpty(className)) {
+            className = DEFAULT_SERIALIZATION_MANAGER_CLASS_NAME;
+        }
         JsonSerializationManager serializationManager = ObjectUtil.createInstance(className);
         JsonSerializationSettings jsonSettings = new JsonSerializationSettings(settings.getProps());
         serializationManager.initialize(jsonSettings);
