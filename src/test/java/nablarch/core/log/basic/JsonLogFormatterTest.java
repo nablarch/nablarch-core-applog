@@ -338,6 +338,9 @@ public class JsonLogFormatterTest extends LogTestSupport {
     @Test
     public void testFormatWithOtherManager() {
 
+        // note CustomJsonSerializationManager クラスは、NumberToJsonSerializerが外されており、
+        //      JavaのNumber型がObjectToJsonSerializerにて処理され、JSONのstringとして出力される。
+
         LogFormatter formatter = new JsonLogFormatter();
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("formatter.targets", "logLevel,message,payload");
