@@ -129,7 +129,6 @@ public class FailureJsonLogFormatterTest extends LogTestSupport {
     @Test
     public void testFormatAnalysisMessageWithTargets() {
         System.setProperty("failureLogFormatter.analysisTargets", "failureCode ,message,data,,");
-        System.setProperty("failureLogFormatter.contactFilePath", "classpath:nablarch/core/log/app/failure-log-contact.properties");
 
         FailureLogFormatter formatter = new FailureJsonLogFormatter();
 
