@@ -100,10 +100,11 @@ public class FailureJsonLogFormatterTest extends LogTestSupport {
     public void testFormatNotificationWithTargets() {
         System.setProperty("failureLogFormatter.notificationTargets", "message , ,message,contact");
         System.setProperty("failureLogFormatter.contactFilePath", "classpath:nablarch/core/log/app/failure-log-contact.properties");
+        System.setProperty("failureLogFormatter.appFailureCodeFilePath", "classpath:nablarch/core/log/app/failure-log-appFailCode.properties");
 
         FailureLogFormatter formatter = new FailureJsonLogFormatter();
 
-        String failureCode = "FW000001";
+        String failureCode = "UM000001";
         Object data = new TreeMap<String, String>() {
             {
                 put("requestId", "REQ_TEST");
@@ -118,7 +119,7 @@ public class FailureJsonLogFormatterTest extends LogTestSupport {
         assertThat(message.startsWith("$JSON$"), is(true));
         assertThat(message.substring("$JSON$".length()), isJson(allOf(
                 withoutJsonPath("$.failureCode"),
-                withJsonPath("$", hasEntry("message", "FW000001Messagenotification")),
+                withJsonPath("$", hasEntry("message", "AP000001Messagenotification")),
                 withoutJsonPath("$.data"),
                 withJsonPath("$", hasEntry("contact", "AAA001")))));
     }
@@ -129,10 +130,11 @@ public class FailureJsonLogFormatterTest extends LogTestSupport {
     @Test
     public void testFormatAnalysisMessageWithTargets() {
         System.setProperty("failureLogFormatter.analysisTargets", "failureCode ,message,data,,");
+        System.setProperty("failureLogFormatter.appFailureCodeFilePath", "classpath:nablarch/core/log/app/failure-log-appFailCode.properties");
 
         FailureLogFormatter formatter = new FailureJsonLogFormatter();
 
-        String failureCode = "FW000001";
+        String failureCode = "UM000001";
         Object data = new TreeMap<String, String>() {
             {
                 put("requestId", "REQ_TEST");
@@ -146,8 +148,8 @@ public class FailureJsonLogFormatterTest extends LogTestSupport {
         String message = formatter.formatAnalysisMessage(null, data, failureCode, new Object[] {"error"});
         assertThat(message.startsWith("$JSON$"), is(true));
         assertThat(message.substring("$JSON$".length()), isJson(allOf(
-                withJsonPath("$", hasEntry("failureCode", "FW000001")),
-                withJsonPath("$", hasEntry("message", "FW000001Messageerror")),
+                withJsonPath("$", hasEntry("failureCode", "AP000001")),
+                withJsonPath("$", hasEntry("message", "AP000001Messageerror")),
                 withJsonPath("$.data", hasEntry("requestId", "REQ_TEST")),
                 withJsonPath("$.data", hasEntry("executionId", "EXE_TEST")),
                 withJsonPath("$.data", hasEntry("userId", "USR_TEST")),
