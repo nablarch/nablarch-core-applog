@@ -102,8 +102,6 @@ public class JsonLogFormatterTest extends LogTestSupport {
 
         LogLevel level = LogLevel.ERROR;
 
-        LogContext context = new LogContext(loggerName, level, msg, error);
-
         String message = formatter.format(new LogContext(loggerName, runtimeLoggerName, level, msg, error, payload1, payload2));
         assertThat(message, isJson(allOf(
                 withJsonPath("$", hasKey("date")),
