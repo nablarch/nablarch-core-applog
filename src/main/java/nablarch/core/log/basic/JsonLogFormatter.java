@@ -208,7 +208,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
      * @param settings LogFormatterの設定
      * @return 構造化済みメッセージを示す接頭辞
      */
-    public String getStructuredMessagePrefix(ObjectSettings settings) {
+    private String getStructuredMessagePrefix(ObjectSettings settings) {
         String prefix = settings.getProp(PROPS_STRUCTURED_MESSAGE_PREFIX);
         return !StringUtil.isNullOrEmpty(prefix) ? prefix : DEFAULT_STRUCTURED_MESSAGE_PREFIX;
     }
