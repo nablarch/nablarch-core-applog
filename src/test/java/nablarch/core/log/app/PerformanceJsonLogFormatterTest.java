@@ -42,7 +42,7 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
         String message = formatter.end(point, "success");
 
         assertThat(message.startsWith("$JSON$"), is(true));
-        assertThat(message.substring(6), isJson(allOf(
+        assertThat(message.substring("$JSON$".length()), isJson(allOf(
                 withJsonPath("$", hasEntry("point", "point0001")),
                 withJsonPath("$", hasEntry("result", "success")),
                 withJsonPath("$", hasKey("startTime")),
@@ -70,7 +70,7 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
         String message = formatter.end(point, "success");
 
         assertThat(message.startsWith("$JSON$"), is(true));
-        assertThat(message.substring(6), isJson(allOf(
+        assertThat(message.substring("$JSON$".length()), isJson(allOf(
                 withJsonPath("$", hasEntry("point", "point0001")),
                 withoutJsonPath("$.result"),
                 withoutJsonPath("$.startTime"),

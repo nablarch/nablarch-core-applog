@@ -228,7 +228,7 @@ public class ApplicationSettingLogUtilTest extends LogTestSupport {
 
         message = ApplicationSettingLogUtil.getAppSettingsWithDateLogMsg();
         assertThat(message.startsWith("$JSON$"), is(true));
-        assertThat(message.substring(6), isJson(allOf(
+        assertThat(message.substring("$JSON$".length()), isJson(allOf(
                 withJsonPath("$.systemSettings", hasEntry("key3", "name3\uD83D\uDE0E\uD83D\uDE0E")),
                 withJsonPath("$", hasEntry("businessDate", "20111201")))));
     }
