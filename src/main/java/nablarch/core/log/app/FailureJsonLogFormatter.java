@@ -57,8 +57,8 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
     protected void initializeFormat(Map<String, String> props) {
         support = new JsonLogFormatterSupport(PROPS_PREFIX);
 
-        notificationStructuredTargets = getStructuredTargets(AppLogUtil.getProps(), PROPS_NOTIFICATION_TARGETS);
-        analysisStructuredTargets = getStructuredTargets(AppLogUtil.getProps(), PROPS_ANALYSIS_TARGETS);
+        notificationStructuredTargets = getStructuredTargets(props, PROPS_NOTIFICATION_TARGETS);
+        analysisStructuredTargets = getStructuredTargets(props, PROPS_ANALYSIS_TARGETS);
     }
 
     /**
