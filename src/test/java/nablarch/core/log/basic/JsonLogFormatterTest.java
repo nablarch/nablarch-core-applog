@@ -107,7 +107,7 @@ public class JsonLogFormatterTest extends LogTestSupport {
                 withJsonPath("$", hasKey("date")),
                 withJsonPath("$", hasEntry("logLevel", "ERROR")),
                 withJsonPath("$", hasEntry("loggerName", "TestLogger")),
-                withoutJsonPath("$.runtimeLoggerName"),
+                withJsonPath("$", hasEntry("runtimeLoggerName", "TestLRuntimeLogger")),
                 withJsonPath("$", hasEntry("bootProcess", "APP001")),
                 withJsonPath("$", hasEntry("processingSystem", "1")),
                 withJsonPath("$", hasEntry("requestId", "USERS00302")),
@@ -121,34 +121,20 @@ public class JsonLogFormatterTest extends LogTestSupport {
     }
 
     /**
-     * 全項目の出力ができること。
+     * 出力項目を指定して出力ができること。
      */
     @Test
     public void testFormatWithAllTargets() {
-        System.setProperty("nablarch.bootProcess", "APP001");
-
-        ThreadContext.setUserId("0000000001");
-        ThreadContext.setRequestId("USERS00302");
-        String executionId = LogUtil.generateExecutionId();
-        ThreadContext.setExecutionId(executionId);
 
         LogFormatter formatter = new JsonLogFormatter();
         Map<String, String> settings = new HashMap<String, String>();
-        settings.put("nablarch.processingSystem", "1");
-        String targets = "date,logLevel,loggerName,runtimeLoggerName,bootProcess,processingSystem,"
-                + "requestId,executionId,userId,message,stackTrace,payload";
+        String targets = "logLevel,loggerName,message";
         settings.put("formatter.targets", targets);
         formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "formatter"));
 
         String loggerName = "TestLogger";
-        String runtimeLoggerName = "TestLRuntimeLogger";
         String msg = "TestMessage";
         Throwable error = null;
-        try {
-            errorMethod1();
-        } catch (Exception e) {
-            error = e;
-        }
 
         Map<String, Object> payload1 = new HashMap<String, Object>();
         payload1.put("key1", "value1");
@@ -159,24 +145,22 @@ public class JsonLogFormatterTest extends LogTestSupport {
 
         LogLevel level = LogLevel.ERROR;
 
-        LogContext context = new LogContext(loggerName, level, msg, error);
-
-        String message = formatter.format(new LogContext(loggerName, runtimeLoggerName, level, msg, error, payload1, payload2));
+        String message = formatter.format(new LogContext(loggerName, level, msg, error, payload1, payload2));
         assertThat(message, isJson(allOf(
-                withJsonPath("$", hasKey("date")),
+                withoutJsonPath("$.date"),
                 withJsonPath("$", hasEntry("logLevel", "ERROR")),
                 withJsonPath("$", hasEntry("loggerName", "TestLogger")),
-                withJsonPath("$", hasEntry("runtimeLoggerName", "TestLRuntimeLogger")),
-                withJsonPath("$", hasEntry("bootProcess", "APP001")),
-                withJsonPath("$", hasEntry("processingSystem", "1")),
-                withJsonPath("$", hasEntry("requestId", "USERS00302")),
-                withJsonPath("$", hasEntry("executionId", executionId)),
-                withJsonPath("$", hasEntry("userId", "0000000001")),
+                withoutJsonPath("$.runtimeLoggerName"),
+                withoutJsonPath("$.bootProcess"),
+                withoutJsonPath("$.processingSystem"),
+                withoutJsonPath("$.requestId"),
+                withoutJsonPath("$.executionId"),
+                withoutJsonPath("$.userId"),
                 withJsonPath("$", hasEntry("message", "TestMessage")),
-                withJsonPath("$", hasKey("stackTrace")),
-                withJsonPath("$", hasEntry("key1", "value1")),
-                withJsonPath("$", hasEntry("key2", "value2")),
-                withJsonPath("$", hasEntry("key3", "value3")))));
+                withoutJsonPath("$.stackTrace"),
+                withoutJsonPath("$.key1"),
+                withoutJsonPath("$.key2"),
+                withoutJsonPath("$.key3"))));
     }
 
     private void errorMethod1() {

@@ -59,12 +59,6 @@ import java.util.*;
  *     エラー情報に指定された例外オブジェクトのスタックトレース。
  *     エラー情報の指定がない場合は表示しない。
  * </pre>
- * フォーマット指定が無い場合に使用する出力項目を下記に示す。
- * <br>
- * date,logLevel,loggerName,executionId,bootProcess,processingSystem,
- * requestId,userId,message,payload,stackTrace
- * <br>
- * <br>
  * プロパティファイルの記述ルールを下記に示す。<br>
  * <br>
  * <dl>
@@ -72,7 +66,8 @@ import java.util.*;
  *   <dd>{@link LogLevel}に使用するラベル。オプション。<br>
  *       指定しなければ{@link LogLevel}の名称を使用する。<dd/>
  *   <dt>writer.&lt;{@link LogWriter}の名称&gt;.formatter.targets<dt/>
- *   <dd>出力項目。オプション。<dd/>
+ *   <dd>出力項目をカンマ区切りで指定する。オプション。
+ *       指定しなければ全ての出力項目が出力の対象となる。<dd/>
  *   <dt>writer.&lt;{@link LogWriter}の名称&gt;.formatter.datePattern<dt/>
  *   <dd>日時のフォーマットに使用するパターン。オプション。<br>
  *       指定しなければyyyy-MM-dd HH:mm:ss.SSSを使用する。<dd/>
@@ -120,8 +115,8 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
     /** 出力項目のプロパティ名 */
     private static final String PROPS_TARGETS = "targets";
     /** 出力項目のデフォルト値 */
-    private static final String DEFAULT_TARGETS = "date,logLevel,loggerName,executionId"
-            + ",bootProcess,processingSystem,requestId,userId,message,payload,stackTrace";
+    private static final String DEFAULT_TARGETS = "date,logLevel,loggerName,runtimeLoggerName,"
+            + "executionId,bootProcess,processingSystem,requestId,userId,message,payload,stackTrace";
 
     /** messageを構造化されていることを示す接頭辞のプロパティ名 */
     private static final String PROPS_STRUCTURED_MESSAGE_PREFIX = "structuredMessagePrefix";
