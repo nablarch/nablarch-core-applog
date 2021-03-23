@@ -112,7 +112,7 @@ public class JsonLogFormatterSupportTest extends LogTestSupport {
      * プロパティ指定
      */
     @Test
-    public void testgetSerializationManager() {
+    public void testGetSerializationManager() {
         System.setProperty("xxxFormatter.jsonSerializationManagerClassName",
                 "nablarch.core.log.basic.CustomJsonSerializationManager");
         JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
@@ -124,7 +124,7 @@ public class JsonLogFormatterSupportTest extends LogTestSupport {
      * デフォルト設定
      */
     @Test
-    public void testgetSerializationManagerFromDefault() {
+    public void testGetSerializationManagerFromDefault() {
         JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
         assertThat(support.getSerializationManager(), is(instanceOf(JsonSerializationManager.class)));
     }
