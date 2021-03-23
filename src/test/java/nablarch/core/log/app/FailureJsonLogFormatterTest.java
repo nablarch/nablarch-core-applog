@@ -57,16 +57,6 @@ public class FailureJsonLogFormatterTest extends LogTestSupport {
         System.clearProperty("failureLogFormatter.contactFilePath");
     }
 
-    @After
-    public void teardown() {
-        ThreadContext.clear();
-
-        System.clearProperty("failureLogFormatter.notificationTargets");
-        System.clearProperty("failureLogFormatter.analysisTargets");
-        System.clearProperty("failureLogFormatter.contactFilePath");
-    }
-
-
     /**
      * デフォルト設定でフォーマットされること。
      */

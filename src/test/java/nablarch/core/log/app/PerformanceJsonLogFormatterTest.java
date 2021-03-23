@@ -23,11 +23,6 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
         System.clearProperty("performanceLogFormatter.targets");
     }
 
-    @After
-    public void teardown() {
-        System.clearProperty("performanceLogFormatter.targets");
-    }
-
     /**
      * デフォルトの出力項目で正しくフォーマットされること。
      */
