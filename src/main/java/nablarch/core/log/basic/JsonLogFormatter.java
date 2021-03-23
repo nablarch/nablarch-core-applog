@@ -515,25 +515,27 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
          */
         @Override
         public void build(Map<String, Object> structuredObject, LogContext context) {
-            if (context.getOptions() != null) {
-                boolean isIllegalObject;
-                for (Object option : context.getOptions()) {
-                    isIllegalObject = false;
-                    if (option instanceof Map) {
-                        for(Map.Entry<?, ?> entry : ((Map<?, ?>)option).entrySet()) {
-                            if (entry.getKey() instanceof String) {
-                                structuredObject.put((String)entry.getKey(), entry.getValue());
-                            } else {
-                                isIllegalObject = true;
-                            }
+            if (context.getOptions() == null) {
+                return;
+            }
+
+            boolean isIllegalObject;
+            for (Object option : context.getOptions()) {
+                isIllegalObject = false;
+                if (option instanceof Map) {
+                    for (Map.Entry<?, ?> entry : ((Map<?, ?>)option).entrySet()) {
+                        if (entry.getKey() instanceof String) {
+                            structuredObject.put((String)entry.getKey(), entry.getValue());
+                        } else {
+                            isIllegalObject = true;
                         }
-                    } else {
-                        isIllegalObject = true;
                     }
-                    if (isIllegalObject) {
-                        errorSupport.outputFormatError("objects in options must be Map<String, Object>."
-                                + "[" + (option == null ? "null" : option.toString()) + "]");
-                    }
+                } else {
+                    isIllegalObject = true;
+                }
+                if (isIllegalObject) {
+                    errorSupport.outputFormatError("objects in options must be Map<String, Object>."
+                            + "[" + (option == null ? "null" : option.toString()) + "]");
                 }
             }
         }
