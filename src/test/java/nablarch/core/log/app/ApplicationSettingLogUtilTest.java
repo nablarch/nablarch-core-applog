@@ -13,6 +13,7 @@ import java.util.Map;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.text.IsEqualIgnoringWhiteSpace.equalToIgnoringWhiteSpace;
@@ -223,8 +224,10 @@ public class ApplicationSettingLogUtilTest extends LogTestSupport {
         String message;
 
         message = ApplicationSettingLogUtil.getAppSettingsLogMsg();
-        assertThat(message,
-                is("$JSON${\"systemSettings\":{\"key3\":\"name3\uD83D\uDE0E\uD83D\uDE0E\"}}"));
+        assertThat(message.startsWith("$JSON$"), is(true));
+        assertThat(message.substring("$JSON$".length()), isJson(allOf(
+                withJsonPath("$.systemSettings", hasEntry("key3", "name3\uD83D\uDE0E\uD83D\uDE0E")),
+                withoutJsonPath("$.businessDate"))));
 
         message = ApplicationSettingLogUtil.getAppSettingsWithDateLogMsg();
         assertThat(message.startsWith("$JSON$"), is(true));
