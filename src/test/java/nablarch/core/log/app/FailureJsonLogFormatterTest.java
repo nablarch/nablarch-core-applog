@@ -80,13 +80,17 @@ public class FailureJsonLogFormatterTest extends LogTestSupport {
         assertThat(message.startsWith("$JSON$"), is(true));
         assertThat(message.substring("$JSON$".length()), isJson(allOf(
                 withJsonPath("$", hasEntry("failureCode", "FW000001")),
-                withJsonPath("$", hasEntry("message", "FW000001メッセージnotification")))));
+                withJsonPath("$", hasEntry("message", "FW000001メッセージnotification")),
+                withoutJsonPath("$.data"),
+                withoutJsonPath("$.contact"))));
 
         message = formatter.formatAnalysisMessage(null, data, failureCode, new Object[] {"error"});
         assertThat(message.startsWith("$JSON$"), is(true));
         assertThat(message.substring("$JSON$".length()), isJson(allOf(
                 withJsonPath("$", hasEntry("failureCode", "FW000001")),
-                withJsonPath("$", hasEntry("message", "FW000001メッセージerror")))));
+                withJsonPath("$", hasEntry("message", "FW000001メッセージerror")),
+                withoutJsonPath("$.data"),
+                withoutJsonPath("$.contact"))));
     }
 
     /**
