@@ -93,7 +93,8 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
         Exception e = assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
             @Override
             public void run() throws Throwable {
-                PerformanceJsonLogFormatter formatter = new PerformanceJsonLogFormatter();            }
+                new PerformanceJsonLogFormatter();
+            }
         });
 
         assertThat(e.getMessage(), is("[dummy] is unknown target. property name = [performanceLogFormatter.targets]"));
