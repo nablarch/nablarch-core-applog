@@ -18,7 +18,7 @@ import java.util.*;
 /**
  * {@link LogFormatter}のJSON形式フォーマット実装クラス。<br>
  * <br>
- * BasicLogFormatterは、出力項目を指定してフォーマットを指定する。
+ * JsonLogFormatterは、出力項目を指定してフォーマットを指定する。
  * 出力項目の一覧を下記に示す。
  * <pre>
  * date
