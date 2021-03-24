@@ -1,24 +1,27 @@
 package nablarch.core.log.basic;
 
 import nablarch.core.ThreadContext;
-import nablarch.core.log.*;
-import nablarch.core.log.app.OnMemoryLogWriter;
+import nablarch.core.log.LogTestSupport;
+import nablarch.core.log.LogUtil;
+import nablarch.core.log.Logger;
+import nablarch.core.log.MockLogSettings;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.*;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasValue;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
 
 /**
  * {@link JsonLogFormatter}のテストクラス。
@@ -203,7 +206,7 @@ public class JsonLogFormatterTest extends LogTestSupport {
     }
 
     /**
-     * 不正なOptionsが無視されること。
+     * Map以外のOptionsが無視されること。
      */
     @Test
     public void testFormatWithIllegalOptions() {
@@ -217,24 +220,59 @@ public class JsonLogFormatterTest extends LogTestSupport {
         String msg = "test";
         Throwable error = null;
 
-        Map<Integer, Object> payload1 = new HashMap<Integer, Object>();
-        payload1.put(1, 123);
+        String payload1 = "test";
 
-        String payload2 = "test";
+        Map<String, Object> payload2 = new HashMap<String, Object>();
+        payload2.put("key", 123);
 
-        Map<String, Object> payload3 = new HashMap<String, Object>();
-        payload3.put("key", 123);
-
-        String payload4 = null;
+        String payload3 = null;
 
         LogLevel level = LogLevel.ERROR;
 
         String message = formatter.format(new LogContext(loggerName, level, msg, error,
-                payload1, payload2, payload3, payload4));
+                payload1, payload2, payload3));
         assertThat(message, isJson(allOf(
                 withJsonPath("$", hasEntry("logLevel", "ERROR")),
                 withJsonPath("$", hasEntry("message", "test")),
                 withJsonPath("$", hasEntry("key", 123)))));
+    }
+
+    /**
+     * キーがStringではないMapのEntryは無視されること。
+     */
+    @Test
+    public void testFormatWithIllegalMapOptions() {
+
+        LogFormatter formatter = new JsonLogFormatter();
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("formatter.targets", "logLevel,message,payload");
+        formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "formatter"));
+
+        String loggerName = "TestLogger";
+        String msg = "test";
+        Throwable error = null;
+
+        Map<Integer, Object> payload1 = new HashMap<Integer, Object>();
+        payload1.put(1, 12);
+
+        Map<Object, Object> payload2 = new HashMap<Object, Object>();
+        payload2.put("key", 34);
+        payload2.put(2, 56);
+        payload2.put(true, 78);
+        payload2.put(null, 90);
+
+        LogLevel level = LogLevel.ERROR;
+
+        String message = formatter.format(new LogContext(loggerName, level, msg, error,
+                payload1, payload2));
+        assertThat(message, isJson(allOf(
+                withJsonPath("$", hasEntry("logLevel", "ERROR")),
+                withJsonPath("$", hasEntry("message", "test")),
+                withJsonPath("$", hasEntry("key", 34)),
+                withJsonPath("$", not(hasValue(12))),
+                withJsonPath("$", not(hasValue(56))),
+                withJsonPath("$", not(hasValue(78))),
+                withJsonPath("$", not(hasValue(90))))));
     }
 
     /**
