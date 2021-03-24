@@ -1,10 +1,15 @@
 package nablarch.core.log.app;
 
 import nablarch.core.log.basic.JsonLogObjectBuilder;
+import nablarch.core.text.json.JsonSerializationSettings;
 import nablarch.core.util.StringUtil;
 import nablarch.core.util.annotation.Published;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *パフォーマンスログのメッセージをJSON形式でフォーマットするクラス。
@@ -51,6 +56,9 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
     /** 終了時の使用メモリ量の項目名 */
     private static final String TARGET_NAME_END_USED_MEMORY = "endUsedMemory";
 
+    /** 出力項目のプロパティ名 */
+    private static final String PROPS_TARGETS = PROPS_PREFIX + "targets";
+
     /** フォーマット指定が無い場合に使用する出力項目のデフォルト値 */
     private static final String DEFAULT_TARGETS = "point,result,startTime,endTime,"
             + "executionTime,maxMemory,startFreeMemory,startUsedMemory,endFreeMemory,endUsedMemory";
@@ -65,14 +73,29 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
      * {@inheritDoc}
      */
     @Override
-    protected void initializeFormat(Map<String, String> props) {
-        support = new JsonLogFormatterSupport(PROPS_PREFIX, DEFAULT_TARGETS);
+    protected void initialize() {
+        Map<String, String> props = AppLogUtil.getProps();
+        initializeTargetPoints(props);
+        support = new JsonLogFormatterSupport(
+                new JsonSerializationSettings(props, PROPS_PREFIX, AppLogUtil.getFilePath()));
+        initializeTargets(props);
+    }
 
+    /**
+     * 出力項目の初期化
+     * @param props 各種ログ出力の設定情報
+     */
+    protected void initializeTargets(Map<String, String> props) {
         structuredTargets = new ArrayList<JsonLogObjectBuilder<PerformanceLogContext>>();
 
         boolean hasMemoryItem = false;
-        String[] targets = support.getTargets().split(",");
 
+        String targetsStr = props.get(PROPS_TARGETS);
+        if (StringUtil.isNullOrEmpty(targetsStr)) {
+            targetsStr = DEFAULT_TARGETS;
+        }
+
+        String[] targets = targetsStr.split(",");
         Set<String> keys = new HashSet<String>(targets.length);
         for (String target: targets) {
             String key = target.trim();
@@ -100,7 +123,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
                     hasMemoryItem = true;
                 } else {
                     throw new IllegalArgumentException(
-                            String.format("[%s] is unknown target. property name = [%s]", key, support.getTargetsProperty()));
+                            String.format("[%s] is unknown target. property name = [%s]", key, PROPS_TARGETS));
                 }
             }
         }

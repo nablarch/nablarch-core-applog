@@ -1,5 +1,11 @@
 package nablarch.core.log.app;
 
+import nablarch.core.ThreadContext;
+import nablarch.core.log.DateItemSupport;
+import nablarch.core.log.LogItem;
+import nablarch.core.log.LogUtil;
+import nablarch.core.util.annotation.Published;
+
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
@@ -11,12 +17,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import nablarch.core.ThreadContext;
-import nablarch.core.log.DateItemSupport;
-import nablarch.core.log.LogItem;
-import nablarch.core.log.LogUtil;
-import nablarch.core.util.annotation.Published;
 
 /**
  * パフォーマンスログのメッセージをフォーマットするクラス。
@@ -69,14 +69,23 @@ public class PerformanceLogFormatter {
      * フォーマット済みのログ出力項目を初期化する。
      */
     public PerformanceLogFormatter() {
-        initialize(AppLogUtil.getProps());
+        initialize();
     }
 
     /**
      * 初期化
+     */
+    protected void initialize() {
+        Map<String, String> props = AppLogUtil.getProps();
+        initializeTargetPoints(props);
+        initializeFormat(props);
+    }
+
+    /**
+     * 出力対象のポイントを初期化
      * @param props 各種ログ出力の設定情報
      */
-    protected void initialize(Map<String, String> props) {
+    protected void initializeTargetPoints(Map<String, String> props) {
         if (props.containsKey(PROPS_TARGET_POINTS)) {
             targetPoints = new HashSet<String>();
             for (String point : props.get(PROPS_TARGET_POINTS).split(",")) {
@@ -85,8 +94,6 @@ public class PerformanceLogFormatter {
         } else {
             targetPoints = Collections.emptySet();
         }
-
-        initializeFormat(props);
     }
 
     /**

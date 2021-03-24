@@ -2,6 +2,7 @@ package nablarch.core.log.app;
 
 import nablarch.core.date.BusinessDateUtil;
 import nablarch.core.repository.SystemRepository;
+import nablarch.core.text.json.JsonSerializationSettings;
 import nablarch.core.util.StringUtil;
 import nablarch.core.util.annotation.Published;
 
@@ -19,7 +20,9 @@ import java.util.Map;
 public class ApplicationSettingJsonLogFormatter extends ApplicationSettingLogFormatter {
 
     /** 各種ログのJSONフォーマット支援オブジェクト */
-    private final JsonLogFormatterSupport support = new JsonLogFormatterSupport(PROPS_PREFIX);
+    private final JsonLogFormatterSupport support
+            = new JsonLogFormatterSupport(
+                    new JsonSerializationSettings(AppLogUtil.getProps(), PROPS_PREFIX, AppLogUtil.getFilePath()));
 
     /**
      * {@inheritDoc}

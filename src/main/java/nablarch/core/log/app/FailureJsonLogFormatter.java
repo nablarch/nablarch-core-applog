@@ -2,10 +2,15 @@ package nablarch.core.log.app;
 
 import nablarch.core.ThreadContext;
 import nablarch.core.log.basic.JsonLogObjectBuilder;
+import nablarch.core.text.json.JsonSerializationSettings;
 import nablarch.core.util.StringUtil;
 import nablarch.core.util.annotation.Published;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 障害通知ログと障害解析ログのメッセージをJSON形式でフォーマットするクラス。
@@ -54,9 +59,20 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
      * {@inheritDoc}
      */
     @Override
-    protected void initializeFormat(Map<String, String> props) {
-        support = new JsonLogFormatterSupport(PROPS_PREFIX);
+    protected void initialize() {
+        Map<String, String> props = AppLogUtil.getProps();
+        initializeFailureCodes(props);
+        initializeMessage(props);
+        support = new JsonLogFormatterSupport(
+                new JsonSerializationSettings(props, PROPS_PREFIX, AppLogUtil.getFilePath()));
+        initializeTargets(props);
+    }
 
+    /**
+     * 出力項目の初期化
+     * @param props 各種ログ出力の設定情報
+     */
+    protected void initializeTargets(Map<String, String> props) {
         notificationStructuredTargets = getStructuredTargets(props, PROPS_NOTIFICATION_TARGETS);
         analysisStructuredTargets = getStructuredTargets(props, PROPS_ANALYSIS_TARGETS);
     }

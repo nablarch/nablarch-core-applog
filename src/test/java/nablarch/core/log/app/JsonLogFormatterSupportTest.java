@@ -1,18 +1,24 @@
 package nablarch.core.log.app;
 
 import nablarch.core.log.LogTestSupport;
-import nablarch.core.log.basic.CustomJsonSerializationManager;
-import nablarch.core.text.json.JsonSerializationManager;
-import org.junit.After;
+import nablarch.core.log.basic.JsonLogObjectBuilder;
+import nablarch.core.text.json.JsonSerializationSettings;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThrows;
 
 /**
  * {@link JsonLogFormatterSupport}のテストクラス。
@@ -20,113 +26,130 @@ import static org.hamcrest.core.Is.is;
  */
 public class JsonLogFormatterSupportTest extends LogTestSupport {
 
+    Map<String, String> props;
+
     @Before
     public void setup() {
-        System.clearProperty("xxxFormatter.targets");
-        System.clearProperty("xxxFormatter.structuredMessagePrefix");
-        System.clearProperty("xxxFormatter.jsonSerializationManagerClassName");
+        props = new HashMap<String, String>();
     }
 
-    @After
-    public void teardown() {
-        System.clearProperty("xxxFormatter.targets");
-        System.clearProperty("xxxFormatter.structuredMessagePrefix");
-        System.clearProperty("xxxFormatter.jsonSerializationManagerClassName");
+    private JsonLogFormatterSupport createJsonLogFormatterSupport() {
+        JsonSerializationSettings settings
+                = new JsonSerializationSettings(props, "xxxFormatter.", "filePath");
+        return new JsonLogFormatterSupport(settings);
     }
 
-    /**
-     * {@link JsonLogFormatterSupport#getTargetsProperty()}のテスト
-     */
-    @Test
-    public void testGetTargetsProperty() {
-        JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
-        assertThat(support.getTargetsProperty(), is("xxxFormatter.targets"));
+    private class TestContext {
+        private int getIntValue() {
+            return 12345;
+        }
+        private String getStringValue() {
+            return "test";
+        }
     }
 
     /**
-     * {@link JsonLogFormatterSupport#getTargets()}のテスト
-     * プロパティ指定
-     */
-    @Test
-    public void testGetTargets() {
-        System.setProperty("xxxFormatter.targets", "requestId,message");
-        JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
-        assertThat(support.getTargets(), is("requestId,message"));
-    }
-
-    /**
-     * {@link JsonLogFormatterSupport#getTargets()}のテスト
+     * {@link JsonLogFormatterSupport#getStructuredMessage(Object)}のテスト
      * デフォルト設定
      */
     @Test
-    public void testGetTargetsFromDefault() {
-        JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
-        assertThat(support.getTargets(), is("default"));
+    public void testGetStructuredMessage() {
+        JsonLogFormatterSupport support = createJsonLogFormatterSupport();
+
+        Map<String, Object> values = new HashMap<String, Object>();
+        values.put("key1", 123);
+        values.put("key2", 456);
+
+        String message = support.getStructuredMessage(values);
+
+        assertThat(message.startsWith("$JSON$"), is(true));
+        assertThat(message.substring("$JSON$".length()), isJson(allOf(
+                withJsonPath("$", hasEntry("key1", 123)),
+                withJsonPath("$", hasEntry("key2", 456)))));
     }
 
     /**
-     * {@link JsonLogFormatterSupport#getStructuredMessagePrefix()}のテスト
-     * プロパティ指定
+     * {@link JsonLogFormatterSupport#getStructuredMessage(Object)}のテスト
+     * structuredMessagePrefixの指定
      */
     @Test
-    public void testGetStructuredMessagePrefix() {
-        System.setProperty("xxxFormatter.structuredMessagePrefix", "$$$");
-        JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
-        assertThat(support.getStructuredMessagePrefix(), is("$$$"));
+    public void testGetStructuredMessageWithOtherPrefix() {
+        props.put("xxxFormatter.structuredMessagePrefix", "$$$");
+        JsonLogFormatterSupport support = createJsonLogFormatterSupport();
+
+        Map<String, Object> values = new HashMap<String, Object>();
+        values.put("key1", 123);
+        values.put("key2", 456);
+
+        String message = support.getStructuredMessage(values);
+
+        assertThat(message.startsWith("$$$"), is(true));
+        assertThat(message.substring("$$$".length()), isJson(allOf(
+                withJsonPath("$", hasEntry("key1", 123)),
+                withJsonPath("$", hasEntry("key2", 456)))));
     }
 
     /**
-     * {@link JsonLogFormatterSupport#getStructuredMessagePrefix()}のテスト
-     * デフォルト設定
+     * {@link JsonLogFormatterSupport#getStructuredMessage(Object)}のテスト
+     * jsonSerializationManagerClassNameの指定
      */
     @Test
-    public void testGetStructuredMessagePrefixFromDefault() {
-        JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
-        assertThat(support.getStructuredMessagePrefix(), is("$JSON$"));
-    }
+    public void testGetStructuredMessageWithOtherManager() {
 
-    /**
-     * {@link JsonLogFormatterSupport#getSerializationManagerClassName()}のテスト
-     * プロパティ指定
-     */
-    @Test
-    public void testGetSerializationManagerClassName() {
-        System.setProperty("xxxFormatter.jsonSerializationManagerClassName",
+        // note CustomJsonSerializationManager クラスは、NumberToJsonSerializerが外されており、
+        //      JavaのNumber型がObjectToJsonSerializerにて処理され、JSONのstringとして出力される。
+
+        props.put("xxxFormatter.jsonSerializationManagerClassName",
                 "nablarch.core.log.basic.CustomJsonSerializationManager");
-        JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
-        assertThat(support.getSerializationManagerClassName(), is("nablarch.core.log.basic.CustomJsonSerializationManager"));
+        JsonLogFormatterSupport support = createJsonLogFormatterSupport();
+
+        Map<String, Object> values = new HashMap<String, Object>();
+        values.put("key1", 123);
+        values.put("key2", 456);
+
+        String message = support.getStructuredMessage(values);
+
+        assertThat(message.startsWith("$JSON$"), is(true));
+        assertThat(message.substring("$JSON$".length()), isJson(allOf(
+                withJsonPath("$", hasEntry("key1", "123")),
+                withJsonPath("$", hasEntry("key2", "456")))));
     }
 
     /**
-     * {@link JsonLogFormatterSupport#getSerializationManagerClassName()}のテスト
-     * デフォルト設定
+     * {@link JsonLogFormatterSupport#getStructuredMessage(List, Object)
+     *  JsonLogFormatterSupport.getStructuredMessage(List, CTX)}のテスト
      */
     @Test
-    public void testGetSerializationManagerClassNameFromDefault() {
-        JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
-        assertThat(support.getSerializationManagerClassName(), is("nablarch.core.text.json.BasicJsonSerializationManager"));
-    }
+    public void testGetStructuredMessageFromContext() {
+        JsonLogFormatterSupport support = createJsonLogFormatterSupport();
 
-    /**
-     * {@link JsonLogFormatterSupport#getSerializationManager()}のテスト
-     * プロパティ指定
-     */
-    @Test
-    public void testGetSerializationManager() {
-        System.setProperty("xxxFormatter.jsonSerializationManagerClassName",
-                "nablarch.core.log.basic.CustomJsonSerializationManager");
-        JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
-        assertThat(support.getSerializationManager(), is(instanceOf(CustomJsonSerializationManager.class)));
-    }
+        Map<String, Object> values = new HashMap<String, Object>();
+        values.put("key1", 123);
+        values.put("key2", 456);
 
-    /**
-     * {@link JsonLogFormatterSupport#getSerializationManager()}のテスト
-     * デフォルト設定
-     */
-    @Test
-    public void testGetSerializationManagerFromDefault() {
-        JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
-        assertThat(support.getSerializationManager(), is(instanceOf(JsonSerializationManager.class)));
+        List<JsonLogObjectBuilder<TestContext>> targets
+                = new ArrayList<JsonLogObjectBuilder<TestContext>>();
+        targets.add(new JsonLogObjectBuilder<TestContext>() {
+            @Override
+            public void build(Map<String, Object> structuredObject, TestContext context) {
+                structuredObject.put("intValue", context.getIntValue());
+            }
+        });
+        targets.add(new JsonLogObjectBuilder<TestContext>() {
+            @Override
+            public void build(Map<String, Object> structuredObject, TestContext context) {
+                structuredObject.put("stringValue", context.getStringValue());
+            }
+        });
+
+        TestContext context = new TestContext();
+
+        String message = support.getStructuredMessage(targets, context);
+
+        assertThat(message.startsWith("$JSON$"), is(true));
+        assertThat(message.substring("$JSON$".length()), isJson(allOf(
+                withJsonPath("$", hasEntry("intValue", 12345)),
+                withJsonPath("$", hasEntry("stringValue", "test")))));
     }
 
     /**
@@ -135,15 +158,19 @@ public class JsonLogFormatterSupportTest extends LogTestSupport {
     @Test
     public void testSerializeError() {
         // note CustomJsonSerializationManagerはbooleanを処理する際に、必ずIOExceptionをスローする
-        System.setProperty("xxxFormatter.jsonSerializationManagerClassName",
+        props.put("xxxFormatter.jsonSerializationManagerClassName",
                 "nablarch.core.log.basic.CustomJsonSerializationManager");
-        JsonLogFormatterSupport support = new JsonLogFormatterSupport("xxxFormatter.", "default");
+        final JsonLogFormatterSupport support = createJsonLogFormatterSupport();
 
-        Map<String, Object> structuredObject = new HashMap<String, Object>();
+        final Map<String, Object> structuredObject = new HashMap<String, Object>();
         structuredObject.put("key", true);
-        assertThat(support.getStructuredMessage(structuredObject), is("format error"));
+
+        Exception e = assertThrows(RuntimeException.class, new ThrowingRunnable() {
+            @Override
+            public void run() throws Throwable {
+                support.getStructuredMessage(structuredObject);
+            }
+        });
     }
-
-
 
 }

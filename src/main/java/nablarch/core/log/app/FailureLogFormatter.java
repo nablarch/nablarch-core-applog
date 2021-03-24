@@ -1,8 +1,5 @@
 package nablarch.core.log.app;
 
-import java.util.*;
-import java.util.Map.Entry;
-
 import nablarch.core.ThreadContext;
 import nablarch.core.log.LogItem;
 import nablarch.core.log.LogSettings;
@@ -14,6 +11,15 @@ import nablarch.core.message.MessageLevel;
 import nablarch.core.message.MessageUtil;
 import nablarch.core.util.StringUtil;
 import nablarch.core.util.annotation.Published;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * 障害通知ログと障害解析ログのメッセージをフォーマットするクラス。
@@ -89,21 +95,36 @@ public class FailureLogFormatter {
      * フォーマット済みのログ出力項目を初期化する。
      */
     public FailureLogFormatter() {
-        initialize(AppLogUtil.getProps());
+        initialize();
     }
 
     /**
      * 初期化
+     */
+    protected void initialize() {
+        Map<String, String> props = AppLogUtil.getProps();
+        initializeFailureCodes(props);
+        initializeMessage(props);
+        initializeFormat(props);
+    }
+
+    /**
+     * 障害コードの初期化
      * @param props 各種ログ出力の設定情報
      */
-    protected void initialize(Map<String, String> props) {
+    protected void initializeFailureCodes(Map<String, String> props) {
         defaultFailureCode = getDefaultFailureCode(props);
-        defaultMessage = getDefaultMessage(props);
-        locale = props.containsKey(PROPS_LANGUAGE) ? new Locale(props.get(PROPS_LANGUAGE)) : null;
         appFailureCodes = getAppFailureCodes(props);
         fwFailureCodes = getFwFailureCodes(props);
+    }
 
-        initializeFormat(props);
+    /**
+     * メッセージの初期化
+     * @param props 各種ログ出力の設定情報
+     */
+    protected void initializeMessage(Map<String, String> props) {
+        defaultMessage = getDefaultMessage(props);
+        locale = props.containsKey(PROPS_LANGUAGE) ? new Locale(props.get(PROPS_LANGUAGE)) : null;
     }
 
     /**
