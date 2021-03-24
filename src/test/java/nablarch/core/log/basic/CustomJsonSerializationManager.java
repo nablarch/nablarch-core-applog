@@ -25,7 +25,7 @@ import java.util.List;
  *
  * @author Shuji Kitamura
  */
-class CustomJsonSerializationManager extends BasicJsonSerializationManager {
+public class CustomJsonSerializationManager extends BasicJsonSerializationManager {
 
     @Override
     protected List<JsonSerializer> createSerializers(JsonSerializationSettings settings) {
