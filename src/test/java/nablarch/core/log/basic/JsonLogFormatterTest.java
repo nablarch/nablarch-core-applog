@@ -63,12 +63,7 @@ public class JsonLogFormatterTest extends LogTestSupport {
         String loggerName = "TestLogger";
         String runtimeLoggerName = "TestLRuntimeLogger";
         String msg = "TestMessage";
-        Throwable error = null;
-        try {
-            errorMethod1();
-        } catch (Exception e) {
-            error = e;
-        }
+        Throwable error = new NullPointerException("error for test");
 
         Map<String, Object> payload1 = new HashMap<String, Object>();
         payload1.put("key1", "value1");
@@ -138,14 +133,6 @@ public class JsonLogFormatterTest extends LogTestSupport {
                 withoutJsonPath("$.key1"),
                 withoutJsonPath("$.key2"),
                 withoutJsonPath("$.key3"))));
-    }
-
-    private void errorMethod1() {
-        errorMethod2();
-    }
-
-    private void errorMethod2() {
-        throw new NullPointerException("error for test");
     }
 
     /**
