@@ -88,7 +88,7 @@ import java.util.Set;
  * @author Shuji Kitamura
  */
 @Published(tag = "architect")
-public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
+public class JsonLogFormatter implements LogFormatter {
 
     /** 出力日時の項目名 */
     private static final String TARGET_NAME_DATE = "date";
@@ -140,6 +140,9 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
     /** ログ出力項目 */
     private List<JsonLogObjectBuilder<LogContext>> structuredTargets;
 
+    /** フォーマットエラーを処理するクラス */
+    private FormatErrorSupport formatErrorSupport;
+
     /**
      * {@inheritDoc}<br>
      * <br>
@@ -147,12 +150,21 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
      */
     @Override
     public void initialize(ObjectSettings settings) {
+        formatErrorSupport = createFormatErrorSupport();
         serializationManager = createSerializationManager(settings);
         structuredTargets = createStructuredTargets(settings);
     }
 
     /**
-     * Jsonのシリアライズに使用する管理クラスを取得する。
+     * フォーマットエラーを処理するクラスを生成する。
+     * @return フォーマットエラーを処理するクラス
+     */
+    protected FormatErrorSupport createFormatErrorSupport() {
+        return new StandardErrorFormatErrorSupport();
+    }
+
+    /**
+     * Jsonのシリアライズに使用する管理クラスを生成する。
      * @param settings LogFormatterの設定
      * @return Jsonのシリアライズに使用する管理クラス
      */
@@ -168,7 +180,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
     }
 
     /**
-     * ログ出力項目を取得する。
+     * ログ出力項目を生成する。
      * @param settings LogFormatterの設定
      * @return ログ出力項目
      */
@@ -200,7 +212,7 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
                 else if (TARGET_NAME_USER_ID.equals(key)) { list.add(new UserIdBuilder()); }
                 else if (TARGET_NAME_MESSAGE.equals(key)) { list.add(new MessageBuilder(getStructuredMessagePrefix(settings))); }
                 else if (TARGET_NAME_STACK_TRACE.equals(key)) { list.add(new StackTraceBuilder()); }
-                else if (TARGET_NAME_PAYLOAD.equals(key)) { list.add(new PayloadBuilder(this)); }
+                else if (TARGET_NAME_PAYLOAD.equals(key)) { list.add(new PayloadBuilder(formatErrorSupport)); }
             }
         }
         return list;
@@ -259,14 +271,6 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
             builder.build(structuredObject, context);
         }
         return structuredObject;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void outputFormatError(String message) {
-        System.err.println(message);
     }
 
     /**
