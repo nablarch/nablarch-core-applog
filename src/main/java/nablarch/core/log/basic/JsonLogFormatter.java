@@ -516,23 +516,31 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
                 return;
             }
 
-            boolean isIllegalObject;
+            StringBuilder illegalMessage = new StringBuilder();
             for (Object option : context.getOptions()) {
-                isIllegalObject = false;
                 if (option instanceof Map) {
                     for (Map.Entry<?, ?> entry : ((Map<?, ?>)option).entrySet()) {
                         if (entry.getKey() instanceof String) {
                             structuredObject.put((String)entry.getKey(), entry.getValue());
                         } else {
-                            isIllegalObject = true;
+                            if (illegalMessage.length() == 0) {
+                                illegalMessage.append("illegal type in keys : ");
+                            } else {
+                                illegalMessage.append(", ");
+                            }
+                            if (entry.getKey() == null) {
+                                illegalMessage.append("null");
+                            } else {
+                                illegalMessage.append(entry.getKey().toString());
+                            }
                         }
                     }
                 } else {
-                    isIllegalObject = true;
-                }
-                if (isIllegalObject) {
                     errorSupport.outputFormatError("objects in options must be Map<String, Object>."
                             + "[" + (option == null ? "null" : option.toString()) + "]");
+                }
+                if (illegalMessage.length() > 0) {
+                    errorSupport.outputFormatError(illegalMessage.toString());
                 }
             }
         }
