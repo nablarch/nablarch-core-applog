@@ -523,14 +523,15 @@ public class JsonLogFormatter implements LogFormatter {
                 return;
             }
 
-            StringBuilder illegalMessage = new StringBuilder();
+            StringBuilder illegalMessage = null;
             for (Object option : context.getOptions()) {
                 if (option instanceof Map) {
                     for (Map.Entry<?, ?> entry : ((Map<?, ?>)option).entrySet()) {
                         if (entry.getKey() instanceof String) {
                             structuredObject.put((String)entry.getKey(), entry.getValue());
                         } else {
-                            if (illegalMessage.length() == 0) {
+                            if (illegalMessage == null) {
+                                illegalMessage = new StringBuilder();
                                 illegalMessage.append("illegal type in keys : ");
                             } else {
                                 illegalMessage.append(", ");
@@ -543,11 +544,12 @@ public class JsonLogFormatter implements LogFormatter {
                         }
                     }
                 } else {
-                    errorSupport.outputFormatError("objects in options must be Map<String, Object>."
-                            + "[" + (option == null ? "null" : option.toString()) + "]");
+                    errorSupport.outputFormatError("objects in options must be Map<String, Object>. : ["
+                            + (option == null ? "null" : option.toString()) + "]");
                 }
-                if (illegalMessage.length() > 0) {
+                if (illegalMessage != null) {
                     errorSupport.outputFormatError(illegalMessage.toString());
+                    illegalMessage = null;
                 }
             }
         }

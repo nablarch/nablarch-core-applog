@@ -20,6 +20,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static nablarch.core.log.RegexMatcher.matches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasValue;
@@ -231,8 +232,17 @@ public class JsonLogFormatterTest extends LogTestSupport {
 
         LogLevel level = LogLevel.ERROR;
 
+        ByteArrayOutputStream snatchedErr = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(snatchedErr));
+
         String message = formatter.format(new LogContext(loggerName, level, msg, error,
                 payload1, payload2, payload3));
+
+        System.err.flush();
+        assertThat(snatchedErr.toString(), is(
+                "objects in options must be Map<String, Object>. : [test]" + System.getProperty("line.separator")
+                + "objects in options must be Map<String, Object>. : [null]" + System.getProperty("line.separator")));
+
         assertThat(message, isJson(allOf(
                 withJsonPath("$", hasEntry("logLevel", "ERROR")),
                 withJsonPath("$", hasEntry("message", "test")),
@@ -265,8 +275,22 @@ public class JsonLogFormatterTest extends LogTestSupport {
 
         LogLevel level = LogLevel.ERROR;
 
+        ByteArrayOutputStream snatchedErr = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(snatchedErr));
+
         String message = formatter.format(new LogContext(loggerName, level, msg, error,
                 payload1, payload2));
+
+        System.err.flush();
+        assertThat(snatchedErr.toString(),
+            allOf(
+                matches("illegal type in keys : 1\\v+"
+                        + "illegal type in keys : ((null)|(2)|(true)),"
+                        + " ((null)|(2)|(true)), ((null)|(2)|(true))\\v+"),
+                containsString("null"),
+                containsString("2"),
+                containsString("true")));
+
         assertThat(message, isJson(allOf(
                 withJsonPath("$", hasEntry("logLevel", "ERROR")),
                 withJsonPath("$", hasEntry("message", "test")),
