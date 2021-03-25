@@ -9,6 +9,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,6 +22,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasValue;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThrows;
 
@@ -178,8 +181,17 @@ public class JsonLogFormatterTest extends LogTestSupport {
 
         LogFormatter formatter = new JsonLogFormatter();
         Map<String, String> settings = new HashMap<String, String>();
-        settings.put("formatter.targets", "message ,, ,dummy,message");
-        formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "formatter"));
+        settings.put("xxxFormatter.targets", "message ,, ,dummy,message");
+
+        ByteArrayOutputStream snatchedErr = new ByteArrayOutputStream();
+        System.setErr(new PrintStream(snatchedErr));
+
+        formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "xxxFormatter"));
+
+        System.err.flush();
+        assertThat(snatchedErr.toString(),
+                is("JsonLogFormatter : [dummy] is unknown target. property name = [xxxFormatter.targets]"
+                        + System.getProperty("line.separator")));
 
         String loggerName = "TestLogger";
         String msg = "TestMessage";
