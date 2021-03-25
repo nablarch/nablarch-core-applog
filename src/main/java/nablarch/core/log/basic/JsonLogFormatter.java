@@ -11,9 +11,15 @@ import nablarch.core.util.ObjectUtil;
 import nablarch.core.util.StringUtil;
 import nablarch.core.util.annotation.Published;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * {@link LogFormatter}のJSON形式フォーマット実装クラス。<br>
@@ -231,18 +237,10 @@ public class JsonLogFormatter implements LogFormatter, FormatErrorSupport {
         try {
             serializer.serialize(writer, structuredObject);
             message = writer.toString();
-        } catch (Exception e) {
-            StringWriter sw;
-            PrintWriter pw = null;
-            try {
-                sw = new StringWriter();
-                pw = new PrintWriter(sw);
-                e.printStackTrace(pw);
-                outputFormatError(sw.toString());
-            } finally {
-                FileUtil.closeQuietly(pw);
-            }
-            message = "\"log format error\"";
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            FileUtil.closeQuietly(writer);
         }
         if (!message.endsWith(Logger.LS)) {
             message += Logger.LS;

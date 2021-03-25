@@ -3,11 +3,11 @@ package nablarch.core.log.basic;
 import nablarch.core.ThreadContext;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.log.LogUtil;
-import nablarch.core.log.Logger;
 import nablarch.core.log.MockLogSettings;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasValue;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertThrows;
 
 /**
  * {@link JsonLogFormatter}のテストクラス。
@@ -358,28 +358,33 @@ public class JsonLogFormatterTest extends LogTestSupport {
     }
 
     /**
-     * フォーマットで例外がスローされても処理を止めないこと。
+     * シリアライズ時にIOExceptionがスローされたときRuntimeExceptionとして再スローされること。
      */
     @Test
     public void testFormatWithError() {
+        // note CustomJsonSerializationManagerはbooleanを処理する際に、必ずIOExceptionをスローする
 
-        LogFormatter formatter = new JsonLogFormatter();
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("formatter.targets", "logLevel,message,payload");
-        settings.put("formatter.jsonSerializationManagerClassName", "nablarch.core.log.basic.CustomJsonSerializationManager");
-        formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "formatter"));
+        assertThrows(RuntimeException.class, new ThrowingRunnable() {
+            @Override
+            public void run() throws Throwable {
+                LogFormatter formatter = new JsonLogFormatter();
+                Map<String, String> settings = new HashMap<String, String>();
+                settings.put("formatter.targets", "logLevel,message,payload");
+                settings.put("formatter.jsonSerializationManagerClassName", "nablarch.core.log.basic.CustomJsonSerializationManager");
+                formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "formatter"));
 
-        String loggerName = "TestLogger";
-        String msg = "test";
-        Throwable error = null;
+                String loggerName = "TestLogger";
+                String msg = "test";
+                Throwable error = null;
 
-        Map<String, Object> payload = new HashMap<String, Object>();
-        payload.put("key", true);
+                Map<String, Object> payload = new HashMap<String, Object>();
+                payload.put("key", true);
 
-        LogLevel level = LogLevel.ERROR;
+                LogLevel level = LogLevel.ERROR;
 
-        String message = formatter.format(new LogContext(loggerName, level, msg, error, payload));
-        assertThat(message, is("\"log format error\"" + Logger.LS));
+                formatter.format(new LogContext(loggerName, level, msg, error, payload));
+            }
+        });
     }
 
 }
