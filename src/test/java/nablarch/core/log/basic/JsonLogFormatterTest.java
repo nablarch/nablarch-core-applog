@@ -17,6 +17,7 @@ import java.util.Map;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
+import static nablarch.core.log.RegexMatcher.matches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
@@ -79,7 +80,7 @@ public class JsonLogFormatterTest extends LogTestSupport {
 
         String message = formatter.format(new LogContext(loggerName, runtimeLoggerName, level, msg, error, payload1, payload2));
         assertThat(message, isJson(allOf(
-                withJsonPath("$", hasKey("date")),
+                withJsonPath("$.date", matches("[0-9]{4}-[0-9]{2}-[0-9]{2}\\s[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}")),
                 withJsonPath("$", hasEntry("logLevel", "ERROR")),
                 withJsonPath("$", hasEntry("loggerName", "TestLogger")),
                 withJsonPath("$", hasEntry("runtimeLoggerName", "TestLRuntimeLogger")),
@@ -89,7 +90,9 @@ public class JsonLogFormatterTest extends LogTestSupport {
                 withJsonPath("$", hasEntry("executionId", executionId)),
                 withJsonPath("$", hasEntry("userId", "0000000001")),
                 withJsonPath("$", hasEntry("message", "TestMessage")),
-                withJsonPath("$", hasKey("stackTrace")),
+                withJsonPath("$.stackTrace", matches(
+                        "java.lang.NullPointerException: error for test[\\W]*"
+                                + "at nablarch.core.log.basic.JsonLogFormatterTest.testFormatWithDefault\\(JsonLogFormatterTest.java:[\\w\\W]*")),
                 withJsonPath("$", hasEntry("key1", "value1")),
                 withJsonPath("$", hasEntry("key2", 123)),
                 withJsonPath("$", hasEntry("key3", true)))));
