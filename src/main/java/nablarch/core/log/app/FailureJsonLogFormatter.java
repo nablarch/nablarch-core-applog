@@ -63,16 +63,24 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
         Map<String, String> props = AppLogUtil.getProps();
         initializeFailureCodes(props);
         initializeMessage(props);
-        support = new JsonLogFormatterSupport(
-                new JsonSerializationSettings(props, PROPS_PREFIX, AppLogUtil.getFilePath()));
+        initializeFormatterSupport(props, PROPS_PREFIX, AppLogUtil.getFilePath());
         initializeTargets(props);
+    }
+
+    /**
+     * 各種ログのJSONフォーマット支援オブジェクトの初期化
+     * @param props 各種ログ出力の設定情報
+     */
+    protected final void initializeFormatterSupport(Map<String, String> props, String prefix, String filePath) {
+        support = new JsonLogFormatterSupport(
+                new JsonSerializationSettings(props, prefix, filePath));
     }
 
     /**
      * 出力項目の初期化
      * @param props 各種ログ出力の設定情報
      */
-    protected void initializeTargets(Map<String, String> props) {
+    protected final void initializeTargets(Map<String, String> props) {
         notificationStructuredTargets = getStructuredTargets(props, PROPS_NOTIFICATION_TARGETS);
         analysisStructuredTargets = getStructuredTargets(props, PROPS_ANALYSIS_TARGETS);
     }
@@ -159,7 +167,7 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
      * 障害コードを処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class FailureCodeBuilder implements JsonLogObjectBuilder<FailureLogContext> {
+    public static class FailureCodeBuilder implements JsonLogObjectBuilder<FailureLogContext> {
 
         /**
          * {@inheritDoc}
@@ -174,7 +182,7 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
      * メッセージを処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class MessageBuilder implements JsonLogObjectBuilder<FailureLogContext> {
+    public static class MessageBuilder implements JsonLogObjectBuilder<FailureLogContext> {
 
         /**
          * {@inheritDoc}
@@ -189,7 +197,7 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
      * 処理対象データを処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class DataBuilder implements JsonLogObjectBuilder<FailureLogContext> {
+    public static class DataBuilder implements JsonLogObjectBuilder<FailureLogContext> {
 
         /**
          * {@inheritDoc}
@@ -204,7 +212,7 @@ public class FailureJsonLogFormatter extends FailureLogFormatter {
      * 連絡先を処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class ContactBuilder implements JsonLogObjectBuilder<FailureLogContext> {
+    public static class ContactBuilder implements JsonLogObjectBuilder<FailureLogContext> {
 
         /** 連絡先 */
         private final List<Map.Entry<String, String>> contacts;

@@ -76,17 +76,34 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
     protected void initialize() {
         Map<String, String> props = AppLogUtil.getProps();
         initializeTargetPoints(props);
-        support = new JsonLogFormatterSupport(
-                new JsonSerializationSettings(props, PROPS_PREFIX, AppLogUtil.getFilePath()));
+        initializeFormatterSupport(props, PROPS_PREFIX, AppLogUtil.getFilePath());
         initializeTargets(props);
+    }
+
+    /**
+     * 各種ログのJSONフォーマット支援オブジェクトの初期化
+     * @param props 各種ログ出力の設定情報
+     */
+    protected final void initializeFormatterSupport(Map<String, String> props, String prefix, String filePath) {
+        support = new JsonLogFormatterSupport(
+                new JsonSerializationSettings(props, prefix, filePath));
     }
 
     /**
      * 出力項目の初期化
      * @param props 各種ログ出力の設定情報
      */
-    protected void initializeTargets(Map<String, String> props) {
-        structuredTargets = new ArrayList<JsonLogObjectBuilder<PerformanceLogContext>>();
+    protected final void initializeTargets(Map<String, String> props) {
+        structuredTargets = getStructuredTargets(props);
+    }
+
+    /**
+     * ログ出力項目を取得する。
+     * @param props 各種ログ出力の設定情報
+     * @return ログ出力項目
+     */
+    protected List<JsonLogObjectBuilder<PerformanceLogContext>> getStructuredTargets(
+            Map<String, String> props) {
 
         boolean hasMemoryItem = false;
 
@@ -94,6 +111,9 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
         if (StringUtil.isNullOrEmpty(targetsStr)) {
             targetsStr = DEFAULT_TARGETS;
         }
+
+        List<JsonLogObjectBuilder<PerformanceLogContext>> structuredTargets
+                = new ArrayList<JsonLogObjectBuilder<PerformanceLogContext>>();
 
         String[] targets = targetsStr.split(",");
         Set<String> keys = new HashSet<String>(targets.length);
@@ -128,6 +148,8 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
             }
         }
         setContainsMemoryItem(hasMemoryItem);
+
+        return structuredTargets;
     }
 
     /**
@@ -142,7 +164,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
      * ポイントを処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class PointBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
+    public static class PointBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
 
         /**
          * {@inheritDoc}
@@ -157,7 +179,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
      * 処理結果を処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class ResultBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
+    public static class ResultBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
 
         /**
          * {@inheritDoc}
@@ -172,7 +194,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
      * 開始日時を処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class StartTimeBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
+    public static class StartTimeBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
 
         /**
          * {@inheritDoc}
@@ -187,7 +209,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
      * 終了日時を処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class EndTimeBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
+    public static class EndTimeBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
 
         /**
          * {@inheritDoc}
@@ -202,7 +224,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
      * 実行時間を処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class ExecutionTimeBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
+    public static class ExecutionTimeBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
 
         /**
          * {@inheritDoc}
@@ -217,7 +239,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
      * 最大メモリ量を処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class MaxMemoryBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
+    public static class MaxMemoryBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
 
         /**
          * {@inheritDoc}
@@ -232,7 +254,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
      * 開始時の空きメモリ量を処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class StartFreeMemoryBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
+    public static class StartFreeMemoryBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
 
         /**
          * {@inheritDoc}
@@ -247,7 +269,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
      * 終了時の空きメモリ量を処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class EndFreeMemoryBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
+    public static class EndFreeMemoryBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
 
         /**
          * {@inheritDoc}
@@ -262,7 +284,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
      * 開始時の使用メモリ量を処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class StartUsedMemoryBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
+    public static class StartUsedMemoryBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
 
         /**
          * {@inheritDoc}
@@ -277,7 +299,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
      * 終了時の使用メモリ量を処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class EndUsedMemoryBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
+    public static class EndUsedMemoryBuilder implements JsonLogObjectBuilder<PerformanceLogContext> {
 
         /**
          * {@inheritDoc}

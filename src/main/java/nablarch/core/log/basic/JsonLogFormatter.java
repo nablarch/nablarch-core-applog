@@ -277,7 +277,7 @@ public class JsonLogFormatter implements LogFormatter {
      * 出力日時を処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class DateBuilder implements JsonLogObjectBuilder<LogContext> {
+    public static class DateBuilder implements JsonLogObjectBuilder<LogContext> {
 
         /**
          * {@inheritDoc}
@@ -292,7 +292,7 @@ public class JsonLogFormatter implements LogFormatter {
      * ログレベルを処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class LogLevelBuilder implements JsonLogObjectBuilder<LogContext> {
+    public static class LogLevelBuilder implements JsonLogObjectBuilder<LogContext> {
 
         /** ログレベルを表す文言を提供するクラス */
         private final LogLevelLabelProvider levelLabelProvider;
@@ -319,7 +319,7 @@ public class JsonLogFormatter implements LogFormatter {
      * ロガー名を処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class LoggerNameBuilder implements JsonLogObjectBuilder<LogContext> {
+    public static class LoggerNameBuilder implements JsonLogObjectBuilder<LogContext> {
 
         /**
          * {@inheritDoc}
@@ -334,7 +334,7 @@ public class JsonLogFormatter implements LogFormatter {
      * 実行時ロガー名を処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class RuntimeLoggerNameBuilder implements JsonLogObjectBuilder<LogContext> {
+    public static class RuntimeLoggerNameBuilder implements JsonLogObjectBuilder<LogContext> {
 
         /**
          * {@inheritDoc}
@@ -349,7 +349,7 @@ public class JsonLogFormatter implements LogFormatter {
      * 起動プロセスを処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class BootProcessBuilder implements JsonLogObjectBuilder<LogContext> {
+    public static class BootProcessBuilder implements JsonLogObjectBuilder<LogContext> {
 
         /**
          * {@inheritDoc}
@@ -364,7 +364,7 @@ public class JsonLogFormatter implements LogFormatter {
      * 処理方式を処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class ProcessingSystemBuilder implements JsonLogObjectBuilder<LogContext> {
+    public static class ProcessingSystemBuilder implements JsonLogObjectBuilder<LogContext> {
 
         /** 処理方式 */
         private final String processingSystem;
@@ -390,7 +390,7 @@ public class JsonLogFormatter implements LogFormatter {
      * リクエストIDを処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class RequestIdBuilder implements JsonLogObjectBuilder<LogContext> {
+    public static class RequestIdBuilder implements JsonLogObjectBuilder<LogContext> {
 
         /**
          * {@inheritDoc}
@@ -405,7 +405,7 @@ public class JsonLogFormatter implements LogFormatter {
      * 実行時IDを処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class ExecutionIdBuilder implements JsonLogObjectBuilder<LogContext> {
+    public static class ExecutionIdBuilder implements JsonLogObjectBuilder<LogContext> {
 
         /**
          * {@inheritDoc}
@@ -420,7 +420,7 @@ public class JsonLogFormatter implements LogFormatter {
      * ユーザIDを処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class UserIdBuilder implements JsonLogObjectBuilder<LogContext> {
+    public static class UserIdBuilder implements JsonLogObjectBuilder<LogContext> {
 
         /**
          * {@inheritDoc}
@@ -435,7 +435,7 @@ public class JsonLogFormatter implements LogFormatter {
      * メッセージを処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class MessageBuilder implements JsonLogObjectBuilder<LogContext> {
+    public static class MessageBuilder implements JsonLogObjectBuilder<LogContext> {
 
         /** 構造化済みメッセージであることを示す接頭辞 */
         private final String structuredMessagePrefix;
@@ -469,7 +469,7 @@ public class JsonLogFormatter implements LogFormatter {
      * エラー情報に指定された例外オブジェクトのスタックトレースを処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class StackTraceBuilder implements JsonLogObjectBuilder<LogContext> {
+    public static class StackTraceBuilder implements JsonLogObjectBuilder<LogContext> {
 
         /**
          * {@inheritDoc}
@@ -498,7 +498,7 @@ public class JsonLogFormatter implements LogFormatter {
      * オプション情報に指定されたオブジェクトを処理するクラス。
      * @author Shuji Kitamura
      */
-    private static class PayloadBuilder implements JsonLogObjectBuilder<LogContext> {
+    public static class PayloadBuilder implements JsonLogObjectBuilder<LogContext> {
 
         private final FormatErrorSupport errorSupport;
 
