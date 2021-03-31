@@ -5,7 +5,6 @@ import nablarch.core.log.Logger;
 import nablarch.core.text.json.JsonSerializationManager;
 import nablarch.core.text.json.JsonSerializationSettings;
 import nablarch.core.text.json.JsonSerializer;
-import nablarch.core.text.json.RawJsonObjectMembers;
 import nablarch.core.util.FileUtil;
 import nablarch.core.util.ObjectUtil;
 import nablarch.core.util.StringUtil;
@@ -79,7 +78,7 @@ import java.util.Set;
  *       指定しなければyyyy-MM-dd HH:mm:ss.SSSを使用する。<dd/>
  *   <dt>writer.{@code <LogWriterの名称>}.formatter.jsonSerializationManagerClassName<dt/>
  *   <dd>JSONへのシリアライズを管理するクラス。オプション。<br>
- *       指定しなければ{@link nablarch.core.text.json.BasicJsonSerializationManager}を使用する。<dd/>
+ *       指定しなければ{@link nablarch.core.log.basic.AppLogJsonSerializationManager}を使用する。<dd/>
  *   <dt>writer.{@code <LogWriterの名称>}.formatter.structuredMessagePrefix<dt/>
  *   <dd>各種ログで使用される組み込み処理用の接頭辞。オプション。<br>
  *       指定しなければ$JSON$を使用する。<dd/>
@@ -132,7 +131,7 @@ public class JsonLogFormatter implements LogFormatter {
     /** Jsonのシリアライズに使用する管理クラス名のプロパティ名 */
     private static final String PROPS_SERIALIZATION_MANAGER_CLASS_NAME = "jsonSerializationManagerClassName";
     /** Jsonのシリアライズに使用する管理クラス名のデフォルト値 */
-    private static final String DEFAULT_SERIALIZATION_MANAGER_CLASS_NAME = "nablarch.core.text.json.BasicJsonSerializationManager";
+    private static final String DEFAULT_SERIALIZATION_MANAGER_CLASS_NAME = "nablarch.core.log.basic.AppLogJsonSerializationManager";
 
     /** Jsonのシリアライズに使用する管理クラス */
     private JsonSerializationManager serializationManager;
