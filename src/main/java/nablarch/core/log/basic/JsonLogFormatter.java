@@ -67,19 +67,19 @@ import java.util.Set;
  * プロパティファイルの記述ルールを下記に示す。<br>
  * <br>
  * <dl>
- *   <dt>writer.{@code <LogWriterの名称>}.formatter.label.&lt;{@link LogLevel}の名称の小文字&gt;<dt/>
+ *   <dt>{@code writer.<LogWriterの名称>.formatter.label.<LogLevelの名称の小文字>}<dt/>
  *   <dd>{@link LogLevel}に使用するラベル。オプション。<br>
  *       指定しなければ{@link LogLevel}の名称を使用する。<dd/>
- *   <dt>writer.{@code <LogWriterの名称>}.formatter.targets<dt/>
+ *   <dt>{@code writer.<LogWriterの名称>.formatter.targets}<dt/>
  *   <dd>出力項目をカンマ区切りで指定する。オプション。
  *       指定しなければ全ての出力項目が出力の対象となる。<dd/>
- *   <dt>writer.{@code <LogWriterの名称>}.formatter.datePattern<dt/>
+ *   <dt>{@code writer.<LogWriterの名称>.formatter.datePattern}<dt/>
  *   <dd>日時のフォーマットに使用するパターン。オプション。<br>
  *       指定しなければyyyy-MM-dd HH:mm:ss.SSSを使用する。<dd/>
- *   <dt>writer.{@code <LogWriterの名称>}.formatter.jsonSerializationManagerClassName<dt/>
+ *   <dt>{@code writer.<LogWriterの名称>.formatter.jsonSerializationManagerClassName}<dt/>
  *   <dd>JSONへのシリアライズを管理するクラス。オプション。<br>
  *       指定しなければ{@link nablarch.core.log.basic.AppLogJsonSerializationManager}を使用する。<dd/>
- *   <dt>writer.{@code <LogWriterの名称>}.formatter.structuredMessagePrefix<dt/>
+ *   <dt>{@code writer.<LogWriterの名称>.formatter.structuredMessagePrefix}<dt/>
  *   <dd>各種ログで使用される組み込み処理用の接頭辞。オプション。<br>
  *       指定しなければ$JSON$を使用する。<dd/>
  * </dl>
