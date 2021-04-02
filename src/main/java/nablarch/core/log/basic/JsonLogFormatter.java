@@ -522,33 +522,21 @@ public class JsonLogFormatter implements LogFormatter {
                 return;
             }
 
-            StringBuilder illegalMessage = null;
             for (Object option : context.getOptions()) {
                 if (option instanceof Map) {
+                    List<String> illegalTypeMemberKeys = new ArrayList<String>();
                     for (Map.Entry<?, ?> entry : ((Map<?, ?>)option).entrySet()) {
                         if (entry.getKey() instanceof String) {
                             structuredObject.put((String)entry.getKey(), entry.getValue());
                         } else {
-                            if (illegalMessage == null) {
-                                illegalMessage = new StringBuilder();
-                                illegalMessage.append("illegal type in keys : ");
-                            } else {
-                                illegalMessage.append(", ");
-                            }
-                            if (entry.getKey() == null) {
-                                illegalMessage.append("null");
-                            } else {
-                                illegalMessage.append(entry.getKey().toString());
-                            }
+                            illegalTypeMemberKeys.add(entry.getKey() == null ? "null" : entry.getKey().toString());
                         }
                     }
+                    if (!illegalTypeMemberKeys.isEmpty()) {
+                        errorSupport.outputFormatError("illegal type in keys : " + StringUtil.join(", ", illegalTypeMemberKeys));
+                    }
                 } else {
-                    errorSupport.outputFormatError("objects in options must be Map<String, Object>. : ["
-                            + (option == null ? "null" : option.toString()) + "]");
-                }
-                if (illegalMessage != null) {
-                    errorSupport.outputFormatError(illegalMessage.toString());
-                    illegalMessage = null;
+                    errorSupport.outputFormatError("objects in options must be Map<String, Object>. : [" + option + "]");
                 }
             }
         }
