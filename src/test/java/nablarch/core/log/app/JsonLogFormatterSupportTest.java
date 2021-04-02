@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThrows;
 
@@ -165,12 +167,16 @@ public class JsonLogFormatterSupportTest extends LogTestSupport {
         final Map<String, Object> structuredObject = new HashMap<String, Object>();
         structuredObject.put("key", true);
 
-        Exception e = assertThrows(RuntimeException.class, new ThrowingRunnable() {
+        RuntimeException e = assertThrows(RuntimeException.class, new ThrowingRunnable() {
             @Override
             public void run() throws Throwable {
                 support.getStructuredMessage(structuredObject);
             }
         });
+
+        final Throwable cause = e.getCause();
+        assertThat(cause, is(instanceOf(IOException.class)));
+        assertThat(cause.getMessage(), is("error for test"));
     }
 
 }
