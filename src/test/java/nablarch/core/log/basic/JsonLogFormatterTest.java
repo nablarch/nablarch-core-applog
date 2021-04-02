@@ -4,7 +4,6 @@ import nablarch.core.ThreadContext;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.log.LogUtil;
 import nablarch.core.log.MockLogSettings;
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -391,27 +390,22 @@ public class JsonLogFormatterTest extends LogTestSupport {
      */
     @Test
     public void testFormatWithError() {
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("formatter.targets", "logLevel,message,payload");
         // note CustomJsonSerializationManagerはbooleanを処理する際に、必ずIOExceptionをスローする
+        settings.put("formatter.jsonSerializationManagerClassName", "nablarch.core.log.basic.CustomJsonSerializationManager");
+
+        final LogFormatter formatter = new JsonLogFormatter();
+        formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "formatter"));
+
+        Map<String, Object> payload = new HashMap<String, Object>();
+        payload.put("key", true);
+        final LogContext logContext = new LogContext("TestLogger", LogLevel.ERROR, "test", null, payload);
 
         RuntimeException e = assertThrows(RuntimeException.class, new ThrowingRunnable() {
             @Override
             public void run() throws Throwable {
-                LogFormatter formatter = new JsonLogFormatter();
-                Map<String, String> settings = new HashMap<String, String>();
-                settings.put("formatter.targets", "logLevel,message,payload");
-                settings.put("formatter.jsonSerializationManagerClassName", "nablarch.core.log.basic.CustomJsonSerializationManager");
-                formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "formatter"));
-
-                String loggerName = "TestLogger";
-                String msg = "test";
-                Throwable error = null;
-
-                Map<String, Object> payload = new HashMap<String, Object>();
-                payload.put("key", true);
-
-                LogLevel level = LogLevel.ERROR;
-
-                formatter.format(new LogContext(loggerName, level, msg, error, payload));
+                formatter.format(logContext);
             }
         });
 
