@@ -4,12 +4,14 @@ import nablarch.core.ThreadContext;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.log.LogUtil;
 import nablarch.core.log.MockLogSettings;
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +26,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasValue;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThrows;
@@ -390,7 +393,7 @@ public class JsonLogFormatterTest extends LogTestSupport {
     public void testFormatWithError() {
         // note CustomJsonSerializationManagerはbooleanを処理する際に、必ずIOExceptionをスローする
 
-        assertThrows(RuntimeException.class, new ThrowingRunnable() {
+        RuntimeException e = assertThrows(RuntimeException.class, new ThrowingRunnable() {
             @Override
             public void run() throws Throwable {
                 LogFormatter formatter = new JsonLogFormatter();
@@ -411,6 +414,10 @@ public class JsonLogFormatterTest extends LogTestSupport {
                 formatter.format(new LogContext(loggerName, level, msg, error, payload));
             }
         });
+
+        final Throwable cause = e.getCause();
+        assertThat(cause, is(instanceOf(IOException.class)));
+        assertThat(cause.getMessage(), is("error for test"));
     }
 
 }
