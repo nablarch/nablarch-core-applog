@@ -12,7 +12,9 @@ import org.junit.function.ThrowingRunnable;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
@@ -21,13 +23,16 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static nablarch.core.log.RegexMatcher.matches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.hasValue;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThrows;
 
 /**
@@ -215,8 +220,14 @@ public class JsonLogFormatterTest extends LogTestSupport {
      */
     @Test
     public void testFormatWithIllegalOptions() {
+        final MockFormatErrorSupport formatErrorSupport = new MockFormatErrorSupport();
 
-        LogFormatter formatter = new JsonLogFormatter();
+        LogFormatter formatter = new JsonLogFormatter() {
+            @Override
+            protected FormatErrorSupport createFormatErrorSupport() {
+                return formatErrorSupport;
+            }
+        };
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("formatter.targets", "logLevel,message,payload");
         formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "formatter"));
@@ -234,16 +245,13 @@ public class JsonLogFormatterTest extends LogTestSupport {
 
         LogLevel level = LogLevel.ERROR;
 
-        ByteArrayOutputStream snatchedErr = new ByteArrayOutputStream();
-        System.setErr(new PrintStream(snatchedErr));
-
         String message = formatter.format(new LogContext(loggerName, level, msg, error,
                 payload1, payload2, payload3));
 
-        System.err.flush();
-        assertThat(snatchedErr.toString(), is(
-                "objects in options must be Map<String, Object>. : [test]" + System.getProperty("line.separator")
-                + "objects in options must be Map<String, Object>. : [null]" + System.getProperty("line.separator")));
+        assertThat(formatErrorSupport.messageList, contains(
+            "objects in options must be Map<String, Object>. : [test]",
+            "objects in options must be Map<String, Object>. : [null]"
+        ));
 
         assertThat(message, isJson(allOf(
                 withJsonPath("$", hasEntry("logLevel", "ERROR")),
@@ -256,8 +264,14 @@ public class JsonLogFormatterTest extends LogTestSupport {
      */
     @Test
     public void testFormatWithIllegalMapOptions() {
+        final MockFormatErrorSupport formatErrorSupport = new MockFormatErrorSupport();
 
-        LogFormatter formatter = new JsonLogFormatter();
+        LogFormatter formatter = new JsonLogFormatter() {
+            @Override
+            protected FormatErrorSupport createFormatErrorSupport() {
+                return formatErrorSupport;
+            }
+        };
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("formatter.targets", "logLevel,message,payload");
         formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "formatter"));
@@ -277,21 +291,18 @@ public class JsonLogFormatterTest extends LogTestSupport {
 
         LogLevel level = LogLevel.ERROR;
 
-        ByteArrayOutputStream snatchedErr = new ByteArrayOutputStream();
-        System.setErr(new PrintStream(snatchedErr));
-
         String message = formatter.format(new LogContext(loggerName, level, msg, error,
                 payload1, payload2));
 
-        System.err.flush();
-        assertThat(snatchedErr.toString(),
-            allOf(
-                matches("illegal type in keys : 1\\v+"
-                        + "illegal type in keys : ((null)|(2)|(true)),"
-                        + " ((null)|(2)|(true)), ((null)|(2)|(true))\\v+"),
-                containsString("null"),
-                containsString("2"),
-                containsString("true")));
+        assertThat(formatErrorSupport.messageList, hasSize(2));
+        assertThat(formatErrorSupport.messageList.get(0), is("illegal type in keys : 1"));
+        assertThat(formatErrorSupport.messageList.get(1), allOf(
+            startsWith("illegal type in keys : "),
+            // Map 内のエントリの反復順序が保証されないので、問題のあるキーがメッセージに含まれるかどうかで判定している
+            containsString("null"),
+            containsString("true"),
+            containsString("2")
+        ));
 
         assertThat(message, isJson(allOf(
                 withJsonPath("$", hasEntry("logLevel", "ERROR")),
@@ -414,4 +425,12 @@ public class JsonLogFormatterTest extends LogTestSupport {
         assertThat(cause.getMessage(), is("error for test"));
     }
 
+    private static class MockFormatErrorSupport implements FormatErrorSupport {
+        private final List<String> messageList = new ArrayList<String>();
+
+        @Override
+        public void outputFormatError(String message) {
+            this.messageList.add(message);
+        }
+    }
 }
