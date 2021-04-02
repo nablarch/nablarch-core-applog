@@ -15,7 +15,7 @@ import java.util.Set;
 /**
  * 障害通知ログと障害解析ログのメッセージをJSON形式でフォーマットするクラス。
  * <p>
- * {@link FailureLogFormatter}では、フォーマットとして出力内容をs呈するが、
+ * {@link FailureLogFormatter}では、フォーマットとして出力内容を設定するが、
  * 本クラスでは、 notificationTargets および、analysisTargets プロパティにて、
  * 出力項目を指定する。指定可能な出力項目は下記の通り。
  * <ul>
