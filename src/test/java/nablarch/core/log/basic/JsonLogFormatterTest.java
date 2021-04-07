@@ -4,6 +4,7 @@ import nablarch.core.ThreadContext;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.log.LogUtil;
 import nablarch.core.log.MockLogSettings;
+import nablarch.core.text.json.JsonSerializationManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -371,13 +372,16 @@ public class JsonLogFormatterTest extends LogTestSupport {
     @Test
     public void testFormatWithOtherManager() {
 
-        // note CustomJsonSerializationManager クラスは、NumberToJsonSerializerが外されており、
-        //      JavaのNumber型がObjectToJsonSerializerにて処理され、JSONのstringとして出力される。
-
-        LogFormatter formatter = new JsonLogFormatter();
+        LogFormatter formatter = new JsonLogFormatter() {
+            @Override
+            protected JsonSerializationManager createSerializationManager(ObjectSettings settings) {
+                // note CustomJsonSerializationManager クラスは、NumberToJsonSerializerが外されており、
+                //      JavaのNumber型がObjectToJsonSerializerにて処理され、JSONのstringとして出力される。
+                return new CustomJsonSerializationManager();
+            }
+        };
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("formatter.targets", "logLevel,message,payload");
-        settings.put("formatter.jsonSerializationManagerClassName", "nablarch.core.log.basic.CustomJsonSerializationManager");
         formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "formatter"));
 
         String loggerName = "TestLogger";
@@ -403,10 +407,14 @@ public class JsonLogFormatterTest extends LogTestSupport {
     public void testFormatWithError() {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("formatter.targets", "logLevel,message,payload");
-        // note CustomJsonSerializationManagerはbooleanを処理する際に、必ずIOExceptionをスローする
-        settings.put("formatter.jsonSerializationManagerClassName", "nablarch.core.log.basic.CustomJsonSerializationManager");
 
-        final LogFormatter formatter = new JsonLogFormatter();
+        final LogFormatter formatter = new JsonLogFormatter() {
+            @Override
+            protected JsonSerializationManager createSerializationManager(ObjectSettings settings) {
+                // note CustomJsonSerializationManagerはbooleanを処理する際に、必ずIOExceptionをスローする
+                return new CustomJsonSerializationManager();
+            }
+        };
         formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "formatter"));
 
         Map<String, Object> payload = new HashMap<String, Object>();
@@ -423,6 +431,25 @@ public class JsonLogFormatterTest extends LogTestSupport {
         final Throwable cause = e.getCause();
         assertThat(cause, is(instanceOf(IOException.class)));
         assertThat(cause.getMessage(), is("error for test"));
+    }
+
+    /**
+     * {@link JsonLogFormatter#createFormatErrorSupport()} の戻り値の型が {@link StandardErrorFormatErrorSupport} であること。
+     */
+    @Test
+    public void testCreateFormatErrorSupport() {
+        JsonLogFormatter formatter = new JsonLogFormatter();
+        assertThat(formatter.createFormatErrorSupport(), is(instanceOf(StandardErrorFormatErrorSupport.class)));
+    }
+
+    /**
+     * {@link JsonLogFormatter#createSerializationManager(ObjectSettings)} )} の戻り値の型が {@link AppLogJsonSerializationManager} であること。
+     */
+    @Test
+    public void testCreateSerializationManager() {
+        JsonLogFormatter formatter = new JsonLogFormatter();
+        ObjectSettings unused = null;
+        assertThat(formatter.createSerializationManager(unused), is(instanceOf(AppLogJsonSerializationManager.class)));
     }
 
     private static class MockFormatErrorSupport implements FormatErrorSupport {

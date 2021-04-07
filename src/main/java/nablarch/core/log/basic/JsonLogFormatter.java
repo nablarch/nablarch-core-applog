@@ -6,7 +6,6 @@ import nablarch.core.text.json.JsonSerializationManager;
 import nablarch.core.text.json.JsonSerializationSettings;
 import nablarch.core.text.json.JsonSerializer;
 import nablarch.core.util.FileUtil;
-import nablarch.core.util.ObjectUtil;
 import nablarch.core.util.StringUtil;
 import nablarch.core.util.annotation.Published;
 
@@ -76,9 +75,6 @@ import java.util.Set;
  *   <dt>{@code writer.<LogWriterの名称>.formatter.datePattern}<dt/>
  *   <dd>日時のフォーマットに使用するパターン。オプション。<br>
  *       指定しなければyyyy-MM-dd HH:mm:ss.SSSを使用する。<dd/>
- *   <dt>{@code writer.<LogWriterの名称>.formatter.jsonSerializationManagerClassName}<dt/>
- *   <dd>JSONへのシリアライズを管理するクラス。オプション。<br>
- *       指定しなければ{@link nablarch.core.log.basic.AppLogJsonSerializationManager}を使用する。<dd/>
  *   <dt>{@code writer.<LogWriterの名称>.formatter.structuredMessagePrefix}<dt/>
  *   <dd>各種ログで使用される組み込み処理用の接頭辞。オプション。<br>
  *       指定しなければ$JSON$を使用する。<dd/>
@@ -128,11 +124,6 @@ public class JsonLogFormatter implements LogFormatter {
     /** messageを構造化されていることを示す接頭辞のデフォルト値 */
     private static final String DEFAULT_STRUCTURED_MESSAGE_PREFIX = "$JSON$";
 
-    /** Jsonのシリアライズに使用する管理クラス名のプロパティ名 */
-    private static final String PROPS_SERIALIZATION_MANAGER_CLASS_NAME = "jsonSerializationManagerClassName";
-    /** Jsonのシリアライズに使用する管理クラス名のデフォルト値 */
-    private static final String DEFAULT_SERIALIZATION_MANAGER_CLASS_NAME = "nablarch.core.log.basic.AppLogJsonSerializationManager";
-
     /** Jsonのシリアライズに使用する管理クラス */
     private JsonSerializationManager serializationManager;
 
@@ -150,7 +141,10 @@ public class JsonLogFormatter implements LogFormatter {
     @Override
     public void initialize(ObjectSettings settings) {
         formatErrorSupport = createFormatErrorSupport();
+
         serializationManager = createSerializationManager(settings);
+        serializationManager.initialize(new JsonSerializationSettings(settings.getProps()));
+
         structuredTargets = createStructuredTargets(settings);
     }
 
@@ -168,14 +162,7 @@ public class JsonLogFormatter implements LogFormatter {
      * @return Jsonのシリアライズに使用する管理クラス
      */
     protected JsonSerializationManager createSerializationManager(ObjectSettings settings) {
-        String className = settings.getProp(PROPS_SERIALIZATION_MANAGER_CLASS_NAME);
-        if (StringUtil.isNullOrEmpty(className)) {
-            className = DEFAULT_SERIALIZATION_MANAGER_CLASS_NAME;
-        }
-        JsonSerializationManager serializationManager = ObjectUtil.createInstance(className);
-        JsonSerializationSettings jsonSettings = new JsonSerializationSettings(settings.getProps());
-        serializationManager.initialize(jsonSettings);
-        return serializationManager;
+        return new AppLogJsonSerializationManager();
     }
 
     /**
