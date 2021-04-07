@@ -200,9 +200,10 @@ public class JsonLogFormatter implements LogFormatter {
                 else if (TARGET_NAME_STACK_TRACE.equals(key)) { list.add(new StackTraceBuilder()); }
                 else if (TARGET_NAME_PAYLOAD.equals(key)) { list.add(new PayloadBuilder(formatErrorSupport)); }
                 else {
-                    System.err.println(
-                            String.format("JsonLogFormatter : [%s] is unknown target. property name = [%s.%s]",
-                                    key, settings.getName(), PROPS_TARGETS));
+                    throw new IllegalArgumentException(
+                        String.format("JsonLogFormatter : [%s] is unknown target. property name = [%s.%s]",
+                                key, settings.getName(), PROPS_TARGETS)
+                    );
                 }
             }
         }

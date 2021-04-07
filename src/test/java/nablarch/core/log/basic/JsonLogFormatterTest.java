@@ -10,9 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -186,34 +184,23 @@ public class JsonLogFormatterTest extends LogTestSupport {
     }
 
     /**
-     * 不正なターゲットが無視されること。
+     * 不正なターゲットが指定された場合は例外がスローされること。
      */
     @Test
     public void testFormatWithIllegalTargets() {
 
-        LogFormatter formatter = new JsonLogFormatter();
-        Map<String, String> settings = new HashMap<String, String>();
+        final LogFormatter formatter = new JsonLogFormatter();
+        final Map<String, String> settings = new HashMap<String, String>();
         settings.put("xxxFormatter.targets", "message ,, ,dummy,message");
 
-        ByteArrayOutputStream snatchedErr = new ByteArrayOutputStream();
-        System.setErr(new PrintStream(snatchedErr));
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
+            @Override
+            public void run() {
+                formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "xxxFormatter"));
+            }
+        });
 
-        formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "xxxFormatter"));
-
-        System.err.flush();
-        assertThat(snatchedErr.toString(),
-                is("JsonLogFormatter : [dummy] is unknown target. property name = [xxxFormatter.targets]"
-                        + System.getProperty("line.separator")));
-
-        String loggerName = "TestLogger";
-        String msg = "TestMessage";
-        Throwable error = null;
-
-        LogLevel level = LogLevel.ERROR;
-
-        String message = formatter.format(new LogContext(loggerName, level, msg, error));
-        assertThat(message, isJson(allOf(
-                withJsonPath("$", hasEntry("message", "TestMessage")))));
+        assertThat(exception.getMessage(), is("JsonLogFormatter : [dummy] is unknown target. property name = [xxxFormatter.targets]"));
     }
 
     /**
