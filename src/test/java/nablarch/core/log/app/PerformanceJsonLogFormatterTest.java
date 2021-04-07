@@ -58,10 +58,6 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
         formatter.start(point);
         String message = formatter.end(point, "success");
 
-        new Verifications() {{
-            context.setMaxMemory(anyLong); minTimes(1);
-        }};
-
         assertThat(message.startsWith("$JSON$"), is(true));
         assertThat(message.substring("$JSON$".length()), isJson(allOf(
                 withJsonPath("$", hasEntry("point", "point0001")),
@@ -74,19 +70,6 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
                 withJsonPath("$", hasEntry("endFreeMemory", 670000)),
                 withJsonPath("$", hasEntry("startUsedMemory", 300000)),
                 withJsonPath("$", hasEntry("endUsedMemory", 330000)))));
-
-        // note ログコンテキストをMockにしている為、setterの呼び出しを確認
-        new Verifications() {{
-            context.setPoint("point0001"); minTimes(1);
-            context.setResult("success"); minTimes(1);
-            context.setStartTime(anyLong); minTimes(1);
-            context.setEndTime(anyLong); minTimes(1);
-            context.setMaxMemory(anyLong); minTimes(1);
-            context.setStartFreeMemory(anyLong); minTimes(1);
-            context.setEndFreeMemory(anyLong); minTimes(1);
-            context.setStartUsedMemory(anyLong); minTimes(1);
-            context.setEndUsedMemory(anyLong); minTimes(1);
-        }};
     }
 
     /**
