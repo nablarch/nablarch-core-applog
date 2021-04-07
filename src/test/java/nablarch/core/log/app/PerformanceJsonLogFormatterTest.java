@@ -2,19 +2,16 @@ package nablarch.core.log.app;
 
 import mockit.Expectations;
 import mockit.Mocked;
-import mockit.Verifications;
 import nablarch.core.log.LogTestSupport;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
-import static mockit.internal.expectations.ActiveInvocations.minTimes;
+import java.lang.management.MemoryUsage;
+
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThrows;
 
@@ -23,9 +20,6 @@ import static org.junit.Assert.assertThrows;
  * @author Shuji Kitamura
  */
 public class PerformanceJsonLogFormatterTest extends LogTestSupport {
-
-    @Mocked
-    private PerformanceLogFormatter.PerformanceLogContext context;
 
     @Before
     public void setup() {
@@ -36,7 +30,7 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
      * デフォルトの出力項目で正しくフォーマットされること。
      */
     @Test
-    public void testFormat() {
+    public void testFormat(@Mocked final PerformanceLogFormatter.PerformanceLogContext context) {
 
         new Expectations() {{
             context.getPoint(); result = "point0001";
@@ -77,10 +71,6 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
      */
     @Test
     public void testFormatWithTargets() {
-        new Expectations() {{
-            context.getPoint(); result = "point0001";
-        }};
-
         System.setProperty("performanceLogFormatter.targets", "point ,, point");
 
         PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
@@ -92,29 +82,9 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
 
         assertThat(message.startsWith("$JSON$"), is(true));
         assertThat(message.substring("$JSON$".length()), isJson(allOf(
-                withJsonPath("$", hasEntry("point", "point0001")),
-                withoutJsonPath("$.result"),
-                withoutJsonPath("$.startTime"),
-                withoutJsonPath("$.endTime"),
-                withoutJsonPath("$.executionTime"),
-                withoutJsonPath("$.maxMemory"),
-                withoutJsonPath("$.startFreeMemory"),
-                withoutJsonPath("$.endFreeMemory"),
-                withoutJsonPath("$.startUsedMemory"),
-                withoutJsonPath("$.endUsedMemory"))));
-
-        // note nullが返るとキーごとスキップされるため、getterが呼び出しされていないこも確認
-        new Verifications() {{
-            context.getResult(); times = 0;
-            context.getStartTime(); times = 0;
-            context.getEndTime(); times = 0;
-            context.getExecutionTime(); times = 0;
-            context.getMaxMemory(); times = 0;
-            context.getStartFreeMemory(); times = 0;
-            context.getEndFreeMemory(); times = 0;
-            context.getStartUsedMemory(); times = 0;
-            context.getEndUsedMemory(); times = 0;
-        }};
+            withJsonPath("$.*", hasSize(1)),
+            withJsonPath("$", hasEntry("point", "point0001"))
+        )));
     }
 
     /**
@@ -130,23 +100,25 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
 
         String point = "point0001";
         formatter.start(point);
-        formatter.end(point, "success");
+        String message = formatter.end(point, "success");
 
-        new Verifications() {{
-            context.setMaxMemory(anyLong); times = 0;
-            context.setStartFreeMemory(anyLong); times = 0;
-            context.setEndFreeMemory(anyLong); times = 0;
-            context.setStartUsedMemory(anyLong); times = 0;
-            context.setEndUsedMemory(anyLong); times = 0;
-        }};
-
+        assertThat(message.substring("$JSON$".length()), isJson(allOf(
+            withoutJsonPath("$.maxMemory"),
+            withoutJsonPath("$.startFreeMemory"),
+            withoutJsonPath("$.endFreeMemory"),
+            withoutJsonPath("$.startUsedMemory"),
+            withoutJsonPath("$.endUsedMemory")
+        )));
     }
 
     /**
-     * 出力項目にmaxMemoryがあるときメモリのセットが行われること。
+     * 出力項目にmaxMemoryがあるときメモリの計測が行われログにmaxMemoryが出力されること。
      */
     @Test
-    public void testFormatWithMaxMemory() {
+    public void testFormatWithMaxMemory(@Mocked final MemoryUsage memoryUsage) {
+        new Expectations() {{
+            memoryUsage.getMax(); returns(2000L, 99L);
+        }};
 
         System.setProperty("performanceLogFormatter.targets", "maxMemory");
 
@@ -154,24 +126,22 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
 
         String point = "point0001";
         formatter.start(point);
-        new Verifications() {{
-            context.setStartFreeMemory(anyLong); times = 1;
-            context.setStartUsedMemory(anyLong); times = 1;
-        }};
+        String message = formatter.end(point, "success");
 
-        formatter.end(point, "success");
-        new Verifications() {{
-            context.setMaxMemory(anyLong); minTimes(1);
-            context.setEndFreeMemory(anyLong); times = 1;
-            context.setEndUsedMemory(anyLong); times = 1;
-        }};
+        assertThat(message.substring("$JSON$".length()), isJson(
+            withJsonPath("$", hasEntry("maxMemory", 2000)))
+        );
     }
 
     /**
-     * 出力項目にstartFreeMemoryがあるときメモリのセットが行われること。
+     * 出力項目にstartFreeMemoryがあるときメモリの計測が行われログにstartFreeMemoryが出力されること。
      */
     @Test
-    public void testFormatWithStartFreeMemory() {
+    public void testFormatWithStartFreeMemory(@Mocked final MemoryUsage memoryUsage) {
+        new Expectations() {{
+            memoryUsage.getMax(); returns(2000L, 99L);
+            memoryUsage.getUsed(); returns(1500L, 9L);
+        }};
 
         System.setProperty("performanceLogFormatter.targets", "startFreeMemory");
 
@@ -179,24 +149,22 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
 
         String point = "point0001";
         formatter.start(point);
-        new Verifications() {{
-            context.setStartFreeMemory(anyLong); times = 1;
-            context.setStartUsedMemory(anyLong); times = 1;
-        }};
+        String message = formatter.end(point, "success");
 
-        formatter.end(point, "success");
-        new Verifications() {{
-            context.setMaxMemory(anyLong); minTimes(1);
-            context.setEndFreeMemory(anyLong); times = 1;
-            context.setEndUsedMemory(anyLong); times = 1;
-        }};
+        assertThat(message.substring("$JSON$".length()), isJson(
+            withJsonPath("$", hasEntry("startFreeMemory", 500)))
+        );
     }
 
     /**
-     * 出力項目にendFreeMemoryがあるときメモリのセットが行われること。
+     * 出力項目にendFreeMemoryがあるときメモリの計測が行われログにendFreeMemoryが出力されること。
      */
     @Test
-    public void testFormatWithEndFreeMemory() {
+    public void testFormatWithEndFreeMemory(@Mocked final MemoryUsage memoryUsage) {
+        new Expectations() {{
+            memoryUsage.getMax(); returns(2000L, 99L);
+            memoryUsage.getUsed(); returns(1500L, 9L);
+        }};
 
         System.setProperty("performanceLogFormatter.targets", "endFreeMemory");
 
@@ -204,24 +172,21 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
 
         String point = "point0001";
         formatter.start(point);
-        new Verifications() {{
-            context.setStartFreeMemory(anyLong); times = 1;
-            context.setStartUsedMemory(anyLong); times = 1;
-        }};
+        String message = formatter.end(point, "success");
 
-        formatter.end(point, "success");
-        new Verifications() {{
-            context.setMaxMemory(anyLong); minTimes(1);
-            context.setEndFreeMemory(anyLong); times = 1;
-            context.setEndUsedMemory(anyLong); times = 1;
-        }};
+        assertThat(message.substring("$JSON$".length()), isJson(
+            withJsonPath("$", hasEntry("endFreeMemory", 90)))
+        );
     }
 
     /**
-     * 出力項目にstartUsedMemoryがあるときメモリのセットが行われること。
+     * 出力項目にstartUsedMemoryがあるときメモリの計測が行われログにstartUsedMemoryが出力されること。
      */
     @Test
-    public void testFormatWithStartUsedMemory() {
+    public void testFormatWithStartUsedMemory(@Mocked final MemoryUsage memoryUsage) {
+        new Expectations() {{
+            memoryUsage.getUsed(); returns(1500L, 9L);
+        }};
 
         System.setProperty("performanceLogFormatter.targets", "startUsedMemory");
 
@@ -229,24 +194,21 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
 
         String point = "point0001";
         formatter.start(point);
-        new Verifications() {{
-            context.setStartFreeMemory(anyLong); times = 1;
-            context.setStartUsedMemory(anyLong); times = 1;
-        }};
+        String message = formatter.end(point, "success");
 
-        formatter.end(point, "success");
-        new Verifications() {{
-            context.setMaxMemory(anyLong); minTimes(1);
-            context.setEndFreeMemory(anyLong); times = 1;
-            context.setEndUsedMemory(anyLong); times = 1;
-        }};
+        assertThat(message.substring("$JSON$".length()), isJson(
+            withJsonPath("$", hasEntry("startUsedMemory", 1500)))
+        );
     }
 
     /**
-     * 出力項目にendUsedMemoryがあるときメモリのセットが行われること。
+     * 出力項目にendUsedMemoryがあるときメモリの計測が行われログにendUsedMemoryが出力されること。
      */
     @Test
-    public void testFormatWithEndUsedMemory() {
+    public void testFormatWithEndUsedMemory(@Mocked final MemoryUsage memoryUsage) {
+        new Expectations() {{
+            memoryUsage.getUsed(); returns(1500L, 9L);
+        }};
 
         System.setProperty("performanceLogFormatter.targets", "endUsedMemory");
 
@@ -254,17 +216,11 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
 
         String point = "point0001";
         formatter.start(point);
-        new Verifications() {{
-            context.setStartFreeMemory(anyLong); times = 1;
-            context.setStartUsedMemory(anyLong); times = 1;
-        }};
+        String message = formatter.end(point, "success");
 
-        formatter.end(point, "success");
-        new Verifications() {{
-            context.setMaxMemory(anyLong); minTimes(1);
-            context.setEndFreeMemory(anyLong); times = 1;
-            context.setEndUsedMemory(anyLong); times = 1;
-        }};
+        assertThat(message.substring("$JSON$".length()), isJson(
+            withJsonPath("$", hasEntry("endUsedMemory", 9)))
+        );
     }
 
     /**
