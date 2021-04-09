@@ -55,10 +55,25 @@ public class ApplicationSettingLogFormatter {
                     + '\n' + '\t' + "business date = [$businessDate$]";
 
     /** アプリケーション設定の出力項目 */
-    private final Map<String, LogItem<ApplicationSettingLogContext>> appLogItem = getAppSettingsLogItems();
+    private Map<String, LogItem<ApplicationSettingLogContext>> appLogItem;
 
     /** アプリケーション設定及び業務日付の出力項目 */
-    private final Map<String, LogItem<ApplicationSettingLogContext>> appWithDateLogItem = getAppSettingsWithDateLogItems();
+    private Map<String, LogItem<ApplicationSettingLogContext>> appWithDateLogItem;
+
+    /**
+     * コンストラクタ。
+     */
+    public ApplicationSettingLogFormatter() {
+        initialize();
+    }
+
+    /**
+     * 初期化処理。
+     */
+    protected void initialize() {
+        appLogItem = getAppSettingsLogItems();
+        appWithDateLogItem = getAppSettingsWithDateLogItems();
+    }
 
     /**
      * アプリケーション設定に関するログメッセージを生成する。

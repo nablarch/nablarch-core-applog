@@ -11,8 +11,14 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.text.IsEqualIgnoringWhiteSpace.equalToIgnoringWhiteSpace;
-import static org.junit.Assert.assertThat;
 
 /**
  * {@link ApplicationSettingLogUtil}のテストクラス。
@@ -180,7 +186,7 @@ public class ApplicationSettingLogUtilTest extends LogTestSupport {
     }
 
     /**
-     * {@link nablarch.fw.launcher.logging.LauncherLogFormatter}を拡張した場合のテスト。
+     * {@link nablarch.core.log.app.ApplicationSettingLogFormatter}を拡張した場合のテスト。
      * <p/>
      * 拡張したクラスのフォーマット、{@link LogItem}定義を使用してログフォーマットが行われていることを確認する。
      */
@@ -201,6 +207,35 @@ public class ApplicationSettingLogUtilTest extends LogTestSupport {
         assertThat(ApplicationSettingLogUtil.getAppSettingsWithDateLogMsg(),
                 equalToIgnoringWhiteSpace("#### date & settings ####"
                         + " 20111201:\n\t\tkey3 = [name3\uD83D\uDE0E\uD83D\uDE0E]:hogehogeSettings"));
+    }
+
+    /**
+     * {@link nablarch.core.log.app.ApplicationSettingJsonLogFormatter}を拡張した場合のテスト。
+     */
+    @Test
+    public void testApplicationSettingJsonLogFormatter() {
+        init();
+
+        System.setProperty("applicationSettingLogFormatter.systemSettingItems",
+                "key3, ,");
+
+        // フォーマットクラスを変更
+        System.setProperty("applicationSettingLogFormatter.className",
+                "nablarch.core.log.app.ApplicationSettingJsonLogFormatter");
+
+        String message;
+
+        message = ApplicationSettingLogUtil.getAppSettingsLogMsg();
+        assertThat(message.startsWith("$JSON$"), is(true));
+        assertThat(message.substring("$JSON$".length()), isJson(allOf(
+                withJsonPath("$.systemSettings", hasEntry("key3", "name3\uD83D\uDE0E\uD83D\uDE0E")),
+                withoutJsonPath("$.businessDate"))));
+
+        message = ApplicationSettingLogUtil.getAppSettingsWithDateLogMsg();
+        assertThat(message.startsWith("$JSON$"), is(true));
+        assertThat(message.substring("$JSON$".length()), isJson(allOf(
+                withJsonPath("$.systemSettings", hasEntry("key3", "name3\uD83D\uDE0E\uD83D\uDE0E")),
+                withJsonPath("$", hasEntry("businessDate", "20111201")))));
     }
 
     public static class TestFormatter extends ApplicationSettingLogFormatter {
