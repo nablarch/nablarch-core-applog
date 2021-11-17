@@ -1,89 +1,28 @@
 package nablarch.core.log.basic;
 
 import nablarch.core.text.json.JsonSerializationManager;
-import nablarch.core.text.json.JsonSerializer;
-import nablarch.core.text.json.JsonSerializationSettings;
-import nablarch.core.util.StringUtil;
+import nablarch.core.text.json.MapToJsonSerializer;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
 
 /**
- * Mapオブジェクトをシリアライズするクラス。
+ * applog用に拡張したMapをJSONにシリアライズするクラス。
  * <p>
- * 受入れ可能なオブジェクトの型は java.util.Map。<br>
- * シリアライズによりJsonのobjectとして出力する。<br>
- * 値がnullとなるmemberはデフォルト設定で出力しない。
- * 出力対象とする場合は、{@link JsonSerializationSettings}で
- * ignoreNullValueMemberプロパティにfalseを設定する。<br>
+ * このクラスは、Mapの値に{@link RawJsonObjectMembers}が有る場合をサポートするように
+ * {@link MapToJsonSerializer}を拡張している。
  * </p>
  * @author Shuji Kitamura
  */
-public class AppLogMapToJsonSerializer implements JsonSerializer {
-
-    /** objectの開始文字 */
-    private static final char BEGIN_OBJECT = '{';
-
-    /** objectの終了文字 */
-    private static final char END_OBJECT = '}';
-
-    /** nameのセパレータとなる文字 */
-    private static final char NAME_SEPARATOR = ':';
-
-    /** 値のセパレータとなる文字 */
-    private static final char VALUE_SEPARATOR = ',';
-
-    /** 値がNULLのmemberを無視するか否かのプロパティ名 */
-    private static final String IGNORE_NULL_VALUE_MEMBER_PROPERTY = "ignoreNullValueMember";
-
-    /** デフォルトの値がNULLのmemberを無視するか否か */
-    private static final boolean DEFAULT_IGNORE_NULL_VALUE_MEMBER = true;
-
-    /** シリアライズ管理クラス */
-    private final JsonSerializationManager manager;
-
-    /** nameに使用するシリアライザ */
-    private JsonSerializer memberNameSerializer;
-
-    /** 値がNULLのmemberを無視するか否か */
-    private boolean isIgnoreNullValueMember;
+public class AppLogMapToJsonSerializer extends MapToJsonSerializer {
 
     /**
      * コンストラクタ。
      * @param manager シリアライズ管理クラス
      */
     public AppLogMapToJsonSerializer(JsonSerializationManager manager) {
-        this.manager = manager;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void initialize(JsonSerializationSettings settings) {
-        memberNameSerializer = manager.getMemberNameSerializer();
-        isIgnoreNullValueMember = isIgnoreNullValueMember(settings);
-    }
-
-    /**
-     * 値がNULLのmemberを無視するか否かを取得する。<br>
-     * 取得元のプロパティ名は"ignoreNullValueMember"。
-     * プロパティの値が設定されていない、もしくはnull、空の文字列の場合、デフォルト値としてtrueを返す。
-     * @param settings シリアライザの設定
-     * @return 値がNULLのmemberを無視するときtrue、出力対象ととするときfalse
-     */
-    private boolean isIgnoreNullValueMember(JsonSerializationSettings settings) {
-        String ignore = settings.getProp(IGNORE_NULL_VALUE_MEMBER_PROPERTY);
-        return !StringUtil.isNullOrEmpty(ignore) ?  Boolean.parseBoolean(ignore) : DEFAULT_IGNORE_NULL_VALUE_MEMBER;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean isTarget(Class<?> valueClass) {
-        return Map.class.isAssignableFrom(valueClass);
+        super(manager);
     }
 
     /**
