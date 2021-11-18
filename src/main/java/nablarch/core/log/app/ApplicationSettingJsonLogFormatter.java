@@ -8,6 +8,7 @@ import nablarch.core.util.StringUtil;
 import nablarch.core.util.annotation.Published;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -120,6 +121,11 @@ public class ApplicationSettingJsonLogFormatter extends ApplicationSettingLogFor
         @Override
         public void build(Map<String, Object> structuredObject, ApplicationSettingLogContext context) {
             String systemSettingItems = AppLogUtil.getProps().get(PROPS_PREFIX + "systemSettingItems");
+
+            if (StringUtil.isNullOrEmpty(systemSettingItems)) {
+                structuredObject.put("systemSettings", Collections.emptyMap());
+                return;
+            }
 
             String[] strings = systemSettingItems.split(",");
             Map<String, Object> systemSettings = new HashMap<String, Object>();

@@ -70,6 +70,19 @@ public class ApplicationSettingJsonLogFormatterTest extends LogTestSupport {
     }
 
     @Test
+    public void systemSettingItemsが指定されていない場合_systemSettingsは空のオブジェクトで出力されることをテスト() {
+        System.clearProperty("nablarch.appLog.filePath");
+
+        sut = new ApplicationSettingJsonLogFormatter();
+
+        assertThat(sut.getAppSettingsLogMsg().substring("$JSON$".length()), isJson(allOf(
+            withJsonPath("$.*", hasSize(1)),
+            withJsonPath("$", hasKey("systemSettings")),
+            withJsonPath("$.systemSettings.*", hasSize(0))
+        )));
+    }
+
+    @Test
     public void getAppSettingsLogMsgでtargetを指定した場合のテスト() {
         System.setProperty("applicationSettingLogFormatter.appSettingTargets", "systemSettings,businessDate");
 
