@@ -149,6 +149,25 @@ public class JsonLogFormatterTest extends LogTestSupport {
     }
 
     /**
+     * 日付の書式を指定できること。
+     */
+    @Test
+    public void testFormatWithDatePattern() {
+        LogFormatter formatter = new JsonLogFormatter();
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("formatter.targets", "date, message");
+        settings.put("formatter.datePattern", "yyyy/MM/dd HH:mm:ss");
+        formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "formatter"));
+
+        String message = formatter.format(new LogContext("TestLogger", LogLevel.ERROR, "TestMessage", null));
+        assertThat(message, isJson(allOf(
+            withJsonPath("$.*", hasSize(2)),
+            withJsonPath("$.date", matches("[0-9]{4}/[0-9]{2}/[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}")),
+            withJsonPath("$", hasEntry("message", "TestMessage"))
+        )));
+    }
+
+    /**
      * 各項目でnullが指定されてもエラーにならないこと。
      */
     @Test

@@ -143,7 +143,10 @@ public class JsonLogFormatter implements LogFormatter {
         formatErrorSupport = createFormatErrorSupport();
 
         serializationManager = createSerializationManager(settings);
-        serializationManager.initialize(new JsonSerializationSettings(settings.getProps()));
+
+        JsonSerializationSettings jsonSettings = new JsonSerializationSettings(
+                settings.getProps(), settings.getName() + ".", settings.getFilePath());
+        serializationManager.initialize(jsonSettings);
 
         structuredTargets = createStructuredTargets(settings);
     }
