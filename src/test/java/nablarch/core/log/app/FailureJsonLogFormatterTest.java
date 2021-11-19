@@ -4,6 +4,7 @@ import nablarch.core.ThreadContext;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.message.MockStringResourceHolder;
 import nablarch.test.support.SystemRepositoryResource;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -20,6 +21,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThrows;
 
@@ -215,5 +217,63 @@ public class FailureJsonLogFormatterTest extends LogTestSupport {
         });
 
         assertThat(e.getMessage(), is("[dummy] is unknown target. property name = [failureLogFormatter.notificationTargets]"));
+    }
+
+    /**
+     * スレッドコンテキストの言語情報からメッセージが構築されること。
+     */
+    @Test
+    public void testGetMessageDependThreadContext() {
+        System.setProperty("failureLogFormatter.notificationTargets", "message");
+        System.setProperty("failureLogFormatter.analysisTargets", "message");
+        ThreadContext.setLanguage(Locale.ENGLISH);
+
+        System.setProperty("nablarch.appLog.filePath", "classpath:nablarch/core/log/app/app-log-default_bc.properties");
+        final FailureJsonLogFormatter sut = new FailureJsonLogFormatter();
+
+        final String analysisMessage =
+            sut.formatAnalysisMessage(null, null, "failure.code.unknown", new Object[]{"error"});
+
+        assertThat(analysisMessage.substring("$JSON$".length()), isJson(allOf(
+            withJsonPath("$.*", hasSize(1)),
+            withJsonPath("$", hasEntry("message", "unknown error!!!"))
+        )));
+
+        final String notificationMessage =
+            sut.formatNotificationMessage(null, null, "failure.code.unknown", new Object[]{"error"});
+
+        assertThat(notificationMessage.substring("$JSON$".length()), isJson(allOf(
+            withJsonPath("$.*", hasSize(1)),
+            withJsonPath("$", hasEntry("message", "unknown error!!!"))
+        )));
+    }
+
+    /**
+     * スレッドコンテキストが存在しない場合デフォルトの言語情報からメッセージが構築されること
+     */
+    @Test
+    public void testGetMessageNotDependThreadContext() {
+        System.setProperty("failureLogFormatter.notificationTargets", "message");
+        System.setProperty("failureLogFormatter.analysisTargets", "message");
+        ThreadContext.clear();
+
+        System.setProperty("nablarch.appLog.filePath", "classpath:nablarch/core/log/app/app-log-default_bc.properties");
+        final FailureJsonLogFormatter sut = new FailureJsonLogFormatter();
+
+        final String analysisMessage =
+            sut.formatAnalysisMessage(null, null, "failure.code.unknown", new Object[]{"error"});
+
+        assertThat(analysisMessage.substring("$JSON$".length()), isJson(allOf(
+            withJsonPath("$.*", hasSize(1)),
+            withJsonPath("$", hasEntry("message", "未知のエラー"))
+        )));
+
+        final String notificationMessage =
+            sut.formatNotificationMessage(null, null, "failure.code.unknown", new Object[]{"error"});
+
+        assertThat(notificationMessage.substring("$JSON$".length()), isJson(allOf(
+            withJsonPath("$.*", hasSize(1)),
+            withJsonPath("$", hasEntry("message", "未知のエラー"))
+        )));
     }
 }
