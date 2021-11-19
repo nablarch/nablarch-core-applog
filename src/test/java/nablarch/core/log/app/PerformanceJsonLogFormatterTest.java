@@ -29,6 +29,7 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
     public void setup() {
         System.clearProperty("performanceLogFormatter.targets");
         System.clearProperty("performanceLogFormatter.datePattern");
+        System.clearProperty("performanceLogFormatter.structuredMessagePrefix");
     }
 
     /**
@@ -284,6 +285,28 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
                 withJsonPath("$.*", hasSize(2)),
                 withJsonPath("$", hasEntry("startTime", "2021/11/19 15:30:20")),
                 withJsonPath("$", hasEntry("endTime", "2021/11/19 15:31:20"))
+        )));
+    }
+
+    /**
+     * JSON文字列であることを示すプレフィックスを指定できることをテスト。
+     */
+    @Test
+    public void testStructuredMessagePrefix() {
+        System.setProperty("performanceLogFormatter.targets", "point");
+        System.setProperty("performanceLogFormatter.structuredMessagePrefix", "@JSON@");
+
+        PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
+
+        String point = "point0001";
+
+        formatter.start(point);
+        String message = formatter.end(point, "success");
+
+        assertThat(message.startsWith("@JSON@"), is(true));
+        assertThat(message.substring("@JSON@".length()), isJson(allOf(
+                withJsonPath("$.*", hasSize(1)),
+                withJsonPath("$", hasEntry("point", "point0001"))
         )));
     }
 }
