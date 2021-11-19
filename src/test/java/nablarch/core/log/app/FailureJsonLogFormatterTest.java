@@ -3,6 +3,9 @@ package nablarch.core.log.app;
 import nablarch.core.ThreadContext;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.message.MockStringResourceHolder;
+import nablarch.core.text.json.BasicJsonSerializationManager;
+import nablarch.core.text.json.JsonSerializationSettings;
+import nablarch.core.text.json.JsonSerializer;
 import nablarch.test.support.SystemRepositoryResource;
 import org.junit.Assert;
 import org.junit.Before;
@@ -10,6 +13,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -388,5 +393,49 @@ public class FailureJsonLogFormatterTest extends LogTestSupport {
                 sut.formatNotificationMessage(null, null, "E000001", new Object[]{"error"});
 
         assertThat(notificationMessage, startsWith("@JSON@"));
+    }
+
+    /**
+     * {@code jsonSerializationManagerClassName}の指定ができることをテスト。
+     */
+    @Test
+    public void testJsonSerializationManagerClassName() {
+        System.setProperty("failureLogFormatter.notificationTargets", "failureCode");
+        System.setProperty("failureLogFormatter.analysisTargets", "failureCode");
+        System.setProperty("failureLogFormatter.jsonSerializationManagerClassName", MockJsonSerializationManager.class.getName());
+
+        final FailureJsonLogFormatter sut = new FailureJsonLogFormatter();
+
+        final String analysisMessage =
+                sut.formatAnalysisMessage(null, null, "E000001", new Object[]{"error"});
+
+        assertThat(analysisMessage, is("$JSON$mock serialization"));
+
+        final String notificationMessage =
+                sut.formatNotificationMessage(null, null, "E000001", new Object[]{"error"});
+
+        assertThat(notificationMessage, is("$JSON$mock serialization"));
+    }
+
+    public static class MockJsonSerializationManager extends BasicJsonSerializationManager {
+        @Override
+        public JsonSerializer getSerializer(Object value) {
+            return new JsonSerializer() {
+
+                @Override
+                public void serialize(Writer writer, Object value) throws IOException {
+                    writer.write("mock serialization");
+                }
+
+                @Override
+                public void initialize(JsonSerializationSettings settings) {
+                }
+
+                @Override
+                public boolean isTarget(Class<?> valueClass) {
+                    return false;
+                }
+            };
+        }
     }
 }
