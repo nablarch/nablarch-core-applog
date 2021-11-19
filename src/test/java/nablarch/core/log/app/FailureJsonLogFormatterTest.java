@@ -276,4 +276,94 @@ public class FailureJsonLogFormatterTest extends LogTestSupport {
             withJsonPath("$", hasEntry("message", "未知のエラー"))
         )));
     }
+
+    /**
+     * {@code fwFailureCodeFilePath}の指定ができることのテスト。
+     */
+    @Test
+    public void testFwFailureCodeFilePath() {
+        System.setProperty("failureLogFormatter.notificationTargets", "failureCode");
+        System.setProperty("failureLogFormatter.analysisTargets", "failureCode");
+        System.setProperty("failureLogFormatter.fwFailureCodeFilePath", "classpath:nablarch/core/log/app/failure-log-fwFailCode3.properties");
+
+        final FailureJsonLogFormatter sut = new FailureJsonLogFormatter();
+
+        final Exception exception = new Exception();
+
+        final String analysisMessage =
+                sut.formatAnalysisMessage(exception, null, null, new Object[]{"error"});
+
+        assertThat(analysisMessage.substring("$JSON$".length()), isJson(allOf(
+                withJsonPath("$.*", hasSize(1)),
+                withJsonPath("$", hasEntry("failureCode", "FW000001"))
+        )));
+
+        final String notificationMessage =
+                sut.formatNotificationMessage(exception, null, null, new Object[]{"error"});
+
+        assertThat(notificationMessage.substring("$JSON$".length()), isJson(allOf(
+                withJsonPath("$.*", hasSize(1)),
+                withJsonPath("$", hasEntry("failureCode", "FW000001"))
+        )));
+    }
+
+    /**
+     * {@code fwMessageIdFilePath}の指定ができることのテスト。
+     */
+    @Test
+    public void testFwMessageIdFilePath() {
+        System.setProperty("failureLogFormatter.notificationTargets", "failureCode");
+        System.setProperty("failureLogFormatter.analysisTargets", "failureCode");
+        System.setProperty("failureLogFormatter.fwMessageIdFilePath", "classpath:nablarch/core/log/app/failure-log-fwFailCode3.properties");
+
+        final FailureJsonLogFormatter sut = new FailureJsonLogFormatter();
+
+        final Exception exception = new Exception();
+
+        final String analysisMessage =
+                sut.formatAnalysisMessage(exception, null, null, new Object[]{"error"});
+
+        assertThat(analysisMessage.substring("$JSON$".length()), isJson(allOf(
+                withJsonPath("$.*", hasSize(1)),
+                withJsonPath("$", hasEntry("failureCode", "FW000001"))
+        )));
+
+        final String notificationMessage =
+                sut.formatNotificationMessage(exception, null, null, new Object[]{"error"});
+
+        assertThat(notificationMessage.substring("$JSON$".length()), isJson(allOf(
+                withJsonPath("$.*", hasSize(1)),
+                withJsonPath("$", hasEntry("failureCode", "FW000001"))
+        )));
+    }
+
+    /**
+     * {@code appMessageIdFilePath}の指定ができることのテスト。
+     */
+    @Test
+    public void testAppMessageIdFilePath() {
+        System.setProperty("failureLogFormatter.notificationTargets", "failureCode");
+        System.setProperty("failureLogFormatter.analysisTargets", "failureCode");
+        System.setProperty("failureLogFormatter.appMessageIdFilePath", "classpath:nablarch/core/log/app/failure-log-appFailCode.properties");
+
+        final FailureJsonLogFormatter sut = new FailureJsonLogFormatter();
+
+        final Exception exception = new Exception();
+
+        final String analysisMessage =
+                sut.formatAnalysisMessage(exception, null, "UM000002", new Object[]{"error"});
+
+        assertThat(analysisMessage.substring("$JSON$".length()), isJson(allOf(
+                withJsonPath("$.*", hasSize(1)),
+                withJsonPath("$", hasEntry("failureCode", "AP000002"))
+        )));
+
+        final String notificationMessage =
+                sut.formatNotificationMessage(exception, null, "UM000003", new Object[]{"error"});
+
+        assertThat(notificationMessage.substring("$JSON$".length()), isJson(allOf(
+                withJsonPath("$.*", hasSize(1)),
+                withJsonPath("$", hasEntry("failureCode", "AP000003"))
+        )));
+    }
 }
