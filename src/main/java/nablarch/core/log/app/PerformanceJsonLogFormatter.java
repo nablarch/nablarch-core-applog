@@ -6,6 +6,7 @@ import nablarch.core.util.StringUtil;
 import nablarch.core.util.annotation.Published;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -201,7 +202,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
          */
         @Override
         public void build(Map<String, Object> structuredObject, PerformanceLogContext context) {
-            structuredObject.put(TARGET_NAME_START_TIME, context.getStartTime());
+            structuredObject.put(TARGET_NAME_START_TIME, new Date(context.getStartTime()));
         }
     }
 
@@ -216,7 +217,7 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
          */
         @Override
         public void build(Map<String, Object> structuredObject, PerformanceLogContext context) {
-            structuredObject.put(TARGET_NAME_END_TIME, context.getEndTime());
+            structuredObject.put(TARGET_NAME_END_TIME, new Date(context.getEndTime()));
         }
     }
 

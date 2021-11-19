@@ -3,13 +3,17 @@ package nablarch.core.log.app;
 import mockit.Expectations;
 import mockit.Mocked;
 import nablarch.core.log.LogTestSupport;
+import nablarch.core.log.RegexMatcher;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
 import java.lang.management.MemoryUsage;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.*;
+import static nablarch.core.log.RegexMatcher.matches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.Is.is;
@@ -35,8 +39,8 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
         new Expectations() {{
             context.getPoint(); result = "point0001";
             context.getResult(); result = "success";
-            context.getStartTime(); result = 100;
-            context.getEndTime(); result = 300;
+            context.getStartTime(); result = toMilliseconds("2021-11-19 15:30:20.123");
+            context.getEndTime(); result = toMilliseconds("2021-11-19 15:31:20.987");
             context.getExecutionTime(); result = 200;
             context.getMaxMemory(); result = 1000000l;
             context.getStartFreeMemory(); result = 700000;
@@ -56,14 +60,28 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
         assertThat(message.substring("$JSON$".length()), isJson(allOf(
                 withJsonPath("$", hasEntry("point", "point0001")),
                 withJsonPath("$", hasEntry("result", "success")),
-                withJsonPath("$", hasEntry("startTime", 100)),
-                withJsonPath("$", hasEntry("endTime", 300)),
+                withJsonPath("$", hasEntry("startTime", "2021-11-19 15:30:20.123")),
+                withJsonPath("$", hasEntry("endTime", "2021-11-19 15:31:20.987")),
                 withJsonPath("$", hasEntry("executionTime", 200)),
                 withJsonPath("$", hasEntry("maxMemory", 1000000)),
                 withJsonPath("$", hasEntry("startFreeMemory", 700000)),
                 withJsonPath("$", hasEntry("endFreeMemory", 670000)),
                 withJsonPath("$", hasEntry("startUsedMemory", 300000)),
                 withJsonPath("$", hasEntry("endUsedMemory", 330000)))));
+    }
+
+    /**
+     * {@code "yyyy-MM-dd HH:mm:ss.SSS"} 書式の日付文字列をミリ秒に変換する。
+     * @param dateText 日付文字列
+     * @return 日付のミリ秒
+     */
+    private static long toMilliseconds(String dateText) {
+        final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        try {
+            return format.parse(dateText).getTime();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
