@@ -22,6 +22,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThrows;
 
@@ -365,5 +366,27 @@ public class FailureJsonLogFormatterTest extends LogTestSupport {
                 withJsonPath("$.*", hasSize(1)),
                 withJsonPath("$", hasEntry("failureCode", "AP000003"))
         )));
+    }
+
+    /**
+     * {@code structuredMessagePrefix}の指定ができることのテスト。
+     */
+    @Test
+    public void testStructuredMessagePrefix() {
+        System.setProperty("failureLogFormatter.notificationTargets", "failureCode");
+        System.setProperty("failureLogFormatter.analysisTargets", "failureCode");
+        System.setProperty("failureLogFormatter.structuredMessagePrefix", "@JSON@");
+
+        final FailureJsonLogFormatter sut = new FailureJsonLogFormatter();
+
+        final String analysisMessage =
+                sut.formatAnalysisMessage(null, null, "E000001", new Object[]{"error"});
+
+        assertThat(analysisMessage, startsWith("@JSON@"));
+
+        final String notificationMessage =
+                sut.formatNotificationMessage(null, null, "E000001", new Object[]{"error"});
+
+        assertThat(notificationMessage, startsWith("@JSON@"));
     }
 }
