@@ -28,6 +28,7 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
     @Before
     public void setup() {
         System.clearProperty("performanceLogFormatter.targets");
+        System.clearProperty("performanceLogFormatter.datePattern");
     }
 
     /**
@@ -256,5 +257,33 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
         });
 
         assertThat(e.getMessage(), is("[dummy] is unknown target. property name = [performanceLogFormatter.targets]"));
+    }
+
+    /**
+     * 日付フォーマットが指定できることをテスト。
+     */
+    @Test
+    public void testDatePattern(@Mocked final PerformanceLogFormatter.PerformanceLogContext context) {
+        System.setProperty("performanceLogFormatter.targets", "startTime,endTime");
+        System.setProperty("performanceLogFormatter.datePattern", "yyyy/MM/dd HH:mm:ss");
+
+        new Expectations() {{
+            context.getStartTime(); result = toMilliseconds("2021-11-19 15:30:20.123");
+            context.getEndTime(); result = toMilliseconds("2021-11-19 15:31:20.987");
+        }};
+
+        PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
+
+        String point = "point0001";
+
+        formatter.start(point);
+        String message = formatter.end(point, "success");
+
+        assertThat(message.startsWith("$JSON$"), is(true));
+        assertThat(message.substring("$JSON$".length()), isJson(allOf(
+                withJsonPath("$.*", hasSize(2)),
+                withJsonPath("$", hasEntry("startTime", "2021/11/19 15:30:20")),
+                withJsonPath("$", hasEntry("endTime", "2021/11/19 15:31:20"))
+        )));
     }
 }
