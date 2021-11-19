@@ -458,6 +458,56 @@ public class JsonLogFormatterTest extends LogTestSupport {
         assertThat(formatter.createSerializationManager(unused), is(instanceOf(AppLogJsonSerializationManager.class)));
     }
 
+    /**
+     * ログレベルのラベルを指定できることをテスト。
+     */
+    @Test
+    public void testLogLevelLabel() {
+        LogFormatter formatter = new JsonLogFormatter();
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("formatter.targets", "logLevel");
+        settings.put("formatter.label.trace", "追跡");
+        settings.put("formatter.label.info", "情報");
+        settings.put("formatter.label.warn", "警告");
+        formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "formatter"));
+
+        String traceMessage = formatter.format(new LogContext("TestLogger", LogLevel.TRACE  , "TestMessage", null));
+        assertThat(traceMessage, isJson(allOf(
+            withJsonPath("$.*", hasSize(1)),
+            withJsonPath("$", hasEntry("logLevel", "追跡"))
+        )));
+
+        String debugMessage = formatter.format(new LogContext("TestLogger", LogLevel.DEBUG  , "TestMessage", null));
+        assertThat(debugMessage, isJson(allOf(
+            withJsonPath("$.*", hasSize(1)),
+            withJsonPath("$", hasEntry("logLevel", "DEBUG"))
+        )));
+
+        String infoMessage = formatter.format(new LogContext("TestLogger", LogLevel.INFO  , "TestMessage", null));
+        assertThat(infoMessage, isJson(allOf(
+            withJsonPath("$.*", hasSize(1)),
+            withJsonPath("$", hasEntry("logLevel", "情報"))
+        )));
+
+        String warnMessage = formatter.format(new LogContext("TestLogger", LogLevel.WARN  , "TestMessage", null));
+        assertThat(warnMessage, isJson(allOf(
+            withJsonPath("$.*", hasSize(1)),
+            withJsonPath("$", hasEntry("logLevel", "警告"))
+        )));
+
+        String errorMessage = formatter.format(new LogContext("TestLogger", LogLevel.ERROR  , "TestMessage", null));
+        assertThat(errorMessage, isJson(allOf(
+            withJsonPath("$.*", hasSize(1)),
+            withJsonPath("$", hasEntry("logLevel", "ERROR"))
+        )));
+
+        String fatalMessage = formatter.format(new LogContext("TestLogger", LogLevel.FATAL  , "TestMessage", null));
+        assertThat(fatalMessage, isJson(allOf(
+            withJsonPath("$.*", hasSize(1)),
+            withJsonPath("$", hasEntry("logLevel", "FATAL"))
+        )));
+    }
+
     private static class MockFormatErrorSupport implements FormatErrorSupport {
         private final List<String> messageList = new ArrayList<String>();
 
