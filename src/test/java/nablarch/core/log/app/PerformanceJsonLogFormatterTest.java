@@ -3,19 +3,26 @@ package nablarch.core.log.app;
 import mockit.Expectations;
 import mockit.Mocked;
 import nablarch.core.log.LogTestSupport;
-import nablarch.core.log.RegexMatcher;
+import nablarch.core.text.json.BasicJsonSerializationManager;
+import nablarch.core.text.json.JsonSerializationSettings;
+import nablarch.core.text.json.JsonSerializer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.lang.management.MemoryUsage;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.*;
-import static nablarch.core.log.RegexMatcher.matches;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThrows;
 
@@ -308,5 +315,49 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
                 withJsonPath("$.*", hasSize(1)),
                 withJsonPath("$", hasEntry("point", "point0001"))
         )));
+    }
+
+    /**
+     * {@link nablarch.core.text.json.JsonSerializationManager}を指定できることをテスト。
+     */
+    @Test
+    public void testJsonSerializationManagerClassName() {
+        System.setProperty("performanceLogFormatter.targets", "point");
+        System.setProperty("performanceLogFormatter.jsonSerializationManagerClassName", MockJsonSerializationManager.class.getName());
+
+        PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
+
+        String point = "point0001";
+
+        formatter.start(point);
+        String message = formatter.end(point, "success");
+
+        assertThat(message, is("$JSON$mock serialization"));
+    }
+
+    /**
+     * {@link nablarch.core.text.json.JsonSerializationManager}のモック。
+     */
+    public static class MockJsonSerializationManager extends BasicJsonSerializationManager {
+
+        @Override
+        public JsonSerializer getSerializer(Object value) {
+            return new JsonSerializer() {
+                @Override
+                public void serialize(Writer writer, Object value) throws IOException {
+                    writer.write("mock serialization");
+                }
+
+                @Override
+                public void initialize(JsonSerializationSettings settings) {
+
+                }
+
+                @Override
+                public boolean isTarget(Class<?> valueClass) {
+                    return true;
+                }
+            };
+        }
     }
 }
