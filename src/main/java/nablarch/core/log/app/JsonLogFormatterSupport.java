@@ -39,12 +39,12 @@ public class JsonLogFormatterSupport {
 
     /**
      * コンストラクタ。
+     * @param serializationManager {@link JsonSerializationManager}の実装オブジェクト
      * @param settings Jsonのシリアライズに関する設定
      */
-    public JsonLogFormatterSupport(JsonSerializationSettings settings) {
+    public JsonLogFormatterSupport(JsonSerializationManager serializationManager, JsonSerializationSettings settings) {
         this.settings = settings;
-        this.serializationManager = ObjectUtil.createInstance(
-                getSerializationManagerClassName());
+        this.serializationManager = serializationManager;
         this.serializationManager.initialize(settings);
     }
 

@@ -4,11 +4,17 @@ import nablarch.core.date.BusinessDateProvider;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.repository.ObjectLoader;
 import nablarch.core.repository.SystemRepository;
+import nablarch.core.text.json.BasicJsonSerializationManager;
+import nablarch.core.text.json.JsonSerializationManager;
+import nablarch.core.text.json.JsonSerializationSettings;
+import nablarch.core.text.json.JsonSerializer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -190,6 +196,47 @@ public class ApplicationSettingJsonLogFormatterTest extends LogTestSupport {
         });
 
         assertThat(exception.getMessage(), is("[unknown] is unknown target. property name = [applicationSettingLogFormatter.appSettingWithDateTargets]"));
+    }
+
+    @Test
+    public void JsonSerializationManagerが設定できることをテスト() {
+        System.setProperty("applicationSettingLogFormatter.appSettingTargets", "businessDate,systemSettings");
+        System.setProperty("applicationSettingLogFormatter.appSettingWithDateTargets", "businessDate");
+
+        final ApplicationSettingJsonLogFormatter sut = new ApplicationSettingJsonLogFormatter() {
+            @Override
+            protected JsonSerializationManager createSerializationManager(JsonSerializationSettings settings) {
+                assertThat(settings.getProp("appSettingTargets"), is("businessDate,systemSettings"));
+                assertThat(settings.getProp("appSettingWithDateTargets"), is("businessDate"));
+                return new MockJsonSerializationManager();
+            }
+        };
+
+        assertThat(sut.getAppSettingsLogMsg(), is("$JSON$mock serialization"));
+        assertThat(sut.getAppSettingsWithDateLogMsg(), is("$JSON$mock serialization"));
+    }
+
+    private static class MockJsonSerializationManager extends BasicJsonSerializationManager {
+
+        @Override
+        public JsonSerializer getSerializer(Object value) {
+            return new JsonSerializer() {
+                @Override
+                public void serialize(Writer writer, Object value) throws IOException {
+                    writer.write("mock serialization");
+                }
+
+                @Override
+                public void initialize(JsonSerializationSettings settings) {
+
+                }
+
+                @Override
+                public boolean isTarget(Class<?> valueClass) {
+                    return true;
+                }
+            };
+        }
     }
 
     @After

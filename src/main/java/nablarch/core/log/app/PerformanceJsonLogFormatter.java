@@ -1,6 +1,8 @@
 package nablarch.core.log.app;
 
 import nablarch.core.log.basic.JsonLogObjectBuilder;
+import nablarch.core.text.json.BasicJsonSerializationManager;
+import nablarch.core.text.json.JsonSerializationManager;
 import nablarch.core.text.json.JsonSerializationSettings;
 import nablarch.core.util.StringUtil;
 import nablarch.core.util.annotation.Published;
@@ -86,8 +88,18 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
      * @param props 各種ログ出力の設定情報
      */
     protected final void initializeFormatterSupport(Map<String, String> props, String prefix, String filePath) {
-        support = new JsonLogFormatterSupport(
-                new JsonSerializationSettings(props, prefix, filePath));
+        JsonSerializationSettings settings = new JsonSerializationSettings(props, prefix, filePath);
+        JsonSerializationManager serializationManager = createSerializationManager(settings);
+        support = new JsonLogFormatterSupport(serializationManager, settings);
+    }
+
+    /**
+     * 変換処理に使用する{@link JsonSerializationManager}を生成する。
+     * @param settings 各種ログ出力の設定情報
+     * @return {@link JsonSerializationManager}
+     */
+    protected JsonSerializationManager createSerializationManager(JsonSerializationSettings settings) {
+        return new BasicJsonSerializationManager();
     }
 
     /**

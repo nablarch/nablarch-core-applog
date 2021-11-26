@@ -4,10 +4,10 @@ import nablarch.core.ThreadContext;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.message.MockStringResourceHolder;
 import nablarch.core.text.json.BasicJsonSerializationManager;
+import nablarch.core.text.json.JsonSerializationManager;
 import nablarch.core.text.json.JsonSerializationSettings;
 import nablarch.core.text.json.JsonSerializer;
 import nablarch.test.support.SystemRepositoryResource;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -402,9 +402,15 @@ public class FailureJsonLogFormatterTest extends LogTestSupport {
     public void testJsonSerializationManagerClassName() {
         System.setProperty("failureLogFormatter.notificationTargets", "failureCode");
         System.setProperty("failureLogFormatter.analysisTargets", "failureCode");
-        System.setProperty("failureLogFormatter.jsonSerializationManagerClassName", MockJsonSerializationManager.class.getName());
 
-        final FailureJsonLogFormatter sut = new FailureJsonLogFormatter();
+        final FailureJsonLogFormatter sut = new FailureJsonLogFormatter() {
+            @Override
+            protected JsonSerializationManager createSerializationManager(JsonSerializationSettings settings) {
+                assertThat(settings.getProp("notificationTargets"), is("failureCode"));
+                assertThat(settings.getProp("analysisTargets"), is("failureCode"));
+                return new MockJsonSerializationManager();
+            }
+        };
 
         final String analysisMessage =
                 sut.formatAnalysisMessage(null, null, "E000001", new Object[]{"error"});

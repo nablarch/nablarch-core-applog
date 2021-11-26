@@ -4,6 +4,7 @@ import mockit.Expectations;
 import mockit.Mocked;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.text.json.BasicJsonSerializationManager;
+import nablarch.core.text.json.JsonSerializationManager;
 import nablarch.core.text.json.JsonSerializationSettings;
 import nablarch.core.text.json.JsonSerializer;
 import org.junit.Before;
@@ -323,9 +324,14 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
     @Test
     public void testJsonSerializationManagerClassName() {
         System.setProperty("performanceLogFormatter.targets", "point");
-        System.setProperty("performanceLogFormatter.jsonSerializationManagerClassName", MockJsonSerializationManager.class.getName());
 
-        PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
+        PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter() {
+            @Override
+            protected JsonSerializationManager createSerializationManager(JsonSerializationSettings settings) {
+                assertThat(settings.getProp("targets"), is("point"));
+                return new MockJsonSerializationManager();
+            }
+        };
 
         String point = "point0001";
 

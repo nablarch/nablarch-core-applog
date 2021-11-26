@@ -1,7 +1,10 @@
 package nablarch.core.log.app;
 
 import nablarch.core.log.LogTestSupport;
+import nablarch.core.log.basic.CustomJsonSerializationManager;
 import nablarch.core.log.basic.JsonLogObjectBuilder;
+import nablarch.core.text.json.BasicJsonSerializationManager;
+import nablarch.core.text.json.JsonSerializationManager;
 import nablarch.core.text.json.JsonSerializationSettings;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,10 +38,14 @@ public class JsonLogFormatterSupportTest extends LogTestSupport {
         props = new HashMap<String, String>();
     }
 
-    private JsonLogFormatterSupport createJsonLogFormatterSupport() {
+    private JsonLogFormatterSupport createJsonLogFormatterSupport(JsonSerializationManager jsonSerializationManager) {
         JsonSerializationSettings settings
                 = new JsonSerializationSettings(props, "xxxFormatter.", "filePath");
-        return new JsonLogFormatterSupport(settings);
+        return new JsonLogFormatterSupport(jsonSerializationManager, settings);
+    }
+
+    private JsonLogFormatterSupport createJsonLogFormatterSupport() {
+        return createJsonLogFormatterSupport(new BasicJsonSerializationManager());
     }
 
     private class TestContext {
@@ -100,10 +107,8 @@ public class JsonLogFormatterSupportTest extends LogTestSupport {
 
         // note CustomJsonSerializationManager クラスは、NumberToJsonSerializerが外されており、
         //      JavaのNumber型がObjectToJsonSerializerにて処理され、JSONのstringとして出力される。
-
-        props.put("xxxFormatter.jsonSerializationManagerClassName",
-                "nablarch.core.log.basic.CustomJsonSerializationManager");
-        JsonLogFormatterSupport support = createJsonLogFormatterSupport();
+        final CustomJsonSerializationManager serializationManager = new CustomJsonSerializationManager();
+        JsonLogFormatterSupport support = createJsonLogFormatterSupport(serializationManager);
 
         Map<String, Object> values = new HashMap<String, Object>();
         values.put("key1", 123);
@@ -160,9 +165,8 @@ public class JsonLogFormatterSupportTest extends LogTestSupport {
     @Test
     public void testSerializeError() {
         // note CustomJsonSerializationManagerはbooleanを処理する際に、必ずIOExceptionをスローする
-        props.put("xxxFormatter.jsonSerializationManagerClassName",
-                "nablarch.core.log.basic.CustomJsonSerializationManager");
-        final JsonLogFormatterSupport support = createJsonLogFormatterSupport();
+        final CustomJsonSerializationManager serializationManager = new CustomJsonSerializationManager();
+        final JsonLogFormatterSupport support = createJsonLogFormatterSupport(serializationManager);
 
         final Map<String, Object> structuredObject = new HashMap<String, Object>();
         structuredObject.put("key", true);

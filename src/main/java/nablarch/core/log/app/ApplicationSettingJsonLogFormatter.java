@@ -3,6 +3,8 @@ package nablarch.core.log.app;
 import nablarch.core.date.BusinessDateUtil;
 import nablarch.core.log.basic.JsonLogObjectBuilder;
 import nablarch.core.repository.SystemRepository;
+import nablarch.core.text.json.BasicJsonSerializationManager;
+import nablarch.core.text.json.JsonSerializationManager;
 import nablarch.core.text.json.JsonSerializationSettings;
 import nablarch.core.util.StringUtil;
 import nablarch.core.util.annotation.Published;
@@ -45,16 +47,28 @@ public class ApplicationSettingJsonLogFormatter extends ApplicationSettingLogFor
     private List<JsonLogObjectBuilder<ApplicationSettingLogContext>> appSettingsWithDateTargets;
 
     /** 各種ログのJSONフォーマット支援オブジェクト */
-    private final JsonLogFormatterSupport support
-            = new JsonLogFormatterSupport(
-                    new JsonSerializationSettings(AppLogUtil.getProps(), PROPS_PREFIX, AppLogUtil.getFilePath()));
+    private JsonLogFormatterSupport support;
 
     @Override
     protected void initialize() {
+        JsonSerializationSettings settings
+                = new JsonSerializationSettings(AppLogUtil.getProps(), PROPS_PREFIX, AppLogUtil.getFilePath());
+        JsonSerializationManager serializationManager = createSerializationManager(settings);
+        this.support = new JsonLogFormatterSupport(serializationManager, settings);
+
         this.appSettingsTargets
             = getStructuredTargets(PROPS_APP_SETTINGS_TARGETS, DEFAULT_TARGETS_APP_SETTINGS);
         this.appSettingsWithDateTargets
             = getStructuredTargets(PROPS_APP_SETTINGS_WITH_DATE_TARGETS, DEFAULT_TARGETS_APP_SETTINGS_WITH_DATE);
+    }
+
+    /**
+     * 変換処理に使用する{@link JsonSerializationManager}を生成する。
+     * @param settings 各種ログ出力の設定情報
+     * @return {@link JsonSerializationManager}
+     */
+    protected JsonSerializationManager createSerializationManager(JsonSerializationSettings settings) {
+        return new BasicJsonSerializationManager();
     }
 
     /**
