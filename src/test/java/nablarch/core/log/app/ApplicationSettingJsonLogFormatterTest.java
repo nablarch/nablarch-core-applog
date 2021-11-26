@@ -198,6 +198,19 @@ public class ApplicationSettingJsonLogFormatterTest extends LogTestSupport {
         assertThat(exception.getMessage(), is("[unknown] is unknown target. property name = [applicationSettingLogFormatter.appSettingWithDateTargets]"));
     }
 
+    /**
+     * {@code structuredMessagePrefix}の指定ができることのテスト。
+     */
+    @Test
+    public void testStructuredMessagePrefix() {
+        System.setProperty("applicationSettingLogFormatter.structuredMessagePrefix", "@JSON@");
+
+        final ApplicationSettingJsonLogFormatter sut = new ApplicationSettingJsonLogFormatter();
+
+        assertThat(sut.getAppSettingsLogMsg(), startsWith("@JSON@"));
+        assertThat(sut.getAppSettingsWithDateLogMsg(), startsWith("@JSON@"));
+    }
+
     @Test
     public void JsonSerializationManagerが設定できることをテスト() {
         System.setProperty("applicationSettingLogFormatter.appSettingTargets", "businessDate,systemSettings");
