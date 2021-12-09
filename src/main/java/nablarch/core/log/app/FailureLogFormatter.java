@@ -1,14 +1,5 @@
 package nablarch.core.log.app;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import nablarch.core.ThreadContext;
 import nablarch.core.log.LogItem;
 import nablarch.core.log.LogSettings;
@@ -20,6 +11,15 @@ import nablarch.core.message.MessageLevel;
 import nablarch.core.message.MessageUtil;
 import nablarch.core.util.StringUtil;
 import nablarch.core.util.annotation.Published;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * 障害通知ログと障害解析ログのメッセージをフォーマットするクラス。
@@ -95,23 +95,51 @@ public class FailureLogFormatter {
      * フォーマット済みのログ出力項目を初期化する。
      */
     public FailureLogFormatter() {
-        
+        initialize();
+    }
+
+    /**
+     * 初期化
+     */
+    protected void initialize() {
         Map<String, String> props = AppLogUtil.getProps();
-        
+        initializeFailureCodes(props);
+        initializeMessage(props);
+        initializeFormat(props);
+    }
+
+    /**
+     * 障害コードの初期化
+     * @param props 各種ログ出力の設定情報
+     */
+    protected void initializeFailureCodes(Map<String, String> props) {
         defaultFailureCode = getDefaultFailureCode(props);
-        defaultMessage = getDefaultMessage(props);
-        locale = props.containsKey(PROPS_LANGUAGE) ? new Locale(props.get(PROPS_LANGUAGE)) : null;
         appFailureCodes = getAppFailureCodes(props);
         fwFailureCodes = getFwFailureCodes(props);
-        
+    }
+
+    /**
+     * メッセージの初期化
+     * @param props 各種ログ出力の設定情報
+     */
+    protected void initializeMessage(Map<String, String> props) {
+        defaultMessage = getDefaultMessage(props);
+        locale = props.containsKey(PROPS_LANGUAGE) ? new Locale(props.get(PROPS_LANGUAGE)) : null;
+    }
+
+    /**
+     * フォーマットの初期化
+     * @param props 各種ログ出力の設定情報
+     */
+    protected void initializeFormat(Map<String, String> props) {
         Map<String, LogItem<FailureLogContext>> logItems = getLogItems(props);
         notificationLogItems = LogUtil.createFormattedLogItems(logItems, getNotificationFormat(props));
         analysisLogItems = LogUtil.createFormattedLogItems(logItems, getAnalysisFormat(props));
-        
+
         initContacts(props, notificationLogItems);
         initContacts(props, analysisLogItems);
     }
-    
+
     /**
      * 指定されたフォーマット済みのログ出力項目に連絡先が含まれている場合は、連絡先を初期化する。
      * プロパティファイルのキー名の長さで降順にソートして返す。
@@ -122,12 +150,23 @@ public class FailureLogFormatter {
     private void initContacts(Map<String, String> props, LogItem<FailureLogContext>[] formattedLogItems) {
         LogItem<FailureLogContext> contactItem = LogUtil.findLogItem(formattedLogItems, ContactItem.class);
         if (contactItem != null) {
-            Map<String, String> contactMap = getProps(props, PROPS_CONTACT_FILE_PATH, null);
-            List<Map.Entry<String, String>> contactList = new ArrayList<Map.Entry<String, String>>(contactMap.size());
-            contactList.addAll(contactMap.entrySet());
-            Collections.sort(contactList, KEY_LENGTH_DESCENDING_COMPARATOR);
+            List<Map.Entry<String, String>> contactList = getContactList(props);
             ((ContactItem) contactItem).setContacts(contactList);
         }
+    }
+
+    /**
+     * 連絡先を取得する。
+     * プロパティファイルのキー名の長さで降順にソートして返す。
+     * @param props 各種ログ出力の設定情報
+     * @return 連絡先
+     */
+    protected List<Map.Entry<String, String>> getContactList(Map<String, String> props) {
+        Map<String, String> contactMap = getProps(props, PROPS_CONTACT_FILE_PATH, null);
+        List<Map.Entry<String, String>> contactList = new ArrayList<Map.Entry<String, String>>(contactMap.size());
+        contactList.addAll(contactMap.entrySet());
+        Collections.sort(contactList, KEY_LENGTH_DESCENDING_COMPARATOR);
+        return contactList;
     }
     
     /**
@@ -182,7 +221,7 @@ public class FailureLogFormatter {
                 return o2.getKey().length() - o1.getKey().length();
             }
         };
-    
+
     /**
      * デフォルトの障害コードを取得する。
      * @param props 各種ログの設定情報
