@@ -174,6 +174,20 @@ public class JsonLogFormatter implements LogFormatter {
      * @return ログ出力項目
      */
     protected List<JsonLogObjectBuilder<LogContext>> createStructuredTargets(ObjectSettings settings) {
+        Map<String, JsonLogObjectBuilder<LogContext>> builderMap = new HashMap<String, JsonLogObjectBuilder<LogContext>>();
+        builderMap.put(TARGET_NAME_DATE, new DateBuilder());
+        builderMap.put(TARGET_NAME_LOG_LEVEL, new LogLevelBuilder(getLogLevelLabelProvider(settings)));
+        builderMap.put(TARGET_NAME_LOGGER_NAME, new LoggerNameBuilder());
+        builderMap.put(TARGET_NAME_RUNTIME_LOGGER_NAME, new RuntimeLoggerNameBuilder());
+        builderMap.put(TARGET_NAME_BOOT_PROCESS, new BootProcessBuilder());
+        builderMap.put(TARGET_NAME_PROCESSING_SYSTEM, new ProcessingSystemBuilder(
+                settings.getLogSettings().getProps().get(SYSTEM_PROP_PROCESSING_SYSTEM)));
+        builderMap.put(TARGET_NAME_REQUEST_ID, new RequestIdBuilder());
+        builderMap.put(TARGET_NAME_EXECUTION_ID, new ExecutionIdBuilder());
+        builderMap.put(TARGET_NAME_USER_ID, new UserIdBuilder());
+        builderMap.put(TARGET_NAME_MESSAGE, new MessageBuilder(getStructuredMessagePrefix(settings)));
+        builderMap.put(TARGET_NAME_STACK_TRACE, new StackTraceBuilder());
+        builderMap.put(TARGET_NAME_PAYLOAD, new PayloadBuilder(formatErrorSupport));
 
         List<JsonLogObjectBuilder<LogContext>> list = new ArrayList<JsonLogObjectBuilder<LogContext>>();
 
@@ -181,33 +195,22 @@ public class JsonLogFormatter implements LogFormatter {
         if (StringUtil.isNullOrEmpty(targetsStr)) {
             targetsStr = DEFAULT_TARGETS;
         }
-        String[] targets = targetsStr.split(",");
 
+        String[] targets = targetsStr.split(",");
         Set<String> keys = new HashSet<String>(targets.length);
         for (String target: targets) {
             String key = target.trim();
             if (!StringUtil.isNullOrEmpty(key) && !keys.contains(key)) {
                 keys.add(key);
-                if (TARGET_NAME_DATE.equals(key)) { list.add(new DateBuilder()); }
-                else if (TARGET_NAME_LOG_LEVEL.equals(key)) { list.add(new LogLevelBuilder(getLogLevelLabelProvider(settings))); }
-                else if (TARGET_NAME_LOGGER_NAME.equals(key)) { list.add(new LoggerNameBuilder()); }
-                else if (TARGET_NAME_RUNTIME_LOGGER_NAME.equals(key)) { list.add(new RuntimeLoggerNameBuilder()); }
-                else if (TARGET_NAME_BOOT_PROCESS.equals(key)) { list.add(new BootProcessBuilder()); }
-                else if (TARGET_NAME_PROCESSING_SYSTEM.equals(key)) {
-                    list.add(new ProcessingSystemBuilder(
-                            settings.getLogSettings().getProps().get(SYSTEM_PROP_PROCESSING_SYSTEM))); }
-                else if (TARGET_NAME_REQUEST_ID.equals(key)) { list.add(new RequestIdBuilder()); }
-                else if (TARGET_NAME_EXECUTION_ID.equals(key)) { list.add(new ExecutionIdBuilder()); }
-                else if (TARGET_NAME_USER_ID.equals(key)) { list.add(new UserIdBuilder()); }
-                else if (TARGET_NAME_MESSAGE.equals(key)) { list.add(new MessageBuilder(getStructuredMessagePrefix(settings))); }
-                else if (TARGET_NAME_STACK_TRACE.equals(key)) { list.add(new StackTraceBuilder()); }
-                else if (TARGET_NAME_PAYLOAD.equals(key)) { list.add(new PayloadBuilder(formatErrorSupport)); }
-                else {
+
+                if (!builderMap.containsKey(key)) {
                     throw new IllegalArgumentException(
-                        String.format("JsonLogFormatter : [%s] is unknown target. property name = [%s.%s]",
-                                key, settings.getName(), PROPS_TARGETS)
+                            String.format("JsonLogFormatter : [%s] is unknown target. property name = [%s.%s]",
+                                    key, settings.getName(), PROPS_TARGETS)
                     );
                 }
+
+                list.add(builderMap.get(key));
             }
         }
         return list;
