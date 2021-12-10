@@ -27,73 +27,46 @@ public class AppLogMapToJsonSerializer extends MapToJsonSerializer {
 
     /**
      * {@inheritDoc}
+     * <p>
+     * メンバーの値が {@link RawJsonObjectMembers} の場合に独自の出力処理を行い、
+     * それ以外の値の場合は従来の出力処理を呼び出している。
+     * </p>
+     *
+     * @param writer 出力先の Writer
+     * @param member 出力するメンバー
+     * @throws IOException 出力時にエラーが発生した場合
      */
     @Override
-    public void serialize(Writer writer, Object value) throws IOException {
-        Map<?, ?> map = (Map<?, ?>) value;
-        boolean first = true;
-        writer.append(BEGIN_OBJECT);
-        for (Map.Entry<?, ?> member : map.entrySet()) {
-            if (isSkip(member)) {
-                continue;
-            }
+    protected void writeMember(Writer writer, Map.Entry<?, ?> member) throws IOException {
+        Object memberValue = member.getValue();
 
-            if (!first) {
-                writer.append(VALUE_SEPARATOR);
-            }
-
-            Object memberValue = member.getValue();
-
-            if (memberValue instanceof RawJsonObjectMembers) {
-                RawJsonObjectMembers rawMembers = (RawJsonObjectMembers) memberValue;
-                writer.append(rawMembers.getRawJsonText());
-            } else {
-                Object memberName = member.getKey();
-                memberNameSerializer.serialize(writer, memberName);
-                writer.append(NAME_SEPARATOR);
-                manager.getSerializer(memberValue).serialize(writer, memberValue);
-            }
-
-            first = false;
+        if (memberValue instanceof RawJsonObjectMembers) {
+            RawJsonObjectMembers rawMembers = (RawJsonObjectMembers) memberValue;
+            writer.append(rawMembers.getRawJsonText());
+        } else {
+            super.writeMember(writer, member);
         }
-        writer.append(END_OBJECT);
     }
 
     /**
-     * 指定されたメンバーが出力の条件を満たしていないことを判定する。
+     * {@inheritDoc}
+     * <p>
+     * 従来の条件に加えて、メンバーの値がホワイトスペースのみの {@link RawJsonObjectMembers}
+     * である場合も追加している。
+     * </p>
      * @param member 判定対象のメンバー
      * @return 出力の条件を満たしていない場合は true
      */
-    private boolean isSkip(Map.Entry<?, ?> member) {
-        return isNotSupportedMemberName(member.getKey())
-                || isNotSupportedMemberValue(member.getValue())
-                || isEmpty(member.getValue());
+    protected boolean isSkip(Map.Entry<?, ?> member) {
+        return super.isSkip(member) || isJsonWhitespace(member.getValue());
     }
 
     /**
-     * メンバーの名前が出力サポート対象か判定する。
-     * @param memberName メンバーの名前
-     * @return 出力サポート対象の場合は true
-     */
-    private boolean isNotSupportedMemberName(Object memberName) {
-        return memberName == null || !memberNameSerializer.isTarget(memberName.getClass());
-    }
-
-    /**
-     * メンバーの値が出力がサポートされていない値かどうか判定する。
+     * メンバーの値が JSON の空白文字だけであるかどうかを判定する。
      * @param memberValue メンバーの値
-     * @return 出力がサポートされていない値の場合は true
+     * @return JSON の空白文字だけである場合は true
      */
-    private boolean isNotSupportedMemberValue(Object memberValue) {
-        return memberValue == null && isIgnoreNullValueMember;
-    }
-
-    /**
-     * メンバーの値が空で出力が不要かどうかを判定する。
-     * @param memberValue メンバーの値
-     * @return 空で出力不要の場合は true
-     */
-    private boolean isEmpty(Object memberValue) {
+    protected boolean isJsonWhitespace(Object memberValue) {
         if (memberValue instanceof RawJsonObjectMembers) {
             return ((RawJsonObjectMembers) memberValue).isJsonWhitespace();
         } else {
