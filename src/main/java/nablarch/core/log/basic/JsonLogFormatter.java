@@ -518,21 +518,44 @@ public class JsonLogFormatter implements LogFormatter {
 
             for (Object option : context.getOptions()) {
                 if (option instanceof Map) {
-                    List<String> illegalTypeMemberKeys = new ArrayList<String>();
-                    for (Map.Entry<?, ?> entry : ((Map<?, ?>)option).entrySet()) {
-                        if (entry.getKey() instanceof String) {
-                            structuredObject.put((String)entry.getKey(), entry.getValue());
-                        } else {
-                            illegalTypeMemberKeys.add(entry.getKey() == null ? "null" : entry.getKey().toString());
-                        }
-                    }
-                    if (!illegalTypeMemberKeys.isEmpty()) {
-                        errorSupport.outputFormatError("illegal type in keys : " + StringUtil.join(", ", illegalTypeMemberKeys));
-                    }
+                    mapToStructuredObject(((Map<?, ?>) option), structuredObject);
                 } else {
                     errorSupport.outputFormatError("objects in options must be Map<String, Object>. : [" + option + "]");
                 }
             }
+        }
+
+        /**
+         * オプション情報を structuredObject に詰め替える。
+         * @param option オプション情報
+         * @param structuredObject 構築先のオブジェクト
+         */
+        private void mapToStructuredObject(Map<?, ?> option, Map<String, Object> structuredObject) {
+            List<Object> illegalTypeMemberKeys = new ArrayList<Object>();
+            for (Map.Entry<?, ?> entry : option.entrySet()) {
+                if (entry.getKey() instanceof String) {
+                    structuredObject.put((String)entry.getKey(), entry.getValue());
+                } else {
+                    illegalTypeMemberKeys.add(entry.getKey());
+                }
+            }
+
+            if (!illegalTypeMemberKeys.isEmpty()) {
+                errorSupport.outputFormatError("illegal type in keys : " + StringUtil.join(", ", toString(illegalTypeMemberKeys)));
+            }
+        }
+
+        /**
+         * Object のリストを String のリストに変換する。
+         * @param objectList Object のリスト
+         * @return String のリスト
+         */
+        private List<String> toString(List<Object> objectList) {
+            List<String> result = new ArrayList<String>(objectList.size());
+            for (Object object : objectList) {
+                result.add(object == null ? "null" : object.toString());
+            }
+            return result;
         }
     }
 
