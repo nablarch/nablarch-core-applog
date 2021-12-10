@@ -137,7 +137,7 @@ public class ApplicationSettingJsonLogFormatter extends ApplicationSettingLogFor
             String systemSettingItems = AppLogUtil.getProps().get(PROPS_PREFIX + "systemSettingItems");
 
             if (StringUtil.isNullOrEmpty(systemSettingItems)) {
-                structuredObject.put("systemSettings", Collections.emptyMap());
+                structuredObject.put(TARGET_NAME_SYSTEM_SETTING, Collections.emptyMap());
                 return;
             }
 
@@ -150,7 +150,7 @@ public class ApplicationSettingJsonLogFormatter extends ApplicationSettingLogFor
                 }
             }
 
-            structuredObject.put("systemSettings", systemSettings);
+            structuredObject.put(TARGET_NAME_SYSTEM_SETTING, systemSettings);
         }
     }
 
@@ -161,7 +161,7 @@ public class ApplicationSettingJsonLogFormatter extends ApplicationSettingLogFor
 
         @Override
         public void build(Map<String, Object> structuredObject, ApplicationSettingLogContext context) {
-            structuredObject.put("businessDate", BusinessDateUtil.getDate());
+            structuredObject.put(TARGET_NAME_BUSINESS_DATE, BusinessDateUtil.getDate());
         }
     }
 }
