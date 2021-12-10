@@ -33,9 +33,10 @@ public class AppLogMapToJsonSerializer extends MapToJsonSerializer {
         Map<?, ?> map = (Map<?, ?>) value;
         boolean isFirst = true;
         writer.append(BEGIN_OBJECT);
-        for (Object memberName: map.keySet()) {
+        for (Map.Entry<?, ?> member : map.entrySet()) {
+            Object memberName = member.getKey();
             if (memberName != null && memberNameSerializer.isTarget(memberName.getClass())) {
-                Object memberValue = map.get(memberName);
+                Object memberValue = member.getValue();
                 if (memberValue != null || !isIgnoreNullValueMember) {
                     if (memberValue instanceof RawJsonObjectMembers) {
                         RawJsonObjectMembers rawMembers = (RawJsonObjectMembers) memberValue;
