@@ -113,7 +113,7 @@ public class JsonLogFormatterTest extends LogTestSupport {
 
         LogFormatter formatter = new JsonLogFormatter();
         Map<String, String> settings = new HashMap<String, String>();
-        String targets = "logLevel,loggerName,message";
+        String targets = "logLevel,loggerName,,message,message";
         settings.put("formatter.targets", targets);
         formatter.initialize(new ObjectSettings(new MockLogSettings(settings), "formatter"));
 
