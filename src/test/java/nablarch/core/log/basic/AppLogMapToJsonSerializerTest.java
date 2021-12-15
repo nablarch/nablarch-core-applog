@@ -138,13 +138,16 @@ public class AppLogMapToJsonSerializerTest {
         Map<String, Object> mapValue = new HashMap<String, Object>();
         mapValue.put("key1","value1");
         mapValue.put("key2",new RawJsonObjectMembers(" \t\r\n"));
-        mapValue.put("key3","value3");
+        mapValue.put("key3",new RawJsonObjectMembers(" \t\r\n"));
+        mapValue.put("key4","value4");
 
         serializer.serialize(writer, mapValue);
+
+        System.out.println(writer.toString());
         assertThat(writer.toString(), isJson(allOf(
                 withJsonPath("$", hasEntry("key1", "value1")),
                 withoutJsonPath("$.key2"),
-                withJsonPath("$", hasEntry("key3", "value3")))));
+                withJsonPath("$", hasEntry("key4", "value4")))));
     }
 
     @Test

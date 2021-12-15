@@ -8,7 +8,9 @@ import nablarch.core.util.StringUtil;
 import nablarch.core.util.annotation.Published;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +68,27 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
     private static final String DEFAULT_TARGETS = "point,result,startTime,endTime,"
             + "executionTime,maxMemory,startFreeMemory,startUsedMemory,endFreeMemory,endUsedMemory";
 
+    /**
+     * ターゲット名と {@link JsonLogObjectBuilder}の対応を定義したマップ。
+     */
+    private static final Map<String, JsonLogObjectBuilder<PerformanceLogContext>> TARGET_BUILDERS_MAP;
+
+    static {
+        Map<String, JsonLogObjectBuilder<PerformanceLogContext>> map = new HashMap<String, JsonLogObjectBuilder<PerformanceLogContext>>();
+        map.put(TARGET_NAME_POINT, new PerformanceJsonLogFormatter.PointBuilder());
+        map.put(TARGET_NAME_RESULT, new PerformanceJsonLogFormatter.ResultBuilder());
+        map.put(TARGET_NAME_START_TIME, new PerformanceJsonLogFormatter.StartTimeBuilder());
+        map.put(TARGET_NAME_END_TIME, new PerformanceJsonLogFormatter.EndTimeBuilder());
+        map.put(TARGET_NAME_EXECUTION_TIME, new PerformanceJsonLogFormatter.ExecutionTimeBuilder());
+        map.put(TARGET_NAME_MAX_MEMORY, new PerformanceJsonLogFormatter.MaxMemoryBuilder());
+        map.put(TARGET_NAME_START_FREE_MEMORY, new PerformanceJsonLogFormatter.StartFreeMemoryBuilder());
+        map.put(TARGET_NAME_END_FREE_MEMORY, new PerformanceJsonLogFormatter.EndFreeMemoryBuilder());
+        map.put(TARGET_NAME_START_USED_MEMORY, new PerformanceJsonLogFormatter.StartUsedMemoryBuilder());
+        map.put(TARGET_NAME_END_USED_MEMORY, new PerformanceJsonLogFormatter.EndUsedMemoryBuilder());
+
+        TARGET_BUILDERS_MAP = Collections.unmodifiableMap(map);
+    }
+
     /** ログ出力項目 */
     private List<JsonLogObjectBuilder<PerformanceLogContext>> structuredTargets;
 
@@ -118,14 +141,12 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
     protected List<JsonLogObjectBuilder<PerformanceLogContext>> getStructuredTargets(
             Map<String, String> props) {
 
-        boolean hasMemoryItem = false;
-
         String targetsStr = props.get(PROPS_TARGETS);
         if (StringUtil.isNullOrEmpty(targetsStr)) {
             targetsStr = DEFAULT_TARGETS;
         }
 
-        List<JsonLogObjectBuilder<PerformanceLogContext>> structuredTargets
+        List<JsonLogObjectBuilder<PerformanceLogContext>> targetBuilders
                 = new ArrayList<JsonLogObjectBuilder<PerformanceLogContext>>();
 
         String[] targets = targetsStr.split(",");
@@ -134,35 +155,47 @@ public class PerformanceJsonLogFormatter extends PerformanceLogFormatter {
             String key = target.trim();
             if (!StringUtil.isNullOrEmpty(key) && !keys.contains(key)) {
                 keys.add(key);
-                if (TARGET_NAME_POINT.equals(key)) { structuredTargets.add(new PerformanceJsonLogFormatter.PointBuilder()); }
-                else if (TARGET_NAME_RESULT.equals(key)) { structuredTargets.add(new PerformanceJsonLogFormatter.ResultBuilder()); }
-                else if (TARGET_NAME_START_TIME.equals(key)) { structuredTargets.add(new PerformanceJsonLogFormatter.StartTimeBuilder()); }
-                else if (TARGET_NAME_END_TIME.equals(key)) { structuredTargets.add(new PerformanceJsonLogFormatter.EndTimeBuilder()); }
-                else if (TARGET_NAME_EXECUTION_TIME.equals(key)) { structuredTargets.add(new PerformanceJsonLogFormatter.ExecutionTimeBuilder()); }
-                else if (TARGET_NAME_MAX_MEMORY.equals(key)) {
-                    structuredTargets.add(new PerformanceJsonLogFormatter.MaxMemoryBuilder());
-                    hasMemoryItem = true;
-                } else if (TARGET_NAME_START_FREE_MEMORY.equals(key)) {
-                    structuredTargets.add(new PerformanceJsonLogFormatter.StartFreeMemoryBuilder());
-                    hasMemoryItem = true;
-                } else if (TARGET_NAME_END_FREE_MEMORY.equals(key)) {
-                    structuredTargets.add(new PerformanceJsonLogFormatter.EndFreeMemoryBuilder());
-                    hasMemoryItem = true;
-                } else if (TARGET_NAME_START_USED_MEMORY.equals(key)) {
-                    structuredTargets.add(new PerformanceJsonLogFormatter.StartUsedMemoryBuilder());
-                    hasMemoryItem = true;
-                } else if (TARGET_NAME_END_USED_MEMORY.equals(key)) {
-                    structuredTargets.add(new PerformanceJsonLogFormatter.EndUsedMemoryBuilder());
-                    hasMemoryItem = true;
-                } else {
+
+                if (!TARGET_BUILDERS_MAP.containsKey(key)) {
                     throw new IllegalArgumentException(
                             String.format("[%s] is unknown target. property name = [%s]", key, PROPS_TARGETS));
                 }
+
+                targetBuilders.add(TARGET_BUILDERS_MAP.get(key));
             }
         }
+
+        boolean hasMemoryItem = containsAnyOfMemoryTarget(keys);
         setContainsMemoryItem(hasMemoryItem);
 
-        return structuredTargets;
+        return targetBuilders;
+    }
+
+    /**
+     * メモリ関係のターゲットが1つ以上含まれているかどうか判定する。
+     * @param targets ターゲットのセット
+     * @return メモリ関係のターゲットが1つ以上含まれている場合は true
+     */
+    private boolean containsAnyOfMemoryTarget(Set<String> targets) {
+        for (String target : targets) {
+            if (isAnyOfMemoryTarget(target)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 指定された target がメモリに関するものかどうか判定する。
+     * @param target 判定対象の target
+     * @return メモリ関係の target の場合は true
+     */
+    private boolean isAnyOfMemoryTarget(String target) {
+        return TARGET_NAME_MAX_MEMORY.equals(target)
+                || TARGET_NAME_START_FREE_MEMORY.equals(target)
+                || TARGET_NAME_END_FREE_MEMORY.equals(target)
+                || TARGET_NAME_START_USED_MEMORY.equals(target)
+                || TARGET_NAME_END_USED_MEMORY.equals(target);
     }
 
     /**

@@ -4,7 +4,6 @@ import nablarch.core.log.basic.JsonLogObjectBuilder;
 import nablarch.core.text.json.JsonSerializationManager;
 import nablarch.core.text.json.JsonSerializationSettings;
 import nablarch.core.util.FileUtil;
-import nablarch.core.util.ObjectUtil;
 import nablarch.core.util.StringUtil;
 
 import java.io.IOException;
@@ -24,12 +23,6 @@ public class JsonLogFormatterSupport {
 
     /** messageを構造化されていることを示す接頭辞のデフォルト値 */
     static final String DEFAULT_STRUCTURED_MESSAGE_PREFIX = "$JSON$";
-
-    /** Jsonのシリアライズに使用する管理クラス名のプロパティ名 */
-    private static final String PROPS_SERIALIZATION_MANAGER_CLASS_NAME = "jsonSerializationManagerClassName";
-
-    /** Jsonのシリアライズに使用する管理クラス名のデフォルト値 */
-    private static final String DEFAULT_SERIALIZATION_MANAGER_CLASS_NAME = "nablarch.core.text.json.BasicJsonSerializationManager";
 
     /** Jsonのシリアライズに関する設定 */
     private final JsonSerializationSettings settings;
@@ -55,15 +48,6 @@ public class JsonLogFormatterSupport {
     private String getStructuredMessagePrefix() {
         String messagePrefix = settings.getProp(PROPS_STRUCTURED_MESSAGE_PREFIX);
         return !StringUtil.isNullOrEmpty(messagePrefix) ? messagePrefix : DEFAULT_STRUCTURED_MESSAGE_PREFIX;
-    }
-
-    /**
-     * Jsonのシリアライズに使用する管理クラス名を取得する。
-     * @return Jsonのシリアライズに使用する管理クラス名
-     */
-    private String getSerializationManagerClassName() {
-        String className = settings.getProp(PROPS_SERIALIZATION_MANAGER_CLASS_NAME);
-        return !StringUtil.isNullOrEmpty(className) ? className : DEFAULT_SERIALIZATION_MANAGER_CLASS_NAME;
     }
 
     /**

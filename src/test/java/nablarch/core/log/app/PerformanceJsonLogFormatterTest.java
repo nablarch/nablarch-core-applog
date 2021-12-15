@@ -148,7 +148,7 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
             memoryUsage.getMax(); returns(2000L, 99L);
         }};
 
-        System.setProperty("performanceLogFormatter.targets", "maxMemory");
+        System.setProperty("performanceLogFormatter.targets", "maxMemory,point");
 
         PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
 
@@ -171,7 +171,7 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
             memoryUsage.getUsed(); returns(1500L, 9L);
         }};
 
-        System.setProperty("performanceLogFormatter.targets", "startFreeMemory");
+        System.setProperty("performanceLogFormatter.targets", "startFreeMemory,point");
 
         PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
 
@@ -194,7 +194,7 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
             memoryUsage.getUsed(); returns(1500L, 9L);
         }};
 
-        System.setProperty("performanceLogFormatter.targets", "endFreeMemory");
+        System.setProperty("performanceLogFormatter.targets", "endFreeMemory,point");
 
         PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
 
@@ -216,7 +216,7 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
             memoryUsage.getUsed(); returns(1500L, 9L);
         }};
 
-        System.setProperty("performanceLogFormatter.targets", "startUsedMemory");
+        System.setProperty("performanceLogFormatter.targets", "startUsedMemory,point");
 
         PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
 
@@ -238,7 +238,7 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
             memoryUsage.getUsed(); returns(1500L, 9L);
         }};
 
-        System.setProperty("performanceLogFormatter.targets", "endUsedMemory");
+        System.setProperty("performanceLogFormatter.targets", "endUsedMemory,point");
 
         PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
 

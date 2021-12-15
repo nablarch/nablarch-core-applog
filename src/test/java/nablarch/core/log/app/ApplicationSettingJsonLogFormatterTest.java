@@ -90,7 +90,7 @@ public class ApplicationSettingJsonLogFormatterTest extends LogTestSupport {
 
     @Test
     public void getAppSettingsLogMsgでtargetを指定した場合のテスト() {
-        System.setProperty("applicationSettingLogFormatter.appSettingTargets", "systemSettings,businessDate");
+        System.setProperty("applicationSettingLogFormatter.appSettingTargets", "systemSettings,,businessDate,businessDate");
 
         sut = new ApplicationSettingJsonLogFormatter();
         assertThat(sut.getAppSettingsLogMsg().substring("$JSON$".length()), isJson(allOf(
