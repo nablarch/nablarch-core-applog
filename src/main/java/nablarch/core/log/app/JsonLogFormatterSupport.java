@@ -5,6 +5,7 @@ import nablarch.core.text.json.JsonSerializationManager;
 import nablarch.core.text.json.JsonSerializationSettings;
 import nablarch.core.util.FileUtil;
 import nablarch.core.util.StringUtil;
+import nablarch.core.util.annotation.Published;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -16,6 +17,7 @@ import java.util.Map;
  * 各種ログのJSONフォーマットを支援するクラスです。
  * @author Shuji Kitamura
  */
+@Published(tag = "architect")
 public class JsonLogFormatterSupport {
 
     /** messageを構造化されていることを示す接頭辞のプロパティ名 */

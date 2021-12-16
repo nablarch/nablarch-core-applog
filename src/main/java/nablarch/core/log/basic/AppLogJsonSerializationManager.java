@@ -12,6 +12,7 @@ import nablarch.core.text.json.ListToJsonSerializer;
 import nablarch.core.text.json.LocalDateTimeToJsonSerializer;
 import nablarch.core.text.json.NumberToJsonSerializer;
 import nablarch.core.text.json.StringToJsonSerializer;
+import nablarch.core.util.annotation.Published;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +21,7 @@ import java.util.List;
  * 各種ログのJSON形式による出力に対応した{@link JsonSerializationManager}の実装クラス。
  * @author Shuji Kitamura
  */
+@Published(tag = "architect")
 public class AppLogJsonSerializationManager extends BasicJsonSerializationManager {
 
     /**
