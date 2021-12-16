@@ -37,6 +37,7 @@ public class ApplicationSettingJsonLogFormatter extends ApplicationSettingLogFor
     private static final String DEFAULT_TARGETS_APP_SETTINGS_WITH_DATE = "systemSettings,businessDate";
 
     /** システム設定値の項目名 */
+    @SuppressWarnings("squid:S1192") // 値が同じだけで定数としての意味は異なるため問題ない。
     private static final String TARGET_NAME_SYSTEM_SETTING = "systemSettings";
     /** 業務日付の項目名 */
     private static final String TARGET_NAME_BUSINESS_DATE = "businessDate";

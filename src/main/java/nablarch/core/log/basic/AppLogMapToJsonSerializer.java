@@ -57,6 +57,7 @@ public class AppLogMapToJsonSerializer extends MapToJsonSerializer {
      * @param member 判定対象のメンバー
      * @return 出力の条件を満たしていない場合は true
      */
+    @Override
     protected boolean isSkip(Map.Entry<?, ?> member) {
         return super.isSkip(member) || isJsonWhitespace(member.getValue());
     }
