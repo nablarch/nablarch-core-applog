@@ -1,5 +1,11 @@
 package nablarch.core.log.app;
 
+import nablarch.core.ThreadContext;
+import nablarch.core.log.DateItemSupport;
+import nablarch.core.log.LogItem;
+import nablarch.core.log.LogUtil;
+import nablarch.core.util.annotation.Published;
+
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
@@ -11,12 +17,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
-import nablarch.core.ThreadContext;
-import nablarch.core.log.DateItemSupport;
-import nablarch.core.log.LogItem;
-import nablarch.core.log.LogUtil;
-import nablarch.core.util.annotation.Published;
 
 /**
  * パフォーマンスログのメッセージをフォーマットするクラス。
@@ -49,13 +49,13 @@ public class PerformanceLogFormatter {
     private static final String PROPS_FORMAT = PROPS_PREFIX + "format";
     
     /** 出力対象のポイント */
-    private final Set<String> targetPoints;
+    private Set<String> targetPoints;
     
     /** フォーマット済みのログ出力項目 */
-    private final LogItem<PerformanceLogContext>[] formattedLogItems;
-    
+    private LogItem<PerformanceLogContext>[] formattedLogItems;
+
     /** 出力対象にメモリ項目が含まれているか否か。 */
-    private final boolean containsMemoryItem;
+    private boolean containsMemoryItem;
 
     /** コンテキストマップ */
     private final ThreadLocal<Map<String, PerformanceLogContext>> contextMap = new ThreadLocal<Map<String, PerformanceLogContext>>() {
@@ -69,9 +69,23 @@ public class PerformanceLogFormatter {
      * フォーマット済みのログ出力項目を初期化する。
      */
     public PerformanceLogFormatter() {
-        
+        initialize();
+    }
+
+    /**
+     * 初期化
+     */
+    protected void initialize() {
         Map<String, String> props = AppLogUtil.getProps();
-        
+        initializeTargetPoints(props);
+        initializeFormat(props);
+    }
+
+    /**
+     * 出力対象のポイントを初期化
+     * @param props 各種ログ出力の設定情報
+     */
+    protected void initializeTargetPoints(Map<String, String> props) {
         if (props.containsKey(PROPS_TARGET_POINTS)) {
             targetPoints = new HashSet<String>();
             for (String point : props.get(PROPS_TARGET_POINTS).split(",")) {
@@ -80,23 +94,37 @@ public class PerformanceLogFormatter {
         } else {
             targetPoints = Collections.emptySet();
         }
-        
+    }
+
+    /**
+     * フォーマットの初期化
+     * @param props 各種ログ出力の設定情報
+     */
+    protected void initializeFormat(Map<String, String> props) {
         DateFormat dateFormat = DEFAULT_DATE_FORMAT;
         if (props.containsKey(PROPS_DATE_PATTERN)) {
             dateFormat = new SimpleDateFormat(props.get(PROPS_DATE_PATTERN));
         }
-        
+
         String format = DEFAULT_FORMAT;
         if (props.containsKey(PROPS_FORMAT)) {
             format = props.get(PROPS_FORMAT);
         }
-        
+
         Map<String, LogItem<PerformanceLogContext>> logItems = getLogItems(dateFormat);
         formattedLogItems = LogUtil.createFormattedLogItems(logItems, format);
-        containsMemoryItem = LogUtil.contains(formattedLogItems, MaxMemoryItem.class,
-                StartFreeMemoryItem.class, EndFreeMemoryItem.class, StartUsedMemoryItem.class, EndUsedMemoryItem.class);
+        setContainsMemoryItem(LogUtil.contains(formattedLogItems, MaxMemoryItem.class,
+                StartFreeMemoryItem.class, EndFreeMemoryItem.class, StartUsedMemoryItem.class, EndUsedMemoryItem.class));
     }
-    
+
+    /**
+     * 出力対象にメモリ項目が含まれているか否かを設定する。
+     * @param containsMemoryItem 出力対象にメモリ項目が含まれているときtrue
+     */
+    protected void setContainsMemoryItem(boolean containsMemoryItem) {
+        this.containsMemoryItem = containsMemoryItem;
+    }
+
     /**
      * フォーマット対象のログ出力項目を取得する。
      * @param dateFormat 開始日時と終了日時のフォーマットに使用する日時フォーマット
@@ -186,6 +214,15 @@ public class PerformanceLogFormatter {
         
         context.setResult(result);
         
+        return formatMessage(context);
+    }
+
+    /**
+     * パフォーマンスログのメッセージをフォーマットする。
+     * @param context パフォーマンスログのコンテキスト情報
+     * @return フォーマット済みのメッセージ
+     */
+    protected String formatMessage(PerformanceLogContext context) {
         return LogUtil.formatMessage(formattedLogItems, context);
     }
     

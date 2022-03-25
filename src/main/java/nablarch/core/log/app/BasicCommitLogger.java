@@ -64,8 +64,17 @@ public class BasicCommitLogger implements CommitLogger {
         if (commitCount >= interval) {
             totalCommitCount += commitCount;
             commitCount = 0;
-            LOGGER.logInfo("COMMIT COUNT = [" + totalCommitCount + ']');
+            LOGGER.logInfo(formatForIncrement(totalCommitCount));
         }
+    }
+
+    /**
+     * {@link #increment}メソッドでログに出力する総コミット件数のメッセージをフォーマットする。
+     * @param count 総コミット件数
+     * @return フォーマットされたメッセージ
+     */
+    protected String formatForIncrement(long count) {
+        return "COMMIT COUNT = [" + count + ']';
     }
 
     /**
@@ -79,7 +88,16 @@ public class BasicCommitLogger implements CommitLogger {
         }
         initialized = false;
         totalCommitCount += commitCount;
-        LOGGER.logInfo("TOTAL COMMIT COUNT = [" + totalCommitCount + ']');
+        LOGGER.logInfo(formatForTerminate(totalCommitCount));
+    }
+
+    /**
+     * {@link #terminate}メソッドでログに出力する総コミット件数のメッセージをフォーマットする。
+     * @param count 総コミット件数
+     * @return フォーマットされたメッセージ
+     */
+    protected String formatForTerminate(long count) {
+        return "TOTAL COMMIT COUNT = [" + count + ']';
     }
 
     /**
