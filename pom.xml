@@ -13,6 +13,18 @@
     <developerConnection>scm:git:git://github.com/nablarch/${project.artifactId}.git</developerConnection>
     <url>https://github.com/nablarch/${project.artifactId}/tree/master</url>
   </scm>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>7</source>
+          <target>7</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
   <parent>
     <groupId>com.nablarch</groupId>
