@@ -7,12 +7,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+
 
 import nablarch.core.log.Logger;
 import nablarch.core.util.StringUtil;
+import nablarch.core.util.ObjectUtil;
 
 /**
  * ファイルにログを書き込むクラス。<br>
@@ -21,6 +20,7 @@ import nablarch.core.util.StringUtil;
  * <ul>
  * <li>ログフォーマッタを設定で指定できる。</li>
  * <li>ログファイルが指定サイズに達したら、出力ファイルを自動で切り替える。</li>
+ * <li>日付が変わったら、出力ファイルを自動で切り替える。</li>
  * <li>初期処理と終了処理、ログファイルの切り替え時に、書き込み先のログファイルにINFOレベルでメッセージを出力する。</li>
  * </ul>
  * 本クラスでは、ファイルへのログ書き込みに{@link java.io.BufferedOutputStream}を使用する。<br>
@@ -39,14 +39,27 @@ import nablarch.core.util.StringUtil;
  * <dt>outputBufferSize
  * <dd>出力バッファのサイズ。オプション。<br>
  *     単位はキロバイト。1000バイトを1キロバイトと換算する。１以上を指定する。指定しなければ8KB。
- *     
+ *
+ * <dt>rotatePolicy
+ * <dd>ファイルローテーション実行クラス。オプション。<br>
+ *     {@link RotatePolicy}が実装されたクラスを指定する。<br>
+ *     標準で日付ごとにローテーションする{@link DateRotatePolicy}と<br>
+ *     ファイルサイズごとにローテーションする{@link FileSizeRotatePolicy}を提供している。<br>
+ *
  * <dt>maxFileSize
  * <dd>書き込み先ファイルの最大サイズ。オプション。<br>
  *     単位はキロバイト。1000バイトを1キロバイトと換算する。指定しなければ自動切替なし。<br>
  *     指定値が解析可能な整数値(Long.parseLong)でない場合は自動切替なし。<br>
  *     指定値が０以下の場合は自動切替なし。<br>
- *     古いログファイル名は、<通常のファイル名>.yyyyMMddHHmmssSSS.old。
- *     
+ *     古いログファイル名は、<通常のファイル名>.yyyyMMddHHmmssSSS.old。<br>
+ *     このオプションは、rotatePolicyに{@link FileSizeRotatePolicy}が設定されているか、何も設定されていない場合に有効である。
+ *
+ * <dt>dateType
+ * <dd>日付タイプ。オプション。<br>
+ *     日付ごとのローテーション判定に必要な日付を、Systemと設定されていればシステム日次から、
+ *     Businessと設定されている場合は業務日付から取得する。<br>
+ *     rotatePolicyとして{@link DateRotatePolicy}が設定されている場合、デフォルト値はSystem。<br>
+ *     このオプションは、rotatePolicyに{@link DateRotatePolicy}が設定されている場合に有効である。
  * </dl>
  * 本クラスでは、初期処理と終了処理、ログファイルの切り替え時に、書き込み先のログファイルにINFOレベルでメッセージを出力する。
  * 
@@ -68,18 +81,13 @@ public class FileLogWriter extends LogWriterSupport {
 
     /** 出力バッファのサイズ */
     private int outputBufferSize;
-    
-    /** 書き込み先ファイルの現在のサイズ */
-    private long currentFileSize;
-    
-    /** 書き込み先ファイルの最大サイズ */
-    private long maxFileSize;
-    
-    /** 古いログファイル名に使用する日時フォーマット */
-    private DateFormat oldFileDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
     /** ファイルに書き込みを行う出力ストリーム */
     private OutputStream out;
+
+    /** ファイルローテーションを行うためのインターフェース */
+    private RotatePolicy rotatePolicy;
+
     
     /**
      * {@inheritDoc}
@@ -102,13 +110,15 @@ public class FileLogWriter extends LogWriterSupport {
         } catch (NumberFormatException e) {
             outputBufferSize = 8 * KB;
         }
-        
-        try {
-            maxFileSize = Long.parseLong(settings.getProp("maxFileSize")) * KB;
-        } catch (NumberFormatException e) {
-            maxFileSize = 0;
+
+        String className = settings.getProp("rotatePolicy");
+        if (className == null) {
+            className = "nablarch.core.log.basic.FileSizeRotatePolicy";
         }
-        
+
+        rotatePolicy=ObjectUtil.createInstance(className);
+        rotatePolicy.initialize(settings);
+
         initializeWriter("initialized.");
     }
     
@@ -124,6 +134,9 @@ public class FileLogWriter extends LogWriterSupport {
      * FILE PATH          = [&lt;書き込み先のファイルパス&gt;]<br>
      * ENCODING           = [&lt;書き込み時に使用する文字エンコーディング&gt;]<br>
      * OUTPUT BUFFER SIZE = [&lt;出力バッファのサイズ&gt;]<br>
+     * <br>
+     * ファイルサイズによるローテーションの場合、追加で以下の設定情報が出力される。<br>
+     * <br>
      * FILE AUTO CHANGE   = [&lt;ログファイルを自動で切り替えるか否か。&gt;]<br>
      * MAX FILE SIZE      = [&lt;書き込み先ファイルの最大サイズ&gt;]<br>
      * CURRENT FILE SIZE  = [&lt;書き込み先ファイルの現在のサイズ&gt;]<br>
@@ -137,9 +150,7 @@ public class FileLogWriter extends LogWriterSupport {
                 .append("\tFILE PATH          = [").append(filePath).append("]").append(Logger.LS)
                 .append("\tENCODING           = [").append(charset.displayName()).append("]").append(Logger.LS)
                 .append("\tOUTPUT BUFFER SIZE = [").append(outputBufferSize).append("]").append(Logger.LS)
-                .append("\tFILE AUTO CHANGE   = [").append((maxFileSize > 0)).append("]").append(Logger.LS)
-                .append("\tMAX FILE SIZE      = [").append(maxFileSize).append("]").append(Logger.LS)
-                .append("\tCURRENT FILE SIZE  = [").append(currentFileSize).append("]").append(Logger.LS)
+                .append(rotatePolicy.getSettings())
                 .toString();
     }
     
@@ -181,33 +192,20 @@ public class FileLogWriter extends LogWriterSupport {
     }
     
     /**
-     * ファイルをリネームする。<br>
-     * <br>
-     * ファイルの最大サイズが指定されていない場合は、何もしない。<br>
-     * <br>
-     * ファイルの最大サイズが指定されている場合は、現在のファイルサイズにメッセージ長を加えた値が、
-     * ファイルの最大サイズ以上になる場合は、ファイルをリネームする。
-     * <br>
+     * ローテーションの種類毎にファイルをリネームする。<br>
      * ファイルをリネームする場合は、併せてファイルへの書き込みを行う出力ストリームを初期化する。
-     * 
      * @param msgLength メッセージ長
      */
     private void renameFile(int msgLength) {
-        
-        if (maxFileSize <= 0) {
+
+        if (!rotatePolicy.needsRotate(msgLength)) {
             return;
         }
-        
-        if (msgLength + currentFileSize <= maxFileSize) {
-            return;
-        }
-        String newFilePath = filePath + "." + oldFileDateFormat.format(new Date()) + ".old";
+
+        String newFilePath = rotatePolicy.getNewFilePath();
         String message = "change [" + filePath + "] -> [" + newFilePath + "]";
         terminateWriter(message);
-        if (!new File(filePath).renameTo(new File(newFilePath))) {
-            throw new IllegalStateException(
-                    "renaming failed. File#renameTo returns false. src file = [" + filePath + "], dest file = [" + newFilePath + "]");
-        }
+        rotatePolicy.rotate();
         initializeWriter(message);
     }
     
@@ -218,7 +216,7 @@ public class FileLogWriter extends LogWriterSupport {
     private void initializeWriter(String message) {
         try {
             out = new BufferedOutputStream(new FileOutputStream(filePath, true), outputBufferSize);
-            currentFileSize = new File(filePath).length();
+            rotatePolicy.onRead(new File(filePath).length());
             LogContext context = new LogContext(FQCN, LogLevel.INFO, message + Logger.LS + getSettings(), null);
             // 本来はメッセージを連結する前にメッセージ出力要否をチェックすべきだが、
             // 実行される回数が少なくパフォーマンスに与える影響が軽微と考えてあえてここでチェックする。
@@ -270,7 +268,7 @@ public class FileLogWriter extends LogWriterSupport {
      * @throws IOException IO例外
      */
     private void write(byte[] message) throws IOException {
-        currentFileSize += message.length;
+        rotatePolicy.onWrite(message);
         out.write(message);
         out.flush();
     }
