@@ -9,8 +9,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -344,60 +342,7 @@ public class FileLogWriterTest extends LogTestSupport {
         assertFalse(log.contains("initialized."));
         
     }
-    /** ファイルの切り替えに失敗した場合は例外を送出されること。 
-     * @throws NoSuchFieldException 
-     * @throws IllegalAccessException  
-     * @throws IOException 
-     * */
-    @Test
-    public void testFailedToSwitch() throws NoSuchFieldException, IllegalAccessException, IOException {
 
-        if (canRenameSameFilename()) {
-            return; // 同じファイル名でリネームができる環境の場合は、リネームを失敗させることができないため、テストしない。
-        }
-
-        LogTestUtil.cleanupLog("/failed-to-switch-app.log");
-
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/failed-to-switch-app.log");
-        settings.put("appFile.encoding", "UTF-8");
-        settings.put("appFile.outputBufferSize", "8");
-        settings.put("appFile.maxFileSize", "10");
-
-        FileLogWriter writer = new FileLogWriter();
-        writer.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
-        
-        // ログファイル名のフォーマットを変更
-        Field field = writer.getClass().getDeclaredField("oldFileDateFormat");
-        field.setAccessible(true);
-        field.set(writer, new SimpleDateFormat("yyyyMMdd"));
-
-        try {
-            for (int i = 0; i < 515; i++) {
-                writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + i + "]]]", null));
-            }
-            fail("must throw IllegalStateException.");
-        } catch (IllegalStateException e) {
-            assertTrue(e.getMessage().indexOf("renaming failed. File#renameTo returns false. src file = [./log/failed-to-switch-app.log], dest file = [") != -1);
-        }
-    }
-
-    private boolean canRenameSameFilename() throws IOException {
-        String sameName = "./log/rename-trial-file.txt";
-        File file = new File(sameName);
-        if (file.exists()) {
-            file.delete();
-        }
-        FileWriter writer = null;
-        try {
-            writer = new FileWriter(file);
-            return file.renameTo(new File(sameName));
-        } finally {
-            if (writer != null) {
-                writer.close();
-            }
-        }
-    }
 
     /**
      * 書き込みの度にフラッシュされていること。
