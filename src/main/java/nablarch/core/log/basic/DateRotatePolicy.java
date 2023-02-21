@@ -17,9 +17,9 @@ import java.util.Date;
 
 /**
  * 日時によるログのローテーションを行うクラス。<br>
- * ファイルの最大サイズが指定されている場合は、現在のファイルサイズにメッセージ長を加えた値が、
- * ファイルの最大サイズ以上になる場合は、ログのローテーションを行う。<br>
- * ファイルの最大サイズが指定されていない場合は、ローテーションをしない。
+ * 日付ごとのローテーション判定に必要な日付を、dateTypeにSystemと設定されていればシステム日次から、
+ * Businessと設定されている場合は業務日付から取得する。
+ * ログ書き込み時に、日付が変わっている場合ログのローテーションを行う。
  * @author Kotaro Taki
  */
 public class DateRotatePolicy implements RotatePolicy {
@@ -33,8 +33,8 @@ public class DateRotatePolicy implements RotatePolicy {
     /** 日時フォーマット */
     private final DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
 
-    /** ログ出力用の日時フォーマット */
-    private final DateFormat logDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+    /** 重複したログファイル名に使用する日時フォーマット */
+    private final DateFormat dupFileDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
     /** 日付タイプ */
     private DateType dateType;
@@ -61,8 +61,15 @@ public class DateRotatePolicy implements RotatePolicy {
 
         filePath = settings.getRequiredProp("filePath");
 
-        String dt = settings.getRequiredProp("dateType");
-        if (dt == null || dt.equals("System")) {
+        String dt;
+
+        try {
+           dt = settings.getRequiredProp("dateType");
+        }
+        catch (IllegalArgumentException e) {
+           dt =  "System";
+        }
+        if (dt.equals("System")) {
             dateType = DateType.System;
         } else if (dt.equals("Business")) {
             dateType = DateType.Business;
@@ -167,6 +174,11 @@ public class DateRotatePolicy implements RotatePolicy {
      */
     @Override
     public void rotate() {
+        File f = new File(newFilePath);
+        if (f.exists()) {
+            newFilePath=filePath+"."+ dupFileDateFormat.format(getCurrentDate())+".old";
+        }
+
         if (!new File(filePath).renameTo(new File(newFilePath))) {
             throw new IllegalStateException(
                     "renaming failed. File#renameTo returns false. src file = [" + filePath + "], dest file = [" + newFilePath + "]");
@@ -195,7 +207,7 @@ public class DateRotatePolicy implements RotatePolicy {
      * OUTPUT BUFFER SIZE = [&lt;出力バッファのサイズ&gt;]<br>
      * FILE AUTO CHANGE   = [&lt;ログファイルを自動で切り替えるか否か。&gt;]<br>
      * NEXT CHANGE DATE   = [&lt;ログファイルの次回更新日&gt;]<br>
-     * CURRENT DATE TIME  = [&lt;現在時刻&gt;]<br>
+     * CURRENT DATE       = [&lt;現在日付&gt;]<br>
      *
      * @return 設定情報
      * @see LogWriterSupport#getSettings()
@@ -204,7 +216,7 @@ public class DateRotatePolicy implements RotatePolicy {
     public String getSettings() {
         return "\tFILE AUTO CHANGE   = [" + true + "]" + Logger.LS
                 + "\tNEXT CHANGE DATE   = [" + dateFormat.format(nextUpdateDate) + "]" + Logger.LS
-                + "\tCURRENT DATE TIME  = [" + logDateFormat.format(getCurrentDate()) + "]" + Logger.LS;
+                + "\tCURRENT DATE  = [" + dateFormat.format(getCurrentDate()) + "]" + Logger.LS;
     }
 
     /**

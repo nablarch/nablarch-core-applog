@@ -140,6 +140,12 @@ public class FileLogWriter extends LogWriterSupport {
      * FILE AUTO CHANGE   = [&lt;ログファイルを自動で切り替えるか否か。&gt;]<br>
      * MAX FILE SIZE      = [&lt;書き込み先ファイルの最大サイズ&gt;]<br>
      * CURRENT FILE SIZE  = [&lt;書き込み先ファイルの現在のサイズ&gt;]<br>
+     * <br>
+     * 日付によるローテーションの場合、追加で以下の設定情報が出力される。<br>
+     * <br>
+     * FILE AUTO CHANGE   = [&lt;ログファイルを自動で切り替えるか否か。&gt;]<br>
+     * NEXT CHANGE DATE   = [&lt;ログファイルの次回更新日&gt;]<br>
+     * CURRENT DATE       = [&lt;現在日付&gt;]<br>
      * 
      * @return 設定情報
      * @see LogWriterSupport#getSettings()
