@@ -188,21 +188,6 @@ public class DateRotatePolicyTest {
         assertThat(actualNextUpdateDate, is(expectedNextUpdateDate));
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testRunTimeExceptionInInitialize() {
-
-        DateRotatePolicy excePtionpolicy = new DateRotatePolicy();
-        new Expectations(excePtionpolicy) {
-            public void initialize(ObjectSettings settings) {
-                result = new RuntimeException("Unable to read file attributes");
-            }
-        };
-        final Map<String, String> settings = new HashMap<String, String>();
-        final ObjectSettings objectSettings = new ObjectSettings(new MockLogSettings(settings), "appFile");
-
-        excePtionpolicy.initialize(objectSettings);
-    }
-
     /** 現在時刻が正しく取得できること
      *  1.dateTypeがSystemの場合
      *  2.dateTypeがBusinessの場合 */

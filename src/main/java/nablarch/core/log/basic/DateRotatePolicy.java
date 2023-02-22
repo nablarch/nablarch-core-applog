@@ -5,10 +5,6 @@ import nablarch.core.date.SystemTimeUtil;
 import nablarch.core.log.Logger;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -81,16 +77,9 @@ public class DateRotatePolicy implements RotatePolicy {
 
         Date currentDate;
         // ファイルが存在、かつシステム日付の場合
-        // 次回更新時刻をファイルの作成時刻から算出する
+        // 次回更新時刻をファイルの更新時刻から算出する
         if (file.exists() && dateType == DateType.System) {
-            final BasicFileAttributes attrs;
-            try {
-                attrs = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-            } catch (IOException e) {
-                throw new RuntimeException("Unable to read file attributes");
-            }
-            final FileTime fileTime = attrs.creationTime();
-            currentDate = new Date(fileTime.toMillis());
+            currentDate = new Date(file.lastModified());
         } else {
             currentDate = getCurrentDate();
         }
