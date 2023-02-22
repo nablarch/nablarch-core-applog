@@ -3,12 +3,19 @@ package nablarch.core.log.basic;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.log.LogTestUtil;
 import nablarch.core.log.MockLogSettings;
+import nablarch.core.repository.ObjectLoader;
+import nablarch.core.repository.SystemRepository;
+import nablarch.test.FixedBusinessDateProvider;
+import nablarch.test.FixedSystemTimeProvider;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -291,6 +298,343 @@ public class FileLogWriterTest extends LogTestSupport {
         assertTrue(appLog.indexOf("[[[515]]]") == -1);
     }
 
+    /** システム日付のローテーションでファイルが自動で切り替わること。*/
+    @Test
+    public void testSystemDateSwitched() {
+        final FixedSystemTimeProvider systemTimeProvider = new FixedSystemTimeProvider() {{
+            setFixedDate("20161231235959999");
+        }};
+
+        SystemRepository.load(new ObjectLoader() {
+            @Override
+            public Map<String, Object> load() {
+                Map<String, Object> repos = new HashMap<String, Object>();
+                repos.put("systemTimeProvider", systemTimeProvider);
+                return repos;
+            }
+        });
+
+        File appFile = LogTestUtil.cleanupLog("/switched-app.log");
+
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", "./log/switched-app.log");
+        settings.put("appFile.encoding", "UTF-8");
+        settings.put("appFile.outputBufferSize", "8");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.DateRotatePolicy");
+        settings.put("appFile.dateType", "System");
+
+        FileLogWriter writer = new FileLogWriter();
+        writer.initialize(
+                new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        String[] dateArray = new String[]{"20170101235959999","20170102235959999","20170103135959999"};
+        for (String date: dateArray) {
+            systemTimeProvider.setFixedDate(date);
+            writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + date + "]]]",
+                    null));
+        }
+
+        writer.terminate();
+
+        // ファイルの存在確認
+        StringBuilder sb = new StringBuilder(50 * 1000);
+        File dir = appFile.getParentFile();
+        assertTrue(dir.listFiles().length == 4);
+
+        String[] actualDateArray = new String[]{"20161231","20170101","20170102"};
+        for (String date: actualDateArray) {
+            File f = new File("./log/switched-app.log"+"."+date+".old");
+            if (!f.exists()) {
+                fail();
+            }
+        }
+
+        // ファイルの内容確認
+        for (File file : dir.listFiles()) {
+            if (!file.getName().startsWith("switched-")) {
+                continue;
+            }
+            String log = LogTestUtil.getLog(file);
+            assertTrue(log.indexOf(
+                    "] change [./log/switched-app.log] -> [./log/switched-app.log.")
+                    != -1);
+            sb.append(log);
+        }
+
+        String appLog = sb.toString();
+
+        for (int i = 0; i < dateArray.length; i++) {
+            assertTrue(appLog.indexOf("[[[" + dateArray[i] + "]]]") != -1);
+        }
+    }
+
+    /** 業務日付のローテーションでファイルが自動で切り替わること。*/
+    @Test
+    public void testBusinessDateSwitched() {
+        final FixedBusinessDateProvider businessTimeProvider = new FixedBusinessDateProvider() {{
+            setDefaultSegment("00");
+            setFixedDate(new HashMap<String, String>() {{
+                put("00", "20110101");
+            }});
+        }};
+
+        SystemRepository.load(new ObjectLoader() {
+            @Override
+            public Map<String, Object> load() {
+                Map<String, Object> repos = new HashMap<String, Object>();
+                repos.put("businessDateProvider", businessTimeProvider);
+                return repos;
+            }
+        });
+
+        File appFile = LogTestUtil.cleanupLog("/switched-app.log");
+
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", "./log/switched-app.log");
+        settings.put("appFile.encoding", "UTF-8");
+        settings.put("appFile.outputBufferSize", "8");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.DateRotatePolicy");
+        settings.put("appFile.dateType", "Business");
+
+        FileLogWriter writer = new FileLogWriter();
+        writer.initialize(
+                new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        String[] dateArray = new String[]{"20110102","20110103","20110104"};
+        for (final String date: dateArray) {
+            businessTimeProvider.setFixedDate(new HashMap<String, String>() {{
+                put("00", date);
+            }});
+            writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + date + "]]]",
+                    null));
+        }
+
+        writer.terminate();
+
+        // ファイルの存在確認
+        StringBuilder sb = new StringBuilder(50 * 1000);
+        File dir = appFile.getParentFile();
+        assertTrue(dir.listFiles().length == 4);
+
+        String[] actualDateArray = new String[]{"20110101","20110102","20110103"};
+        for (String date: actualDateArray) {
+            File f = new File("./log/switched-app.log"+"."+date+".old");
+            if (!f.exists()) {
+                fail();
+            }
+        }
+
+        // ファイルの内容確認
+        for (File file : dir.listFiles()) {
+            if (!file.getName().startsWith("switched-")) {
+                continue;
+            }
+            String log = LogTestUtil.getLog(file);
+            assertTrue(log.indexOf(
+                    "] change [./log/switched-app.log] -> [./log/switched-app.log.")
+                    != -1);
+            sb.append(log);
+        }
+
+        String appLog = sb.toString();
+
+        for (int i = 0; i < dateArray.length; i++) {
+            assertTrue(appLog.indexOf("[[[" + dateArray[i] + "]]]") != -1);
+        }
+    }
+
+    /** ログが1日目に書き込まれた翌々日に次のログが書き込まれた場合に、ファイルが自動で切り替わること。*/
+    @Test
+    public void testTwoDaysLaterDatePatternSwitched() {
+        final FixedSystemTimeProvider systemTimeProvider = new FixedSystemTimeProvider() {{
+            setFixedDate("20161231235959999");
+        }};
+
+        SystemRepository.load(new ObjectLoader() {
+            @Override
+            public Map<String, Object> load() {
+                Map<String, Object> repos = new HashMap<String, Object>();
+                repos.put("systemTimeProvider", systemTimeProvider);
+                return repos;
+            }
+        });
+
+        File appFile = LogTestUtil.cleanupLog("/switched-app.log");
+
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", "./log/switched-app.log");
+        settings.put("appFile.encoding", "UTF-8");
+        settings.put("appFile.outputBufferSize", "8");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.DateRotatePolicy");
+        settings.put("appFile.dateType", "System");
+
+        FileLogWriter writer = new FileLogWriter();
+        writer.initialize(
+                new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        String[] dateArray = new String[]{"20170101235959999","20170103135959999"};
+        for (String date: dateArray) {
+            systemTimeProvider.setFixedDate(date);
+            writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + date + "]]]",
+                    null));
+        }
+
+        writer.terminate();
+
+        // ファイルの存在確認
+        StringBuilder sb = new StringBuilder(50 * 1000);
+        File dir = appFile.getParentFile();
+        assertTrue(dir.listFiles().length == 3);
+
+        String[] actualDateArray = new String[]{"20161231","20170101"};
+        for (String date: actualDateArray) {
+            File f = new File("./log/switched-app.log"+"."+date+".old");
+            if (!f.exists()) {
+                fail();
+            }
+        }
+
+        // ファイルの内容確認
+        for (File file : dir.listFiles()) {
+            if (!file.getName().startsWith("switched-")) {
+                continue;
+            }
+            String log = LogTestUtil.getLog(file);
+            assertTrue(log.indexOf(
+                    "] change [./log/switched-app.log] -> [./log/switched-app.log.")
+                    != -1);
+            sb.append(log);
+        }
+
+        String appLog = sb.toString();
+
+        for (int i = 0; i < dateArray.length; i++) {
+            assertTrue(appLog.indexOf("[[[" + dateArray[i] + "]]]") != -1);
+        }
+    }
+
+    /** 一度アプリケーションを終了したあと、その日に再起動する場合にファイルが切り替わらないこと。*/
+    @Test
+    public void testRestartTodayPatterSwitched() {
+        final Date currentDate = new Date();
+        final FixedSystemTimeProvider systemTimeProvider = new FixedSystemTimeProvider() {{
+            setFixedDate(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(currentDate));
+        }};
+
+        SystemRepository.load(new ObjectLoader() {
+            @Override
+            public Map<String, Object> load() {
+                Map<String, Object> repos = new HashMap<String, Object>();
+                repos.put("systemTimeProvider", systemTimeProvider);
+                return repos;
+            }
+        });
+
+        File appFile = LogTestUtil.cleanupLog("/switched-app.log");
+
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", "./log/switched-app.log");
+        settings.put("appFile.encoding", "UTF-8");
+        settings.put("appFile.outputBufferSize", "8");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.DateRotatePolicy");
+        settings.put("appFile.dateType", "System");
+
+        FileLogWriter writer = new FileLogWriter();
+        writer.initialize(
+                new ObjectSettings(new MockLogSettings(settings), "appFile"));
+        writer.terminate();
+
+        // 再起動
+        writer = new FileLogWriter();
+        writer.initialize(
+                new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + currentDate + "]]]",
+                null));
+        writer.terminate();
+
+        // ファイルの存在確認
+        File dir = appFile.getParentFile();
+        assertTrue(dir.listFiles().length == 1);
+        File newFile = new File("./log/switched-app.log");
+        if (!newFile.exists()) {
+            fail();
+        }
+    }
+
+    /** 一度アプリケーションを終了したあと、次の日に再起動する場合にファイルが自動で切り替わること。*/
+    @Test
+    public void testRestartNextDayPatterSwitched() {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+        final Date currentDate = new Date();
+        final FixedSystemTimeProvider systemTimeProvider = new FixedSystemTimeProvider() {{
+            setFixedDate(dateFormat.format(currentDate));
+        }};
+
+        SystemRepository.load(new ObjectLoader() {
+            @Override
+            public Map<String, Object> load() {
+                Map<String, Object> repos = new HashMap<String, Object>();
+                repos.put("systemTimeProvider", systemTimeProvider);
+                return repos;
+            }
+        });
+
+        File appFile = LogTestUtil.cleanupLog("/switched-app.log");
+
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", "./log/switched-app.log");
+        settings.put("appFile.encoding", "UTF-8");
+        settings.put("appFile.outputBufferSize", "8");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.DateRotatePolicy");
+        settings.put("appFile.dateType", "System");
+
+        FileLogWriter writer = new FileLogWriter();
+        writer.initialize(
+                new ObjectSettings(new MockLogSettings(settings), "appFile"));
+        writer.terminate();
+
+        // 明日の日付で更新する
+        Calendar cl = Calendar.getInstance();
+        cl.setTime(currentDate);
+        cl.add(Calendar.DATE, 1);
+        String dateSt = dateFormat.format(cl.getTime());
+        systemTimeProvider.setFixedDate(dateSt);
+
+        writer = new FileLogWriter();
+        writer.initialize(
+                new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + currentDate + "]]]",
+                null));
+        writer.terminate();
+
+        // ファイルの内容確認と内容確認
+        StringBuilder sb = new StringBuilder(50 * 1000);
+        File dir = appFile.getParentFile();
+        assertTrue(dir.listFiles().length == 2);
+
+        File oldFile = new File("./log/switched-app.log"+"."+new SimpleDateFormat("yyyyMMdd").format(currentDate)+".old");
+        if (!oldFile.exists()) {
+            fail();
+        }
+
+        File newFile = new File("./log/switched-app.log");
+        if (!newFile.exists()) {
+            fail();
+        }
+
+        for (File file : dir.listFiles()) {
+            if (!file.getName().startsWith("switched-")) {
+                continue;
+            }
+            String log = LogTestUtil.getLog(file);
+            assertTrue(log.indexOf(
+                    "] change [./log/switched-app.log] -> [./log/switched-app.log.")
+                    != -1);
+        }
+    }
+
     /** 
      * INFOレベルより下のレベルで切り替えが発生した場合にINFOレベルのログが出ないこと。
      */
@@ -448,6 +792,83 @@ public class FileLogWriterTest extends LogTestSupport {
                             }
                             writer.write(new LogContext(FQCN, LogLevel.DEBUG,
                                     "[[[" + i + "]]]", null));
+                        }
+                    }
+                });
+            }
+            for (int i = 0; i < size; i++) {
+                threads[i].start();
+            }
+
+            for (int i = 0; i < size; i++) {
+                try {
+                    threads[i].join();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        } finally {
+            writer.terminate();
+        }
+    }
+
+    /**
+     * マルチスレッドでファイル切り替えが発生する状況で正しく動作すること。
+     */
+    @Test
+    public void testDateRotateMultiThreads() {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+        final Date date = new Date();
+        final FixedSystemTimeProvider systemTimeProvider = new FixedSystemTimeProvider() {{
+            setFixedDate(dateFormat.format(date));
+        }};
+
+        SystemRepository.load(new ObjectLoader() {
+            @Override
+            public Map<String, Object> load() {
+                Map<String, Object> repos = new HashMap<String, Object>();
+                repos.put("systemTimeProvider", systemTimeProvider);
+                return repos;
+            }
+        });
+
+        LogTestUtil.cleanupLog("/multi-threads-app.log");
+
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", "./log/multi-threads-app.log");
+        settings.put("appFile.encoding", "UTF-8");
+        settings.put("appFile.maxFileSize", "10");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.DateRotatePolicy");
+        settings.put("appFile.dateType", "System");
+
+        final FileLogWriter writer = new FileLogWriter();
+
+        try {
+            writer.initialize(new ObjectSettings(new MockLogSettings(settings),
+                    "appFile"));
+
+            int size = 50;
+
+            Thread[] threads = new Thread[size];
+            for (int i = 0; i < size; i++) {
+                threads[i] = new Thread(new Runnable() {
+                    public void run() {
+                        for (int i = 0; i < MESSAGE_COUNT; i++) {
+                            try {
+                                Thread.sleep(100L);
+                            } catch (InterruptedException e) {
+                                throw new RuntimeException(e);
+                            }
+                            writer.write(new LogContext(FQCN, LogLevel.DEBUG,
+                                    "[[[" + i + "]]]", null));
+
+                            if (i % 5 ==0) {
+                                Date currentDate = systemTimeProvider.getDate();
+                                Calendar calendar = Calendar.getInstance();
+                                calendar.setTime(currentDate);
+                                calendar.add(Calendar.DATE, 1);
+                                systemTimeProvider.setFixedDate(dateFormat.format(calendar.getTime()));
+                            }
                         }
                     }
                 });
