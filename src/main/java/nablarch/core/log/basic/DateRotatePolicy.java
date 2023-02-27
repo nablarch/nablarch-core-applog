@@ -60,11 +60,11 @@ public class DateRotatePolicy implements RotatePolicy {
            dt = settings.getRequiredProp("dateType");
         }
         catch (IllegalArgumentException e) {
-           dt =  "System";
+           dt =  "system";
         }
-        if (dt.equals("System")) {
+        if (dt.equals("system")) {
             dateType = DateType.System;
-        } else if (dt.equals("Business")) {
+        } else if (dt.equals("business")) {
             dateType = DateType.Business;
         } else {
             throw new IllegalArgumentException("dateType was invalid");
