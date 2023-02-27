@@ -18,9 +18,6 @@ import java.util.Date;
  */
 public class FileSizeRotatePolicy implements RotatePolicy {
 
-    /** 次回ローテーション実施時の、リネーム先のファイルパス */
-    private String newFilePath;
-
     /** 書き込み先ファイルの最大サイズ */
     private long maxFileSize;
 
@@ -59,10 +56,10 @@ public class FileSizeRotatePolicy implements RotatePolicy {
      * @throws IllegalStateException ログファイルのリネームができない場合
      */
     @Override
-    public void rotate() {
-        if (!new File(filePath).renameTo(new File(newFilePath))) {
+    public void rotate(String rotatedFilePath) {
+        if (!new File(filePath).renameTo(new File(rotatedFilePath))) {
             throw new IllegalStateException(
-                    "renaming failed. File#renameTo returns false. src file = [" + filePath + "], dest file = [" + newFilePath + "]");
+                    "renaming failed. File#renameTo returns false. src file = [" + filePath + "], dest file = [" + rotatedFilePath + "]");
         }
     }
 
@@ -86,16 +83,18 @@ public class FileSizeRotatePolicy implements RotatePolicy {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String decideRotatedFilePath() {
-         newFilePath = filePath + "." + oldFileDateFormat.format(new Date()) + ".old";
-         return newFilePath;
+        String rotatedFilePath = filePath + "." + oldFileDateFormat.format(new Date()) + ".old";
+        return rotatedFilePath;
     }
 
     /**
-     * ログファイル読み込み時に発生するイベント。<br>
-     * 読み込んだファイルサイズを現在のファイルサイズとして、インスタンス変数に保持する。
-     * @param currentFileSize 読み込まれたファイルサイズ(KB)
+     * {@inheritDoc}<br>
+     * {@link FileSizeRotatePolicy}では、読み込んだファイルサイズを現在のファイルサイズとして、インスタンス変数に保持する。
      */
     @Override
     public void onOpenFile(File file) {
@@ -103,9 +102,8 @@ public class FileSizeRotatePolicy implements RotatePolicy {
     }
 
     /**
-     * ログファイル書き込み時に発生するイベント。<br>
-     * ファイルサイズに書き込むメッセージサイズを足すことで、現在のファイルサイズを更新する。
-     * @param message ログファイルに書き込まれるメッセージ
+     * {@inheritDoc}<br>
+     * {@link FileSizeRotatePolicy}では、ファイルサイズに書き込むメッセージサイズを足すことで、現在のファイルサイズを更新する。
      */
     @Override
     public void onWrite(String message) {
@@ -113,23 +111,15 @@ public class FileSizeRotatePolicy implements RotatePolicy {
     }
 
     /**
-     * 設定情報を取得する。<br>
-     * <br>
+     * {@inheritDoc}
      * 設定情報のフォーマットを下記に示す。<br>
      * <br>
-     * WRITER NAME        = [&lt;{@link LogWriter}の名称&gt;]<br>
-     * WRITER CLASS       = [&lt;{@link LogWriter}のクラス名&gt;]<br>
-     * FORMATTER CLASS    = [&lt;{@link LogFormatter}のクラス名&gt;]<br>
-     * LEVEL              = [&lt;ログの出力制御の基準とする{@link LogLevel}&gt;]
-     * FILE PATH          = [&lt;書き込み先のファイルパス&gt;]<br>
-     * ENCODING           = [&lt;書き込み時に使用する文字エンコーディング&gt;]<br>
-     * OUTPUT BUFFER SIZE = [&lt;出力バッファのサイズ&gt;]<br>
      * FILE AUTO CHANGE   = [&lt;ログファイルを自動で切り替えるか否か。&gt;]<br>
      * MAX FILE SIZE      = [&lt;書き込み先ファイルの最大サイズ&gt;]<br>
      * CURRENT FILE SIZE  = [&lt;書き込み先ファイルの現在のサイズ&gt;]<br>
      *
      * @return 設定情報
-     * @see LogWriterSupport#getSettings()
+     * @see FileLogWriter#getSettings()
      */
     @Override
     public String getSettings() {
@@ -138,6 +128,9 @@ public class FileSizeRotatePolicy implements RotatePolicy {
                 + "\tCURRENT FILE SIZE  = [" + currentFileSize + "]" + Logger.LS;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setupIfNeeded() {
 

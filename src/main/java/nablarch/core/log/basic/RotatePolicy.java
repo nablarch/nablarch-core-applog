@@ -14,6 +14,7 @@ public interface RotatePolicy {
     /**
      * 初期処理を行う。
      * @param settings LogWriterの設定
+     * @param charset 書き込み時に使用する文字エンコーディング
      */
     void initialize(ObjectSettings settings, Charset charset);
 
@@ -24,30 +25,29 @@ public interface RotatePolicy {
      */
     boolean needsRotate(String message);
 
+    /**
+     * ローテーション先のファイル名を決定する。
+     * @return ローテーション先のファイル名
+     */
     String decideRotatedFilePath();
 
     /**
      * ローテーションを行う。
      */
-    void rotate();
+    void rotate(String rotatedFilePath);
 
     /**
-     * ログファイル読み込み時に、出力する設定情報を返す。<br>
-     * 特に何も設定しない場合、下記の設定情報が出力される<br>
-     * <br>
-     * WRITER NAME        = [&lt;{@link LogWriter}の名称&gt;]<br>
-     * WRITER CLASS       = [&lt;{@link LogWriter}のクラス名&gt;]<br>
-     * FORMATTER CLASS    = [&lt;{@link LogFormatter}のクラス名&gt;]<br>
-     * LEVEL              = [&lt;ログの出力制御の基準とする{@link LogLevel}&gt;]
-     * FILE PATH          = [&lt;書き込み先のファイルパス&gt;]<br>
-     * ENCODING           = [&lt;書き込み時に使用する文字エンコーディング&gt;]<br>
-     * OUTPUT BUFFER SIZE = [&lt;出力バッファのサイズ&gt;]<br>
-     *
+     * ログファイル読み込み時に出力する、ローテーションの設定情報を返す。<br>
      * @return 設定情報
      * @see FileLogWriter#getSettings()
      */
     String getSettings();
 
+    /**
+     * ログファイル書き込み前に、必要な設定をする。<br>
+     * {@link #initialize}は、システムリポジトリのロード前に呼び出されるため、システムリポジトリの参照ができない。
+     * システム日付の取得などシステムリポジトリを参照する初期設定などを独自で実装したい場合に使用する。
+     */
     void setupIfNeeded();
 
     /**
@@ -60,7 +60,7 @@ public interface RotatePolicy {
     /**
      * ログファイル読み込み時に発生するイベント。<br>
      * ファイルサイズによるローテーションなどを独自で実装したい場合に使用する。
-     * @param file 読み込まれたファイルサイズ(KB)
+     * @param file 読み込まれたファイル
      */
     void onOpenFile(File file);
 }
