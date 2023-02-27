@@ -44,9 +44,6 @@ public class DateRotatePolicy implements RotatePolicy {
     /** 次回ローテーション日 */
     private Date nextUpdateDate;
 
-    /** 日付の計算に使用するCalendar */
-    private Calendar cl;
-
     /**
      * {@inheritDoc}
      * @throws IllegalArgumentException 不正なdateTypeが指定されている場合
@@ -84,7 +81,7 @@ public class DateRotatePolicy implements RotatePolicy {
             currentDate = getCurrentDate();
         }
 
-        cl = Calendar.getInstance();
+        Calendar cl = Calendar.getInstance();
 
         calcNextUpdateDate(currentDate);
         nextUpdateDate = cl.getTime();
@@ -112,7 +109,8 @@ public class DateRotatePolicy implements RotatePolicy {
      * 次回ローテション時刻を計算する。
      * @param currentDate 現在日時
      */
-    private void calcNextUpdateDate(Date currentDate) {
+    private Calendar calcNextUpdateDate(Date currentDate) {
+        Calendar cl = Calendar.getInstance();
         cl.setTime(currentDate);
         // 時・分・秒・ミリ秒を0にする
         cl.set(Calendar.HOUR_OF_DAY, 0);
@@ -122,15 +120,19 @@ public class DateRotatePolicy implements RotatePolicy {
 
         // その後、日を+1する
         cl.add(Calendar.DATE, 1);
+
+        return  cl;
     }
 
     /**
      * リネーム先のファイル名を決定するための、時刻を計算する。
      * @param nextUpdateDate 次回更新日時
      */
-    private void calcNewFilePath(Date nextUpdateDate) {
+    private Calendar calcNewFilePath(Date nextUpdateDate) {
+        Calendar cl = Calendar.getInstance();
         cl.setTime(nextUpdateDate);
         cl.add(Calendar.DATE, -1);
+        return cl;
     }
 
     /**
@@ -146,11 +148,11 @@ public class DateRotatePolicy implements RotatePolicy {
         if (nextUpdateDate.after(currentDate)) {
             return false;
         } else {
-            calcNewFilePath(nextUpdateDate);
+            Calendar cl = calcNewFilePath(nextUpdateDate);
             Date newFileDate = cl.getTime();
             newFilePath = filePath + "." + dateFormat.format(newFileDate) + ".old";
 
-            calcNextUpdateDate(currentDate);
+            cl = calcNextUpdateDate(currentDate);
             nextUpdateDate = cl.getTime();
 
             return true;
