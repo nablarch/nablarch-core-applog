@@ -53,9 +53,9 @@ import nablarch.core.util.ObjectUtil;
  *
  * <dt>dateType</dt>
  * <dd>日付タイプ。オプション。<br>
- *     日付ごとのローテーション判定に必要な日付を、systemと設定されていればシステム日次から、
- *     businessと設定されている場合は業務日付から取得する。<br>
- *     rotatePolicyとして{@link DateRotatePolicy}が設定されている場合、デフォルト値はsystem。<br>
+ *     日付ごとのローテーション判定に必要な日付の種類を指定する。<br>
+ *     システム日時を使用する場合はsystem、業務日付を使用する場合はbusinessを指定する。<br>
+ *     デフォルトはsystem。<br>
  *     このオプションは、rotatePolicyに{@link DateRotatePolicy}が設定されている場合に有効である。</dd>
  * </dl>
  * 本クラスでは、初期処理と終了処理、ログファイルの切り替え時に、書き込み先のログファイルにINFOレベルでメッセージを出力する。
