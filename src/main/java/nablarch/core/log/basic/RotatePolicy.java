@@ -21,16 +21,12 @@ public interface RotatePolicy {
      */
     boolean needsRotate(long msgLength);
 
+    String decideRotatedFilePath();
+
     /**
      * ローテーションを行う。
      */
     void rotate();
-
-    /**
-     * 次回ローテーション実施時のリネーム先のファイルパスを返す。
-     * @return リネーム先のファイルパス
-     */
-    String getNewFilePath();
 
     /**
      * ログファイル読み込み時に、出力する設定情報を返す。<br>

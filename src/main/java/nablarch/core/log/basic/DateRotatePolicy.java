@@ -147,16 +147,23 @@ public class DateRotatePolicy implements RotatePolicy {
 
         if (nextUpdateDate.after(currentDate)) {
             return false;
-        } else {
-            Calendar cl = calcNewFilePath(nextUpdateDate);
-            Date newFileDate = cl.getTime();
-            newFilePath = filePath + "." + dateFormat.format(newFileDate) + ".old";
-
-            cl = calcNextUpdateDate(currentDate);
-            nextUpdateDate = cl.getTime();
-
-            return true;
         }
+
+        return true;
+    }
+
+    @Override
+    public String decideRotatedFilePath() {
+        Date currentDate = getCurrentDate();
+
+        Calendar cl = calcNewFilePath(nextUpdateDate);
+        Date newFileDate = cl.getTime();
+        newFilePath = filePath + "." + dateFormat.format(newFileDate) + ".old";
+
+        cl = calcNextUpdateDate(currentDate);
+        nextUpdateDate = cl.getTime();
+
+        return newFilePath;
     }
 
     /**
@@ -174,14 +181,6 @@ public class DateRotatePolicy implements RotatePolicy {
             throw new IllegalStateException(
                     "renaming failed. File#renameTo returns false. src file = [" + filePath + "], dest file = [" + newFilePath + "]");
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getNewFilePath() {
-        return newFilePath;
     }
 
     /**

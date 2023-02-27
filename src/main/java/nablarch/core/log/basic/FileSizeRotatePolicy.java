@@ -77,9 +77,13 @@ public class FileSizeRotatePolicy implements RotatePolicy {
             return false;
         }
 
-        newFilePath = filePath + "." + oldFileDateFormat.format(new Date()) + ".old";
-
         return true;
+    }
+
+    @Override
+    public String decideRotatedFilePath() {
+         newFilePath = filePath + "." + oldFileDateFormat.format(new Date()) + ".old";
+         return newFilePath;
     }
 
     /**
@@ -100,14 +104,6 @@ public class FileSizeRotatePolicy implements RotatePolicy {
     @Override
     public void onWrite(byte[] message) {
         this.currentFileSize += message.length;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getNewFilePath() {
-        return this.newFilePath;
     }
 
     /**

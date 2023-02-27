@@ -208,8 +208,8 @@ public class FileLogWriter extends LogWriterSupport {
             return;
         }
 
-        String newFilePath = rotatePolicy.getNewFilePath();
-        String message = "change [" + filePath + "] -> [" + newFilePath + "]";
+        String rotatedFilePath = rotatePolicy.decideRotatedFilePath();
+        String message = "change [" + filePath + "] -> [" + rotatedFilePath + "]";
         terminateWriter(message);
         rotatePolicy.rotate();
         initializeWriter(message);
