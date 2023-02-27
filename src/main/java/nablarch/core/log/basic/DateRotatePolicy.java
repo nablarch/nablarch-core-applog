@@ -138,11 +138,7 @@ public class DateRotatePolicy implements RotatePolicy {
 
         Date currentDate = getCurrentDate();
 
-        if (nextUpdateDate.after(currentDate)) {
-            return false;
-        }
-
-        return true;
+        return !nextUpdateDate.after(currentDate);
     }
 
     /**

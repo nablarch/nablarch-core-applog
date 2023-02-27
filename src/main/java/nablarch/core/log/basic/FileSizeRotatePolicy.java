@@ -76,11 +76,7 @@ public class FileSizeRotatePolicy implements RotatePolicy {
             return false;
         }
 
-        if (StringUtil.getBytes(message, charset).length + currentFileSize <= maxFileSize) {
-            return false;
-        }
-
-        return true;
+        return StringUtil.getBytes(message, charset).length + currentFileSize > maxFileSize;
     }
 
     /**
@@ -88,8 +84,7 @@ public class FileSizeRotatePolicy implements RotatePolicy {
      */
     @Override
     public String decideRotatedFilePath() {
-        String rotatedFilePath = filePath + "." + oldFileDateFormat.format(new Date()) + ".old";
-        return rotatedFilePath;
+        return filePath + "." + oldFileDateFormat.format(new Date()) + ".old";
     }
 
     /**

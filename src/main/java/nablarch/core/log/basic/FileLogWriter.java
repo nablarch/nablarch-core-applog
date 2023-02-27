@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.Map;
 
 import nablarch.core.log.Logger;
 import nablarch.core.util.StringUtil;
