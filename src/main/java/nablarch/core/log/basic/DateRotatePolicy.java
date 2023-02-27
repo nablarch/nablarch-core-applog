@@ -5,6 +5,7 @@ import nablarch.core.date.SystemTimeUtil;
 import nablarch.core.log.Logger;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -50,7 +51,7 @@ public class DateRotatePolicy implements RotatePolicy {
      * @throws RuntimeException dateTypeがSystemで、既にログパスにファイルが存在する際にファイルの作成時刻が取得できない場合
      */
     @Override
-    public void initialize(ObjectSettings settings) {
+    public void initialize(ObjectSettings settings, Charset charset) {
 
         filePath = settings.getRequiredProp("filePath");
 
@@ -139,7 +140,8 @@ public class DateRotatePolicy implements RotatePolicy {
      * それ以外の場合は、ローテーションをしない。
      */
     @Override
-    public boolean needsRotate(long msgLength) {
+    public boolean needsRotate(String message) {
+
         Date currentDate = getCurrentDate();
 
         if (nextUpdateDate.after(currentDate)) {
@@ -222,7 +224,7 @@ public class DateRotatePolicy implements RotatePolicy {
      * {@inheritDoc}
      */
     @Override
-    public void onWrite(byte[] message) {
+    public void onWrite(String message) {
 
     }
 
@@ -230,7 +232,7 @@ public class DateRotatePolicy implements RotatePolicy {
      * {@inheritDoc}
      */
     @Override
-    public void onRead(long currentFileSize) {
+    public void onOpenFile(File file) {
 
     }
 }

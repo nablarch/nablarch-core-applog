@@ -117,7 +117,7 @@ public class FileLogWriter extends LogWriterSupport {
             rotatePolicy = new FileSizeRotatePolicy();
         }
 
-        rotatePolicy.initialize(settings);
+        rotatePolicy.initialize(settings,charset);
 
         initializeWriter("initialized.");
     }
@@ -187,11 +187,9 @@ public class FileLogWriter extends LogWriterSupport {
                 throw new IllegalStateException(
                     String.format("failed to write for FileLogWriter has already terminated. name = [%s]", getName()));
             }
-            byte[] b = getBytes(formattedMessage);
-            int length = b.length;
-            renameFile(length);
+            renameFile(formattedMessage);
             try {
-                write(b);
+                write(formattedMessage);
             } catch (IOException e) {
                 throw new IllegalStateException("failed to write. out name = [" + getName() + "]", e);
             }
@@ -201,11 +199,11 @@ public class FileLogWriter extends LogWriterSupport {
     /**
      * ローテーションの種類毎にファイルをリネームする。<br>
      * ファイルをリネームする場合は、併せてファイルへの書き込みを行う出力ストリームを初期化する。
-     * @param msgLength メッセージ長
+     * @param msg メッセージ長
      */
-    private void renameFile(int msgLength) {
+    private void renameFile(String msg) {
 
-        if (!rotatePolicy.needsRotate(msgLength)) {
+        if (!rotatePolicy.needsRotate(msg)) {
             return;
         }
 
@@ -223,15 +221,14 @@ public class FileLogWriter extends LogWriterSupport {
     private void initializeWriter(String message) {
         try {
             out = new BufferedOutputStream(new FileOutputStream(filePath, true), outputBufferSize);
-            rotatePolicy.onRead(new File(filePath).length());
+            rotatePolicy.onOpenFile(new File(filePath));
             LogContext context = new LogContext(FQCN, LogLevel.INFO, message + Logger.LS + getSettings(), null);
             // 本来はメッセージを連結する前にメッセージ出力要否をチェックすべきだが、
             // 実行される回数が少なくパフォーマンスに与える影響が軽微と考えてあえてここでチェックする。
             if (needsToWrite(context)) {
                 String formattedMessage = getFormatter().format(
                         context);
-                byte[] b = getBytes(formattedMessage);
-                write(b);
+                write(formattedMessage);
             }
         } catch (IOException e) {
             throw new IllegalArgumentException(String.format("failed to create %s. file name = [%s], encoding = [%s], buffer size =[%s]",
@@ -250,8 +247,7 @@ public class FileLogWriter extends LogWriterSupport {
             // 実行される回数が少なくパフォーマンスに与える影響が軽微と考えてあえてここでチェックする。
             if (needsToWrite(context)) {
                 String formattedMessage = getFormatter().format(context);
-                byte[] b = getBytes(formattedMessage);
-                write(b);
+                write(formattedMessage);
             }
             out.close();
             out = null;
@@ -259,24 +255,15 @@ public class FileLogWriter extends LogWriterSupport {
             throw new IllegalStateException("termination failed. out name = [" + getName() + "]", e);
         }
     }
-    
-    /**
-     * 文字列をエンコードする。
-     * @param formattedMessage 文字列
-     * @return バイト配列
-     */
-    private byte[] getBytes(String formattedMessage) {
-        return StringUtil.getBytes(formattedMessage, charset);
-    }
 
     /**
      * メッセージの書き込みを行いフラッシュする。
      * @param message メッセージ
      * @throws IOException IO例外
      */
-    private void write(byte[] message) throws IOException {
+    private void write(String message) throws IOException {
         rotatePolicy.onWrite(message);
-        out.write(message);
+        out.write(StringUtil.getBytes(message, charset));
         out.flush();
     }
 }

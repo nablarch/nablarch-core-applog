@@ -1,8 +1,10 @@
 package nablarch.core.log.basic;
 
 import nablarch.core.log.Logger;
+import nablarch.core.util.StringUtil;
 
 import java.io.File;
+import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -34,11 +36,15 @@ public class FileSizeRotatePolicy implements RotatePolicy {
     /** 古いログファイル名に使用する日時フォーマット */
     private final DateFormat oldFileDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
+    /** 書き込み時に使用する文字エンコーディング */
+    private Charset charset;
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public void initialize(ObjectSettings settings) {
+    public void initialize(ObjectSettings settings, Charset charset) {
+        this.charset = charset;
         filePath = settings.getRequiredProp("filePath");
 
         try {
@@ -68,12 +74,12 @@ public class FileSizeRotatePolicy implements RotatePolicy {
      * ファイルの最大サイズが指定されていない場合は、ローテーションをしない。
      */
     @Override
-    public boolean needsRotate(long msgLength) {
+    public boolean needsRotate(String message) {
         if (maxFileSize <= 0) {
             return false;
         }
 
-        if (msgLength + currentFileSize <= maxFileSize) {
+        if (StringUtil.getBytes(message, charset).length + currentFileSize <= maxFileSize) {
             return false;
         }
 
@@ -92,8 +98,8 @@ public class FileSizeRotatePolicy implements RotatePolicy {
      * @param currentFileSize 読み込まれたファイルサイズ(KB)
      */
     @Override
-    public void onRead(long currentFileSize) {
-        this.currentFileSize = currentFileSize;
+    public void onOpenFile(File file) {
+        this.currentFileSize = file.length();
     }
 
     /**
@@ -102,8 +108,8 @@ public class FileSizeRotatePolicy implements RotatePolicy {
      * @param message ログファイルに書き込まれるメッセージ
      */
     @Override
-    public void onWrite(byte[] message) {
-        this.currentFileSize += message.length;
+    public void onWrite(String message) {
+        this.currentFileSize += StringUtil.getBytes(message, charset).length;
     }
 
     /**

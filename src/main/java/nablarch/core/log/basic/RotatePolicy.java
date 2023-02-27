@@ -1,5 +1,8 @@
 package nablarch.core.log.basic;
 
+import java.io.File;
+import java.nio.charset.Charset;
+
 /**
  * ログのローテーションを行うインタフェース。<br>
  * ログのローテーションの種類毎に本インタフェースの実装クラスを作成する。
@@ -12,14 +15,14 @@ public interface RotatePolicy {
      * 初期処理を行う。
      * @param settings LogWriterの設定
      */
-    void initialize(ObjectSettings settings);
+    void initialize(ObjectSettings settings, Charset charset);
 
     /**
      * ローテーションが必要かの判定を行う。
-     * @param msgLength ログファイルに書き込まれるメッセージ長
+     * @param message ログファイルに書き込まれるメッセージ
      * @return ローテーションが必要な場合はtrue
      */
-    boolean needsRotate(long msgLength);
+    boolean needsRotate(String message);
 
     String decideRotatedFilePath();
 
@@ -52,12 +55,12 @@ public interface RotatePolicy {
      * ファイルサイズによるローテーションなどを独自で実装したい場合に使用する。
      * @param message ログファイルに書き込まれるメッセージ
      */
-    void onWrite(byte[] message);
+    void onWrite(String message);
 
     /**
      * ログファイル読み込み時に発生するイベント。<br>
      * ファイルサイズによるローテーションなどを独自で実装したい場合に使用する。
-     * @param currentFileSize 読み込まれたファイルサイズ(KB)
+     * @param file 読み込まれたファイルサイズ(KB)
      */
-    void onRead(long currentFileSize);
+    void onOpenFile(File file);
 }
