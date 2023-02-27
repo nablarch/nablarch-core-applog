@@ -181,6 +181,7 @@ public class FileLogWriter extends LogWriterSupport {
      * IO例外が発生した場合は、IO例外をラップして{@link IllegalStateException}を送出する。
      */
     protected void onWrite(String formattedMessage) {
+        rotatePolicy.setupIfNeeded();
         synchronized (this) {
             if (out == null) {
                 throw new IllegalStateException(

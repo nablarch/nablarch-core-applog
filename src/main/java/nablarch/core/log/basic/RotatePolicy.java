@@ -45,6 +45,8 @@ public interface RotatePolicy {
      */
     String getSettings();
 
+    void setupIfNeeded();
+
     /**
      * ログファイル書き込み時に発生するイベント。<br>
      * ファイルサイズによるローテーションなどを独自で実装したい場合に使用する。

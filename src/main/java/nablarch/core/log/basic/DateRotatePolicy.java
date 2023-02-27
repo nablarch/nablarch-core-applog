@@ -77,14 +77,11 @@ public class DateRotatePolicy implements RotatePolicy {
         // 次回更新時刻をファイルの更新時刻から算出する
         if (file.exists() && dateType == DateType.System) {
             currentDate = new Date(file.lastModified());
-        } else {
-            currentDate = getCurrentDate();
+            Calendar cl = Calendar.getInstance();
+
+            calcNextUpdateDate(currentDate);
+            nextUpdateDate = cl.getTime();
         }
-
-        Calendar cl = Calendar.getInstance();
-
-        calcNextUpdateDate(currentDate);
-        nextUpdateDate = cl.getTime();
     }
 
     /**
@@ -207,6 +204,18 @@ public class DateRotatePolicy implements RotatePolicy {
         return "\tFILE AUTO CHANGE   = [" + true + "]" + Logger.LS
                 + "\tNEXT CHANGE DATE   = [" + dateFormat.format(nextUpdateDate) + "]" + Logger.LS
                 + "\tCURRENT DATE  = [" + dateFormat.format(getCurrentDate()) + "]" + Logger.LS;
+    }
+
+    @Override
+    public void setupIfNeeded() {
+        if (nextUpdateDate == null) {
+            Date currentDate = getCurrentDate();
+
+            Calendar cl = Calendar.getInstance();
+
+            calcNextUpdateDate(currentDate);
+            nextUpdateDate = cl.getTime();
+        }
     }
 
     /**
