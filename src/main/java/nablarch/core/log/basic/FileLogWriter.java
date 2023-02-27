@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.Map;
 
 import nablarch.core.log.Logger;
 import nablarch.core.util.StringUtil;
@@ -107,10 +108,11 @@ public class FileLogWriter extends LogWriterSupport {
             outputBufferSize = 8 * KB;
         }
 
-        if (settings.getProps().containsKey("rotatePolicy")) {
-            rotatePolicy = ObjectUtil.createInstance(settings.getProp("rotatePolicy"));
-        } else {
+        String className = settings.getProp("rotatePolicy");
+        if (className == null) {
             rotatePolicy = new FileSizeRotatePolicy();
+        } else {
+            rotatePolicy = ObjectUtil.createInstance(className);
         }
 
         rotatePolicy.initialize(settings, charset);

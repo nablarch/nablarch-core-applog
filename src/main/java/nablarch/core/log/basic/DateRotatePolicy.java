@@ -73,9 +73,7 @@ public class DateRotatePolicy implements RotatePolicy {
         // 次回ローテーション日をファイルの更新時刻から算出する
         if (file.exists() && dateType == DateType.SYSTEM) {
             Date currentDate = new Date(file.lastModified());
-            Calendar cl = Calendar.getInstance();
-
-            calcNextUpdateDate(currentDate);
+            Calendar cl = calcNextUpdateDate(currentDate);
             nextUpdateDate = cl.getTime();
         }
     }
@@ -204,9 +202,7 @@ public class DateRotatePolicy implements RotatePolicy {
         if (nextUpdateDate == null) {
             Date currentDate = getCurrentDate();
 
-            Calendar cl = Calendar.getInstance();
-
-            calcNextUpdateDate(currentDate);
+            Calendar cl = calcNextUpdateDate(currentDate);
             nextUpdateDate = cl.getTime();
         }
     }
