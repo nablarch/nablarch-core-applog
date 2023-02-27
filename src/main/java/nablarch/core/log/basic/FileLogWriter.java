@@ -111,12 +111,12 @@ public class FileLogWriter extends LogWriterSupport {
             outputBufferSize = 8 * KB;
         }
 
-        String className = settings.getProp("rotatePolicy");
-        if (className == null) {
-            className = "nablarch.core.log.basic.FileSizeRotatePolicy";
+        if (settings.getProps().containsKey("rotatePolicy")) {
+            rotatePolicy=ObjectUtil.createInstance(settings.getProp("rotatePolicy"));
+        } else {
+            rotatePolicy = new FileSizeRotatePolicy();
         }
 
-        rotatePolicy=ObjectUtil.createInstance(className);
         rotatePolicy.initialize(settings);
 
         initializeWriter("initialized.");
