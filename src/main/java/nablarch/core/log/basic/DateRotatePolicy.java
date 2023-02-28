@@ -150,9 +150,6 @@ public class DateRotatePolicy implements RotatePolicy {
             rotatedFilePath = filePath + "." + dupFileDateFormat.format(getCurrentDate()) + ".old";
         }
 
-        Date currentDate = getCurrentDate();
-        nextUpdateDate = calcNextUpdateDate(currentDate);
-
         return rotatedFilePath;
     }
 
@@ -166,6 +163,9 @@ public class DateRotatePolicy implements RotatePolicy {
             throw new IllegalStateException(
                     "renaming failed. File#renameTo returns false. src file = [" + filePath + "], dest file = [" + rotatedFilePath + "]");
         }
+
+        Date currentDate = getCurrentDate();
+        nextUpdateDate = calcNextUpdateDate(currentDate);
     }
 
     /**
