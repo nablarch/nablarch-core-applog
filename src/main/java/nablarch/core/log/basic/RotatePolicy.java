@@ -14,16 +14,16 @@ public interface RotatePolicy {
     /**
      * 初期処理を行う。
      * @param settings LogWriterの設定
-     * @param charset 書き込み時に使用する文字エンコーディング
      */
-    void initialize(ObjectSettings settings, Charset charset);
+    void initialize(ObjectSettings settings);
 
     /**
      * ローテーションが必要かの判定を行う。
      * @param message ログファイルに書き込まれるメッセージ
+     * @param charset 書き込み時に使用する文字エンコーディング
      * @return ローテーションが必要な場合はtrue
      */
-    boolean needsRotate(String message);
+    boolean needsRotate(String message, Charset charset);
 
     /**
      * ローテーション先のファイル名を決定する。
@@ -33,6 +33,7 @@ public interface RotatePolicy {
 
     /**
      * ローテーションを行う。
+     * @param rotatedFilePath ローテーション先のファイルパス
      */
     void rotate(String rotatedFilePath);
 
@@ -54,8 +55,9 @@ public interface RotatePolicy {
      * ログファイル書き込み時に発生するイベント。<br>
      * ファイルサイズによるローテーションなどを独自で実装したい場合に使用する。
      * @param message ログファイルに書き込まれるメッセージ
+     * @param charset 書き込み時に使用する文字エンコーディング
      */
-    void onWrite(String message);
+    void onWrite(String message, Charset charset);
 
     /**
      * ログファイル読み込み時に発生するイベント。<br>

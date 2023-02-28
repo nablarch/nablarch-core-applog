@@ -100,7 +100,7 @@ public class FileLogWriter extends LogWriterSupport {
             rotatePolicy = ObjectUtil.createInstance(className);
         }
 
-        rotatePolicy.initialize(settings, charset);
+        rotatePolicy.initialize(settings);
 
         initializeWriter("initialized.");
     }
@@ -175,7 +175,7 @@ public class FileLogWriter extends LogWriterSupport {
      */
     private void renameFile(String formattedMessage) {
 
-        if (!rotatePolicy.needsRotate(formattedMessage)) {
+        if (!rotatePolicy.needsRotate(formattedMessage,charset)) {
             return;
         }
 
@@ -234,7 +234,7 @@ public class FileLogWriter extends LogWriterSupport {
      * @throws IOException IO例外
      */
     private void write(String message) throws IOException {
-        rotatePolicy.onWrite(message);
+        rotatePolicy.onWrite(message,charset);
         out.write(StringUtil.getBytes(message, charset));
         out.flush();
     }

@@ -51,7 +51,7 @@ public class FileSizeRotatePolicy implements RotatePolicy {
      * {@inheritDoc}
      */
     @Override
-    public void initialize(ObjectSettings settings, Charset charset) {
+    public void initialize(ObjectSettings settings) {
         this.charset = charset;
         filePath = settings.getRequiredProp("filePath");
 
@@ -80,7 +80,7 @@ public class FileSizeRotatePolicy implements RotatePolicy {
      * ファイルの最大サイズが指定されていない場合はfalseを返す。
      */
     @Override
-    public boolean needsRotate(String message) {
+    public boolean needsRotate(String message, Charset charset) {
         if (maxFileSize <= 0) {
             return false;
         }
@@ -110,7 +110,7 @@ public class FileSizeRotatePolicy implements RotatePolicy {
      * {@link FileSizeRotatePolicy}では、ファイルサイズに書き込むメッセージサイズを足すことで、現在のファイルサイズを更新する。
      */
     @Override
-    public void onWrite(String message) {
+    public void onWrite(String message, Charset charset) {
         this.currentFileSize += StringUtil.getBytes(message, charset).length;
     }
 

@@ -56,7 +56,7 @@ public class DateRotatePolicy implements RotatePolicy {
      * @throws RuntimeException dateTypeがSystemで、既にログパスにファイルが存在する際にファイルの作成時刻が取得できない場合
      */
     @Override
-    public void initialize(ObjectSettings settings, Charset charset) {
+    public void initialize(ObjectSettings settings) {
 
         filePath = settings.getRequiredProp("filePath");
 
@@ -142,7 +142,7 @@ public class DateRotatePolicy implements RotatePolicy {
      * それ以外の場合は、ローテーションが不要と判定する。
      */
     @Override
-    public boolean needsRotate(String message) {
+    public boolean needsRotate(String message, Charset charset) {
 
         Date currentDate = getCurrentDate();
 
@@ -215,7 +215,7 @@ public class DateRotatePolicy implements RotatePolicy {
      * {@inheritDoc}
      */
     @Override
-    public void onWrite(String message) {
+    public void onWrite(String message, Charset charset) {
 
     }
 
