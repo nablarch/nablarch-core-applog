@@ -136,7 +136,7 @@ public class FileSizeRotatePolicy implements RotatePolicy {
      * {@inheritDoc}
      */
     @Override
-    public void setupIfNeeded() {
+    public void setupAfterSystemRepositoryInitialized() {
 
     }
 }

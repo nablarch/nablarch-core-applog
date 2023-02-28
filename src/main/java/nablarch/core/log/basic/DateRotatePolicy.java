@@ -187,7 +187,7 @@ public class DateRotatePolicy implements RotatePolicy {
      * {@link DateRotatePolicy}では、次回ローテーション日が設定されていない場合に次回ローテーション日を計算する。
      */
     @Override
-    public void setupIfNeeded() {
+    public void setupAfterSystemRepositoryInitialized() {
         if (nextUpdateDate == null) {
             Date currentDate = getCurrentDate();
 

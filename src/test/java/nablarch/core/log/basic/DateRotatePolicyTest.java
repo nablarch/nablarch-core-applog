@@ -442,7 +442,7 @@ public class DateRotatePolicyTest {
         DateRotatePolicy policy = new DateRotatePolicy();
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
 
-        policy.setupIfNeeded();
+        policy.setupAfterSystemRepositoryInitialized();
         Date actualNextUpdateDate = Deencapsulation.getField(policy, "nextUpdateDate");
 
         Date expectedNextUpdateDate = null;
