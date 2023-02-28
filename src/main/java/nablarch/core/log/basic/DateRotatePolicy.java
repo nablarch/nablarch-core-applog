@@ -142,8 +142,8 @@ public class DateRotatePolicy implements RotatePolicy {
         Calendar cl = Calendar.getInstance();
         cl.setTime(nextUpdateDate);
         cl.add(Calendar.DATE, -1);
-        Date newFileDate = cl.getTime();
-        String rotatedFilePath = filePath + "." + dateFormat.format(newFileDate) + ".old";
+        Date rotatedFileDate = cl.getTime();
+        String rotatedFilePath = filePath + "." + dateFormat.format(rotatedFileDate) + ".old";
 
         Date currentDate = getCurrentDate();
         nextUpdateDate = calcNextUpdateDate(currentDate);
