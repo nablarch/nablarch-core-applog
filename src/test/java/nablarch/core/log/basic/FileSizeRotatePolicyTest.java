@@ -27,9 +27,6 @@ import static org.junit.Assert.fail;
  */
 public class FileSizeRotatePolicyTest {
 
-    /** 書き込み時に使用する文字エンコーディング */
-    private Charset charset =  Charset.forName(System.getProperty("file.encoding"));
-
     /** 最大ファイルサイズとファイルパスが正しく設定されていること */
     @Test
     public void testInitialize() {
@@ -128,19 +125,19 @@ public class FileSizeRotatePolicyTest {
 
         // maxFileSizeが0バイトのためfalseを返す
         Deencapsulation.setField(policy, "maxFileSize", 0L);
-        assertThat(policy.needsRotate("abcde",charset), is(false));
+        assertThat(policy.needsRotate("abcde", Charset.forName(System.getProperty("file.encoding"))), is(false));
 
         // maxFileSizeが20バイトだが、currentFileSizeが10バイトでmsgLengthが5バイトのためrotate不要
         // 20 > 10+5 のためfalseを返す
         Deencapsulation.setField(policy, "maxFileSize", 20L);
         Deencapsulation.setField(policy, "currentFileSize", 10L);
-        assertThat(policy.needsRotate("abcde",charset), is(false));
+        assertThat(policy.needsRotate("abcde", Charset.forName(System.getProperty("file.encoding"))), is(false));
 
         // maxFileSizeが20バイトだが、currentFileSizeが15バイトでmsgLengthが10バイト
         // 20 < 15+10 のためtrueを返す
         Deencapsulation.setField(policy, "maxFileSize", 20L);
         Deencapsulation.setField(policy, "currentFileSize", 15L);
-        assertThat(policy.needsRotate("abcdeabcde",charset), is(true));
+        assertThat(policy.needsRotate("abcdeabcde", Charset.forName(System.getProperty("file.encoding"))), is(true));
     }
 
     /** 正しくリネーム先のファイルパスが決定できること */
@@ -197,7 +194,7 @@ public class FileSizeRotatePolicyTest {
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
         Deencapsulation.setField(policy, "currentFileSize", 10L);
         // 1バイトを加算する
-        policy.onWrite("a",charset);
+        policy.onWrite("a", Charset.forName(System.getProperty("file.encoding")));
 
         long actual = Deencapsulation.getField(policy, "currentFileSize");
 

@@ -33,22 +33,19 @@ import static org.junit.Assert.fail;
  */
 public class DateRotatePolicyTest {
 
-    /** 書き込み時に使用する文字エンコーディング */
-    private Charset charset =  Charset.forName(System.getProperty("file.encoding"));
-
-    private FixedSystemTimeProvider systemTimeProvider = new FixedSystemTimeProvider() {{
-        setFixedDate("20161231235959999");
-    }};
-
-    private FixedBusinessDateProvider businessTimeProvider = new FixedBusinessDateProvider() {{
-        setDefaultSegment("00");
-        setFixedDate(new HashMap<String, String>() {{
-            put("00", "20110101");
-        }});
-    }};
-
     @Before
     public void setup() {
+        final FixedSystemTimeProvider systemTimeProvider = new FixedSystemTimeProvider() {{
+            setFixedDate("20161231235959999");
+        }};
+
+        final FixedBusinessDateProvider businessTimeProvider = new FixedBusinessDateProvider() {{
+            setDefaultSegment("00");
+            setFixedDate(new HashMap<String, String>() {{
+                put("00", "20110101");
+            }});
+        }};
+
         SystemRepository.load(new ObjectLoader() {
             @Override
             public Map<String, Object> load() {
@@ -249,7 +246,7 @@ public class DateRotatePolicyTest {
             fail();
         }
         Deencapsulation.setField(policy, "nextUpdateDate", nextUpdateDate);
-        boolean actual = policy.needsRotate("abcdeabcde",charset);
+        boolean actual = policy.needsRotate("abcdeabcde",Charset.forName(System.getProperty("file.encoding")));
 
         assertThat(actual, is(false));
 
@@ -260,7 +257,7 @@ public class DateRotatePolicyTest {
             fail();
         }
         Deencapsulation.setField(policy, "nextUpdateDate", nextUpdateDate);
-        actual = policy.needsRotate("abcdeabcde",charset);
+        actual = policy.needsRotate("abcdeabcde",Charset.forName(System.getProperty("file.encoding")));
 
         assertThat(actual, is(true));
     }
