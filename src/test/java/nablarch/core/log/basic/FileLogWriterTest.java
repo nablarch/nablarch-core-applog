@@ -329,9 +329,9 @@ public class FileLogWriterTest extends LogTestSupport {
 
         String[] dateArray = new String[]{"20170101235959999","20170102235959999","20170103135959999"};
         for (String date: dateArray) {
-            systemTimeProvider.setFixedDate(date);
             writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + date + "]]]",
                     null));
+            systemTimeProvider.setFixedDate(date);
         }
 
         writer.terminate();
@@ -341,7 +341,7 @@ public class FileLogWriterTest extends LogTestSupport {
         File dir = appFile.getParentFile();
         assertTrue(dir.listFiles().length >= 3);
 
-        String[] actualDateArray = new String[]{"20170101","20170102"};
+        String[] actualDateArray = new String[]{"20161231","20170101"};
         for (String date: actualDateArray) {
             File f = new File("./log/switched-app.log"+"."+date+".old");
             if (!f.exists()) {
@@ -402,11 +402,11 @@ public class FileLogWriterTest extends LogTestSupport {
 
         String[] dateArray = new String[]{"20110102","20110103","20110104"};
         for (final String date: dateArray) {
+            writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + date + "]]]",
+                    null));
             businessTimeProvider.setFixedDate(new HashMap<String, String>() {{
                 put("00", date);
             }});
-            writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + date + "]]]",
-                    null));
         }
 
         writer.terminate();
@@ -415,7 +415,7 @@ public class FileLogWriterTest extends LogTestSupport {
         StringBuilder sb = new StringBuilder(50 * 1000);
         File dir = appFile.getParentFile();
 
-        String[] actualDateArray = new String[]{"20110102"};
+        String[] actualDateArray = new String[]{"20110101"};
         for (String date: actualDateArray) {
             File f = new File("./log/switched-app.log"+"."+date+".old");
             if (!f.exists()) {
@@ -471,11 +471,11 @@ public class FileLogWriterTest extends LogTestSupport {
         writer.initialize(
                 new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
-        String[] dateArray = new String[]{"20170101235959999","20170103135959999"};
+        String[] dateArray = new String[]{"20170101235959999","20170103135959999","20170104135959999"};
         for (String date: dateArray) {
-            systemTimeProvider.setFixedDate(date);
             writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + date + "]]]",
                     null));
+            systemTimeProvider.setFixedDate(date);
         }
 
         writer.terminate();
@@ -485,7 +485,7 @@ public class FileLogWriterTest extends LogTestSupport {
         File dir = appFile.getParentFile();
         assertTrue(dir.listFiles().length >= 2);
 
-        String[] actualDateArray = new String[]{"20170101"};
+        String[] actualDateArray = new String[]{"20161231","20170101"};
         for (String date: actualDateArray) {
             File f = new File("./log/switched-app.log"+"."+date+".old");
             if (!f.exists()) {
