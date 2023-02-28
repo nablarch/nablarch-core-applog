@@ -79,8 +79,7 @@ public class DateRotatePolicy implements RotatePolicy {
         // 次回ローテーション日をファイルの更新時刻から算出する
         if (file.exists() && dateType == DateType.SYSTEM) {
             Date currentDate = new Date(file.lastModified());
-            Calendar cl = calcNextUpdateDate(currentDate);
-            nextUpdateDate = cl.getTime();
+            nextUpdateDate = calcNextUpdateDate(currentDate);
         }
     }
 
@@ -93,7 +92,6 @@ public class DateRotatePolicy implements RotatePolicy {
             return SystemTimeUtil.getDate();
         } else {
             String currentDateSt = BusinessDateUtil.getDate();
-
             try {
                 return dateFormat.parse(currentDateSt);
             } catch (ParseException e) {
@@ -107,7 +105,7 @@ public class DateRotatePolicy implements RotatePolicy {
      * @param currentDate 現在日時
      * @return 次回ローテション日のCalendarオブジェクト
      */
-    private Calendar calcNextUpdateDate(Date currentDate) {
+    private Date calcNextUpdateDate(Date currentDate) {
         Calendar cl = Calendar.getInstance();
         cl.setTime(currentDate);
         // 時・分・秒・ミリ秒を0にする
@@ -119,7 +117,7 @@ public class DateRotatePolicy implements RotatePolicy {
         // その後、日を+1する
         cl.add(Calendar.DATE, 1);
 
-        return cl;
+        return cl.getTime();
     }
 
     /**
@@ -158,8 +156,7 @@ public class DateRotatePolicy implements RotatePolicy {
         String rotatedFilePath = filePath + "." + dateFormat.format(newFileDate) + ".old";
 
         Date currentDate = getCurrentDate();
-        cl = calcNextUpdateDate(currentDate);
-        nextUpdateDate = cl.getTime();
+        nextUpdateDate = calcNextUpdateDate(currentDate);
 
         return rotatedFilePath;
     }
@@ -204,8 +201,7 @@ public class DateRotatePolicy implements RotatePolicy {
         if (nextUpdateDate == null) {
             Date currentDate = getCurrentDate();
 
-            Calendar cl = calcNextUpdateDate(currentDate);
-            nextUpdateDate = cl.getTime();
+            nextUpdateDate = calcNextUpdateDate(currentDate);
         }
     }
 
