@@ -39,7 +39,7 @@ public class FileSizeRotatePolicyTest {
         settings.put("appFile.maxFileSize", "10");
 
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         long actualMaxFileSize = Deencapsulation.getField(policy, "maxFileSize");
         String actualFilepath = Deencapsulation.getField(policy, "filePath");
@@ -57,7 +57,7 @@ public class FileSizeRotatePolicyTest {
         settings.put("appFile.maxFileSize", "invalid");
 
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         long actualMaxFileSize = Deencapsulation.getField(policy, "maxFileSize");
 
@@ -72,7 +72,7 @@ public class FileSizeRotatePolicyTest {
         settings.put("appFile.maxFileSize", "20");
 
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         File f = new File("./log/testFileSizeRotate-app.log");
         if (f.exists()) {
@@ -104,7 +104,7 @@ public class FileSizeRotatePolicyTest {
         settings.put("appFile.maxFileSize", "20");
 
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
         File f = new File("./log/testInvalidFileSizeRotate-app.log");
 
         if (f.exists()) {
@@ -124,23 +124,23 @@ public class FileSizeRotatePolicyTest {
         settings.put("appFile.filePath", "./log/app.log");
 
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         // maxFileSizeが0バイトのためfalseを返す
         Deencapsulation.setField(policy, "maxFileSize", 0L);
-        assertThat(policy.needsRotate("abcde"), is(false));
+        assertThat(policy.needsRotate("abcde",charset), is(false));
 
         // maxFileSizeが20バイトだが、currentFileSizeが10バイトでmsgLengthが5バイトのためrotate不要
         // 20 > 10+5 のためfalseを返す
         Deencapsulation.setField(policy, "maxFileSize", 20L);
         Deencapsulation.setField(policy, "currentFileSize", 10L);
-        assertThat(policy.needsRotate("abcde"), is(false));
+        assertThat(policy.needsRotate("abcde",charset), is(false));
 
         // maxFileSizeが20バイトだが、currentFileSizeが15バイトでmsgLengthが10バイト
         // 20 < 15+10 のためtrueを返す
         Deencapsulation.setField(policy, "maxFileSize", 20L);
         Deencapsulation.setField(policy, "currentFileSize", 15L);
-        assertThat(policy.needsRotate("abcdeabcde"), is(true));
+        assertThat(policy.needsRotate("abcdeabcde",charset), is(true));
     }
 
     /** 正しくリネーム先のファイルパスが決定できること */
@@ -194,10 +194,10 @@ public class FileSizeRotatePolicyTest {
         settings.put("appFile.filePath", "./log/app.log");
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
 
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
         Deencapsulation.setField(policy, "currentFileSize", 10L);
         // 1バイトを加算する
-        policy.onWrite("a");
+        policy.onWrite("a",charset);
 
         long actual = Deencapsulation.getField(policy, "currentFileSize");
 
@@ -214,7 +214,7 @@ public class FileSizeRotatePolicyTest {
         settings.put("appFile.maxFileSize", "20");
 
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         Deencapsulation.setField(policy, "currentFileSize", 10000L);
 

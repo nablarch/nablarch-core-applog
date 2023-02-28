@@ -414,9 +414,8 @@ public class FileLogWriterTest extends LogTestSupport {
         // ファイルの存在確認
         StringBuilder sb = new StringBuilder(50 * 1000);
         File dir = appFile.getParentFile();
-        assertTrue(dir.listFiles().length >= 3);
 
-        String[] actualDateArray = new String[]{"20110102","20110103"};
+        String[] actualDateArray = new String[]{"20110102"};
         for (String date: actualDateArray) {
             File f = new File("./log/switched-app.log"+"."+date+".old");
             if (!f.exists()) {

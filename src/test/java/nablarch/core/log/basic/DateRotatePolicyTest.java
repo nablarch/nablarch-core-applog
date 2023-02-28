@@ -72,7 +72,7 @@ public class DateRotatePolicyTest {
         settings.put("appFile.dateType", "system");
 
         DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         DateRotatePolicy.DateType actualDateType = Deencapsulation.getField(policy, "dateType");
 
@@ -83,7 +83,7 @@ public class DateRotatePolicyTest {
         settings.put("appFile.filePath", "./log/app.log");
 
         policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         actualDateType = Deencapsulation.getField(policy, "dateType");
 
@@ -95,7 +95,7 @@ public class DateRotatePolicyTest {
         settings.put("appFile.dateType", "business");
 
         policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         actualDateType = Deencapsulation.getField(policy, "dateType");
 
@@ -110,7 +110,7 @@ public class DateRotatePolicyTest {
         settings.put("appFile.dateType", "Invalid");
 
         DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
     }
 
     /** filePathが正しく設定されていること */
@@ -122,7 +122,7 @@ public class DateRotatePolicyTest {
         settings.put("appFile.dateType", "system");
 
         DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         // filePath
         String actualFilepath = Deencapsulation.getField(policy, "filePath");
@@ -149,7 +149,7 @@ public class DateRotatePolicyTest {
         settings.put("appFile.dateType", "system");
 
         DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         Date actualNextUpdateDate = Deencapsulation.getField(policy, "nextUpdateDate");
 
@@ -181,7 +181,7 @@ public class DateRotatePolicyTest {
         settings.put("appFile.dateType", "system");
 
         DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         try {
             Method method = DateRotatePolicy.class.getDeclaredMethod("getCurrentDate");
@@ -207,7 +207,7 @@ public class DateRotatePolicyTest {
         settings.put("appFile.dateType", "business");
 
         policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         try {
             Method method = DateRotatePolicy.class.getDeclaredMethod("getCurrentDate");
@@ -238,7 +238,7 @@ public class DateRotatePolicyTest {
         settings.put("appFile.dateType", "system");
 
         DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         //現在時刻<次回更新日
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
@@ -249,7 +249,7 @@ public class DateRotatePolicyTest {
             fail();
         }
         Deencapsulation.setField(policy, "nextUpdateDate", nextUpdateDate);
-        boolean actual = policy.needsRotate("abcdeabcde");
+        boolean actual = policy.needsRotate("abcdeabcde",charset);
 
         assertThat(actual, is(false));
 
@@ -260,25 +260,28 @@ public class DateRotatePolicyTest {
             fail();
         }
         Deencapsulation.setField(policy, "nextUpdateDate", nextUpdateDate);
-        actual = policy.needsRotate("abcdeabcde");
+        actual = policy.needsRotate("abcdeabcde",charset);
 
         assertThat(actual, is(true));
     }
 
-    /** 正しくリネーム先のファイルパスが決定できること
-     *  正しくnextUpdateDateが計算できること*/
+    /** 正しくリネーム先のファイルパスが決定できること */
     @Test
     public void testDecideRotatedFilePath() {
         File f = new File("./log/app.log");
         if (f.exists()) {
             f.delete();
         }
+        File rotatedFile = new File("./log/app.log.20161230.old");
+        if (rotatedFile.exists()) {
+            rotatedFile.delete();
+        }
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", "./log/app.log");
         settings.put("appFile.dateType", "system");
 
         DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         // ファイルパスの確認
         Date nextUpdateDate = null;
@@ -293,20 +296,47 @@ public class DateRotatePolicyTest {
         String actual = policy.decideRotatedFilePath();
 
         assertThat(actual, is("./log/app.log.20161230.old"));
+    }
 
-        // nextUpdateDateの確認
-        Date actualNextUpdateDate = Deencapsulation.getField(policy, "nextUpdateDate");
-        Date expectedNextUpdateDate = null;
+    /** リネーム先のファイルが既に存在する場合に、正しくリネーム先のファイルパスが決定できること */
+    @Test
+    public void testDecideDupRotatedFilePath() {
+        File f = new File("./log/app.log");
+        if (f.exists()) {
+            f.delete();
+        }
+        File dupf = new File("./log/app.log.20161230.old");
+        if (!dupf.exists()) {
+            try {
+                dupf.createNewFile();
+            } catch (IOException e) {
+                fail();
+            }
+        }
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", "./log/app.log");
+        settings.put("appFile.dateType", "system");
+
+        DateRotatePolicy policy = new DateRotatePolicy();
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        // ファイルパスの確認
+        Date nextUpdateDate = null;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         try {
-            expectedNextUpdateDate = sdf.parse("20170101000000000");
+            nextUpdateDate = sdf.parse("20161231000000000");
         } catch (ParseException e) {
             fail();
         }
+        Deencapsulation.setField(policy, "nextUpdateDate", nextUpdateDate);
 
-        assertThat(actualNextUpdateDate, is(expectedNextUpdateDate));
+        String actual = policy.decideRotatedFilePath();
+
+        assertThat(actual, is("./log/app.log.20161231235959999.old"));
     }
 
-    /** 正しくファイルがリネームされること */
+    /** 正しくファイルがリネームされること
+     * 正しくnextUpdateDateが計算できること */
     @Test
     public void testRotate() {
         Map<String, String> settings = new HashMap<String, String>();
@@ -314,7 +344,7 @@ public class DateRotatePolicyTest {
         settings.put("appFile.dateType", "system");
 
         DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         File f = new File("./log/testDateRotate-app.log");
         if (f.exists()) {
@@ -336,6 +366,18 @@ public class DateRotatePolicyTest {
         if (!expected.exists()) {
             fail();
         }
+
+        // nextUpdateDateの確認
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+        Date actualNextUpdateDate = Deencapsulation.getField(policy, "nextUpdateDate");
+        Date expectedNextUpdateDate = null;
+        try {
+            expectedNextUpdateDate = sdf.parse("20170101000000000");
+        } catch (ParseException e) {
+            fail();
+        }
+
+        assertThat(actualNextUpdateDate, is(expectedNextUpdateDate));
     }
 
     /** ファイルがリネームできない場合に、IllegalStateExceptionが発生すること */
@@ -346,7 +388,7 @@ public class DateRotatePolicyTest {
         settings.put("appFile.dateType", "system");
 
         DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         File f = new File("./log/testInvalidDateRotate-app.log");
         if (f.exists()) {
@@ -361,44 +403,6 @@ public class DateRotatePolicyTest {
         policy.rotate("./log/testInvalidDateRotate-app.log.old");
     }
 
-    /** リネーム先のファイルが既に存在する場合に、正しくファイルがリネームされること */
-    @Test
-    public void testDuplicationRotate() {
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/testDuplicationRotate-app.log");
-        settings.put("appFile.dateType", "system");
-
-        DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
-
-        File f = new File("./log/testDuplicationRotate-app.log");
-        if (f.exists()) {
-            f.delete();
-        }
-        File dupf = new File("./log/testDuplicationRotate-app.log.old");
-        if (dupf.exists()) {
-            dupf.delete();
-        }
-
-        File expected = new File("./log/testDuplicationRotate-app.log.20161231235959999.old");
-        if (expected.exists()) {
-            expected.delete();
-        }
-
-        try {
-            f.createNewFile();
-            dupf.createNewFile();
-        } catch (IOException e) {
-            fail();
-        }
-
-        policy.rotate("./log/testDuplicationRotate-app.log.old");
-
-        if (!expected.exists()) {
-            fail();
-        }
-    }
-
     /** 正しく設定情報が取得できること */
     @Test
     public void testGetSetting() {
@@ -408,7 +412,7 @@ public class DateRotatePolicyTest {
         settings.put("appFile.dateType", "system");
 
         DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         Date nextUpdateDate = null;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
@@ -421,26 +425,22 @@ public class DateRotatePolicyTest {
 
         String actual = policy.getSettings();
 
-        String expected = "\tFILE AUTO CHANGE   = [" + true + "]" + Logger.LS;
+        String expected = "\tDATE TYPE          = [" + "SYSTEM" + "]" + Logger.LS;
 
         assertThat(actual, is(expected));
     }
 
     /** 正しくnextUpdateDateが計算されること */
     @Test
-    public void testSetupIfNeeded() {
-        File f = new File("./log/app.log");
-        if (f.exists()) {
-            f.delete();
-        }
-
+    public void testSetUpAfterSystemRepositoryInitialized() {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", "./log/app.log");
         settings.put("appFile.encoding", "utf-8");
         settings.put("appFile.dateType", "system");
 
         DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"),charset);
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+        Deencapsulation.setField(policy, "nextUpdateDate", null);
 
         policy.setupAfterSystemRepositoryInitialized();
         Date actualNextUpdateDate = Deencapsulation.getField(policy, "nextUpdateDate");
