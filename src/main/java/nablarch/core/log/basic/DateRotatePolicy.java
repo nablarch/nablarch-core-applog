@@ -60,13 +60,11 @@ public class DateRotatePolicy implements RotatePolicy {
 
         filePath = settings.getRequiredProp("filePath");
 
-        String dt;
-
-        try {
-            dt = settings.getRequiredProp("dateType");
-        } catch (IllegalArgumentException e) {
+        String dt = settings.getProp("dateType");
+        if (dt == null){
             dt = "system";
         }
+
         if (dt.equals("system")) {
             dateType = DateType.SYSTEM;
         } else if (dt.equals("business")) {
