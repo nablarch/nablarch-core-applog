@@ -27,9 +27,9 @@ import static org.junit.Assert.fail;
  */
 public class FileSizeRotatePolicyTest {
 
-    /** 最大ファイルサイズとファイルパスが正しく設定されていること */
+    /** 最大ファイルサイズが正しく設定されていること */
     @Test
-    public void testInitialize() {
+    public void testMaxFileSize() {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", "./log/app.log");
         // 単位はKB
@@ -39,11 +39,9 @@ public class FileSizeRotatePolicyTest {
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         long actualMaxFileSize = Deencapsulation.getField(policy, "maxFileSize");
-        String actualFilepath = Deencapsulation.getField(policy, "filePath");
 
         // インスタンス変数にはバイトで保存されているため変換
         assertThat(actualMaxFileSize, is(10L * 1000L));
-        assertThat(actualFilepath, is("./log/app.log"));
     }
 
     /** 最大ファイルサイズに不正な値を指定した際にmaxFileSizeに0が設定されていること */
@@ -59,6 +57,20 @@ public class FileSizeRotatePolicyTest {
         long actualMaxFileSize = Deencapsulation.getField(policy, "maxFileSize");
 
         assertThat(actualMaxFileSize, is(0L));
+    }
+
+    /** ファイルパスが正しく設定されていること */
+    @Test
+    public void testFilePath() {
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", "./log/app.log");
+
+        FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        String actualFilepath = Deencapsulation.getField(policy, "filePath");
+
+        assertThat(actualFilepath, is("./log/app.log"));
     }
 
     /** 正しくファイルがリネームされること */
@@ -114,24 +126,48 @@ public class FileSizeRotatePolicyTest {
         policy.rotate("./log/testInvalidFileSizeRotate-app.log.old");
     }
 
-    /** 正しくrotateが必要かどうか判定を行えること */
+    /** 正しくrotateが必要かどうか判定を行えること
+     *  maxFileSizeが0バイトのためfalseを返す */
     @Test
-    public void testNeedsRotate() {
+    public void testNeedsRotateMaxFileSizeZero() {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", "./log/app.log");
+        settings.put("appFile.maxFileSize", "0");
 
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         // maxFileSizeが0バイトのためfalseを返す
-        Deencapsulation.setField(policy, "maxFileSize", 0L);
         assertThat(policy.needsRotate("abcde", Charset.forName(System.getProperty("file.encoding"))), is(false));
+   }
+
+    /** 正しくrotateが必要かどうか判定を行えること
+     *  maxFileSizeが20バイトだが、currentFileSizeが10バイトでmsgLengthが5バイトのためrotate不要 */
+    @Test
+    public void testNeedsRotateIfNotNeeded() {
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", "./log/app.log");
+        settings.put("appFile.maxFileSize", "20");
+
+        FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         // maxFileSizeが20バイトだが、currentFileSizeが10バイトでmsgLengthが5バイトのためrotate不要
         // 20 > 10+5 のためfalseを返す
         Deencapsulation.setField(policy, "maxFileSize", 20L);
         Deencapsulation.setField(policy, "currentFileSize", 10L);
         assertThat(policy.needsRotate("abcde", Charset.forName(System.getProperty("file.encoding"))), is(false));
+    }
+
+    /** 正しくrotateが必要かどうか判定を行えること
+     *  maxFileSizeが20バイトだが、currentFileSizeが15バイトでmsgLengthが10バイト */
+    @Test
+    public void testNeedsRotateIfNeeded() {
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", "./log/app.log");
+
+        FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         // maxFileSizeが20バイトだが、currentFileSizeが15バイトでmsgLengthが10バイト
         // 20 < 15+10 のためtrueを返す
