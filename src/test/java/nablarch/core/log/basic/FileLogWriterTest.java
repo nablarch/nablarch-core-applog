@@ -415,7 +415,7 @@ public class FileLogWriterTest extends LogTestSupport {
         StringBuilder sb = new StringBuilder(50 * 1000);
         File dir = appFile.getParentFile();
 
-        String[] actualDateArray = new String[]{"20110101"};
+        String[] actualDateArray = new String[]{"20110101","20110102"};
         for (String date: actualDateArray) {
             File f = new File("./log/switched-app.log"+"."+date+".old");
             if (!f.exists()) {

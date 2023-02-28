@@ -130,7 +130,7 @@ public class DateRotatePolicy implements RotatePolicy {
 
         Date currentDate = getCurrentDate();
 
-        return currentDate.after(nextUpdateDate);
+        return currentDate.after(nextUpdateDate) || currentDate.equals(nextUpdateDate);
     }
 
     /**
