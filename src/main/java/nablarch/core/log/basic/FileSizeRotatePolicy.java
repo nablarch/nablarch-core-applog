@@ -76,10 +76,8 @@ public class FileSizeRotatePolicy implements RotatePolicy {
 
     /**
      * {@inheritDoc}<br>
-     * ファイルの最大サイズが指定されている場合は、現在のファイルサイズにメッセージ長を加えた値が、
-     * ファイルの最大サイズ以上になる場合は、ローテーションが必要と判定する。<br>
-     * ローテーションが必要場合は、併せてローテーション実施時のリネーム先のファイルパスを更新する。<br>
-     * ファイルの最大サイズが指定されていない場合は、ローテーションをしない。
+     * 設定したファイルの最大サイズを超える場合にtrueを返す。
+     * ファイルの最大サイズが指定されていない場合はfalseを返す。
      */
     @Override
     public boolean needsRotate(String message) {
