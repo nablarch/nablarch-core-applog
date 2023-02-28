@@ -42,6 +42,7 @@ public class DateRotatePolicyTest {
             setDefaultSegment("00");
             setFixedDate(new HashMap<String, String>() {{
                 put("00", "20110101");
+                put("000", "20110102");
             }});
         }};
 
@@ -130,6 +131,23 @@ public class DateRotatePolicyTest {
         assertThat(actualFilepath, is("./log/app.log"));
     }
 
+    /** segmentが正しく設定されていること */
+    @Test
+    public void testSegmentInitialize() {
+        // dateTypeがSystemの場合
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", "./log/app.log");
+        settings.put("appFile.dateType", "system");
+        settings.put("appFile.segment", "000");
+
+        DateRotatePolicy policy = new DateRotatePolicy();
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        // filePath
+        String actualSegment = Deencapsulation.getField(policy, "segment");
+        assertThat(actualSegment, is("000"));
+    }
+
     /** パスにファイルが存在かつシステム日付の場合、次回更新時刻をファイルの作成時刻から
      *  nextUpdateDateが正しく計算されていること */
     @Test
@@ -174,7 +192,7 @@ public class DateRotatePolicyTest {
 
     /** 現在時刻<次回更新日の場合に、正しくrotateが必要かどうか判定を行えること */
     @Test
-    public void testNeedsRotateIfNeeded() {
+    public void testNeedsRotateIfNoNeeded() {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", "./log/app.log");
         settings.put("appFile.dateType", "system");
@@ -198,7 +216,7 @@ public class DateRotatePolicyTest {
 
     /** 業務日付の場合、現在時刻<次回更新日の場合に、正しくrotateが必要かどうか判定を行えること */
     @Test
-    public void testBusinessNeedsRotateIfNeeded() {
+    public void testBusinessNeedsRotateIfNotNeeded() {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", "./log/app.log");
         settings.put("appFile.dateType", "business");
@@ -220,9 +238,34 @@ public class DateRotatePolicyTest {
         assertThat(actual, is(false));
     }
 
+    /** 業務日付でセグメントが指定されている場合、現在日付 = 次回更新日の場合に、正しくrotateが必要かどうか判定を行えること */
+    @Test
+    public void testBusinessSegmentNeedsRotateIfNeeded() {
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", "./log/app.log");
+        settings.put("appFile.dateType", "business");
+        settings.put("appFile.segment", "000");
+
+        DateRotatePolicy policy = new DateRotatePolicy();
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        //現在時刻<次回更新日
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+        Date nextUpdateDate = null;
+        try {
+            nextUpdateDate = sdf.parse("20110102000000000");
+        } catch (ParseException e) {
+            fail();
+        }
+        Deencapsulation.setField(policy, "nextUpdateDate", nextUpdateDate);
+        boolean actual = policy.needsRotate("abcdeabcde",Charset.forName(System.getProperty("file.encoding")));
+
+        assertThat(actual, is(true));
+    }
+
     /** 現在時刻>次回更新日の場合に、正しくrotateが必要かどうか判定を行えること */
     @Test
-    public void testNeedsRotateIfNotNeeded() {
+    public void testNeedsRotateIfNeeded() {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", "./log/app.log");
         settings.put("appFile.dateType", "system");

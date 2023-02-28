@@ -16,14 +16,17 @@ import java.util.Date;
  * 日次によるログのローテーションを行うクラス。<br>
  * <br>
  * プロパティファイルの記述ルールを下記に示す。<br>
+ * 下記プロパティは、rotatePolicyに{@link DateRotatePolicy}が設定されている場合に有効である。
  * <dl>
  *
  * <dt>dateType</dt>
  * <dd>日付タイプ。オプション。<br>
  *     日付ごとのローテーション判定に必要な日付の種類を指定する。<br>
  *     システム日付を使用する場合はsystem、業務日付を使用する場合はbusinessを指定する。<br>
- *     デフォルトはsystem。<br>
- *     このオプションは、rotatePolicyに{@link DateRotatePolicy}が設定されている場合に有効である。</dd>
+ *     デフォルトはsystem。</dd>
+ * <dt>segment</dt>
+ * <dd>業務日付を取得する場合に使用される区分。オプション。<br>
+ *     設定されていない場合は、defaultSegmentを使用して業務日付を取得する。</dd>
  * </dl>
  * @author Kotaro Taki
  */
@@ -40,6 +43,9 @@ public class DateRotatePolicy implements RotatePolicy {
 
     /** 日付タイプ */
     private DateType dateType;
+
+    /** セグメント */
+    private String segment;
 
     /** 日付タイプ列挙型 */
     enum DateType {
@@ -81,6 +87,8 @@ public class DateRotatePolicy implements RotatePolicy {
             Date currentDate = new Date(file.lastModified());
             nextUpdateDate = calcNextUpdateDate(currentDate);
         }
+
+        segment = settings.getProp("segment");
     }
 
     /**
@@ -91,7 +99,13 @@ public class DateRotatePolicy implements RotatePolicy {
         if (dateType == DateType.SYSTEM) {
             return SystemTimeUtil.getDate();
         } else {
-            String currentDateSt = BusinessDateUtil.getDate();
+            String currentDateSt;
+            if (segment == null) {
+                 currentDateSt = BusinessDateUtil.getDate();
+            } else {
+                currentDateSt = BusinessDateUtil.getDate(segment);
+            }
+
             try {
                 return dateFormat.parse(currentDateSt);
             } catch (ParseException e) {
