@@ -44,15 +44,11 @@ public class FileSizeRotatePolicy implements RotatePolicy {
     /** 古いログファイル名に使用する日時フォーマット */
     private final DateFormat oldFileDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
-    /** 書き込み時に使用する文字エンコーディング */
-    private Charset charset;
-
     /**
      * {@inheritDoc}
      */
     @Override
     public void initialize(ObjectSettings settings) {
-        this.charset = charset;
         filePath = settings.getRequiredProp("filePath");
 
         try {
