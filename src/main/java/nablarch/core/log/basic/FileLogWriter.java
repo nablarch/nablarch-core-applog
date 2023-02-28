@@ -117,6 +117,7 @@ public class FileLogWriter extends LogWriterSupport {
      * FILE PATH          = [&lt;書き込み先のファイルパス&gt;]<br>
      * ENCODING           = [&lt;書き込み時に使用する文字エンコーディング&gt;]<br>
      * OUTPUT BUFFER SIZE = [&lt;出力バッファのサイズ&gt;]<br>
+     * ROTATEPOLICY CLASS = [&lt;ファイルローテーション実行クラス&gt;]<br>
      * <br>
      * 追加で{@link RotatePolicy#getSettings()}によって得られた設定情報が出力される。<br>
      * @return 設定情報
@@ -128,6 +129,7 @@ public class FileLogWriter extends LogWriterSupport {
                 .append("\tFILE PATH          = [").append(filePath).append("]").append(Logger.LS)
                 .append("\tENCODING           = [").append(charset.displayName()).append("]").append(Logger.LS)
                 .append("\tOUTPUT BUFFER SIZE = [").append(outputBufferSize).append("]").append(Logger.LS)
+                .append("\tROTATEPOLICY CLASS = [").append(rotatePolicy.getClass().getSimpleName()).append("]").append(Logger.LS)
                 .append(rotatePolicy.getSettings())
                 .toString();
     }

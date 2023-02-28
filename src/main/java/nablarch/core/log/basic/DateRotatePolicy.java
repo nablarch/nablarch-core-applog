@@ -172,14 +172,14 @@ public class DateRotatePolicy implements RotatePolicy {
      * {@inheritDoc}<br>
      * 設定情報のフォーマットを下記に示す。<br>
      * <br>
-     * FILE AUTO CHANGE   = [&lt;ログファイルを自動で切り替えるか否か。&gt;]<br>
+     * DATE TYPE          = [&lt;日付タイプ。&gt;]<br>
      *
      * @return 設定情報
      * @see FileLogWriter#getSettings()
      */
     @Override
     public String getSettings() {
-        return "\tFILE AUTO CHANGE   = [" + true + "]" + Logger.LS;
+        return "\tDATE TYPE          = [" + dateType + "]" + Logger.LS;
     }
 
     /**
