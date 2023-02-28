@@ -13,10 +13,18 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * 日時によるログのローテーションを行うクラス。<br>
- * 日付ごとのローテーション判定に必要な日付を、dateTypeにsystemと設定されていればシステム日次から、
- * businessと設定されている場合は業務日付から取得する。
- * ログ書き込み時に、日付が変わっている場合ログのローテーションを行う。
+ * 日次によるログのローテーションを行うクラス。<br>
+ * <br>
+ * プロパティファイルの記述ルールを下記に示す。<br>
+ * <dl>
+ *
+ * <dt>dateType</dt>
+ * <dd>日付タイプ。オプション。<br>
+ *     日付ごとのローテーション判定に必要な日付の種類を指定する。<br>
+ *     システム日付を使用する場合はsystem、業務日付を使用する場合はbusinessを指定する。<br>
+ *     デフォルトはsystem。<br>
+ *     このオプションは、rotatePolicyに{@link DateRotatePolicy}が設定されている場合に有効である。</dd>
+ * </dl>
  * @author Kotaro Taki
  */
 public class DateRotatePolicy implements RotatePolicy {

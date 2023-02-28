@@ -13,7 +13,18 @@ import java.util.Date;
  * ファイルサイズによるログのローテーションを行うクラス。<br>
  * ファイルの最大サイズが指定されている場合は、現在のファイルサイズにメッセージ長を加えた値が、
  * ファイルの最大サイズ以上になる場合は、ログのローテーションを行う。<br>
- * ファイルの最大サイズが指定されていない場合は、ローテーションをしない。
+ * <br>
+ * プロパティファイルの記述ルールを下記に示す。<br>
+ * <dl>
+ *
+ * <dt>maxFileSize</dt>
+ * <dd>書き込み先ファイルの最大サイズ。オプション。<br>
+ *     単位はキロバイト。1000バイトを1キロバイトと換算する。指定しなければ自動切替なし。<br>
+ *     指定値が解析可能な整数値(Long.parseLong)でない場合は自動切替なし。<br>
+ *     指定値が０以下の場合は自動切替なし。<br>
+ *     古いログファイル名は、<通常のファイル名>.yyyyMMddHHmmssSSS.old。<br>
+ *     このオプションは、rotatePolicyに{@link FileSizeRotatePolicy}が設定されているか、何も設定されていない場合に有効である。</dd>
+ * </dl>
  * @author Kotaro Taki
  */
 public class FileSizeRotatePolicy implements RotatePolicy {

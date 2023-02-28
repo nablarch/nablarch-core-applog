@@ -41,22 +41,8 @@ import nablarch.core.util.ObjectUtil;
  * <dt>rotatePolicy</dt>
  * <dd>ファイルローテーション実行クラス。オプション。<br>
  *     {@link RotatePolicy}が実装されたクラスを指定する。<br>
- *     デフォルト値は{@link FileSizeRotatePolicy}</dd>
- *
- * <dt>maxFileSize</dt>
- * <dd>書き込み先ファイルの最大サイズ。オプション。<br>
- *     単位はキロバイト。1000バイトを1キロバイトと換算する。指定しなければ自動切替なし。<br>
- *     指定値が解析可能な整数値(Long.parseLong)でない場合は自動切替なし。<br>
- *     指定値が０以下の場合は自動切替なし。<br>
- *     古いログファイル名は、<通常のファイル名>.yyyyMMddHHmmssSSS.old。<br>
- *     このオプションは、rotatePolicyに{@link FileSizeRotatePolicy}が設定されているか、何も設定されていない場合に有効である。</dd>
- *
- * <dt>dateType</dt>
- * <dd>日付タイプ。オプション。<br>
- *     日付ごとのローテーション判定に必要な日付の種類を指定する。<br>
- *     システム日時を使用する場合はsystem、業務日付を使用する場合はbusinessを指定する。<br>
- *     デフォルトはsystem。<br>
- *     このオプションは、rotatePolicyに{@link DateRotatePolicy}が設定されている場合に有効である。</dd>
+ *     デフォルト値は{@link FileSizeRotatePolicy}<br>
+ *     利用するローテーション実行クラス毎に、追加でプロパティの設定が必要となる。</dd>
  * </dl>
  * 本クラスでは、初期処理と終了処理、ログファイルの切り替え時に、書き込み先のログファイルにINFOレベルでメッセージを出力する。
  *
