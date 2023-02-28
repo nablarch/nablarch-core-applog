@@ -121,18 +121,6 @@ public class DateRotatePolicy implements RotatePolicy {
     }
 
     /**
-     * リネーム先のファイル名を決定するための、日付を計算する。
-     * @param nextUpdateDate 次回ローテション日
-     * @return リネーム先のファイル名を決定するために使用するCalendarオブジェクト
-     */
-    private Calendar calcRotatedFilePath(Date nextUpdateDate) {
-        Calendar cl = Calendar.getInstance();
-        cl.setTime(nextUpdateDate);
-        cl.add(Calendar.DATE, -1);
-        return cl;
-    }
-
-    /**
      * {@inheritDoc}<br>
      * 現在時刻 > インスタンス変数として保持している次回ローテション日の場合、ローテーションが必要と判定する。<br>
      * それ以外の場合は、ローテーションが不要と判定する。
@@ -151,7 +139,9 @@ public class DateRotatePolicy implements RotatePolicy {
      */
     @Override
     public String decideRotatedFilePath() {
-        Calendar cl = calcRotatedFilePath(nextUpdateDate);
+        Calendar cl = Calendar.getInstance();
+        cl.setTime(nextUpdateDate);
+        cl.add(Calendar.DATE, -1);
         Date newFileDate = cl.getTime();
         String rotatedFilePath = filePath + "." + dateFormat.format(newFileDate) + ".old";
 
