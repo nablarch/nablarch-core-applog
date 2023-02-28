@@ -145,6 +145,11 @@ public class DateRotatePolicy implements RotatePolicy {
         Date rotatedFileDate = cl.getTime();
         String rotatedFilePath = filePath + "." + dateFormat.format(rotatedFileDate) + ".old";
 
+        File f = new File(rotatedFilePath);
+        if (f.exists()) {
+            rotatedFilePath = filePath + "." + dupFileDateFormat.format(getCurrentDate()) + ".old";
+        }
+
         Date currentDate = getCurrentDate();
         nextUpdateDate = calcNextUpdateDate(currentDate);
 
@@ -157,11 +162,6 @@ public class DateRotatePolicy implements RotatePolicy {
      */
     @Override
     public void rotate(String rotatedFilePath) {
-        File f = new File(rotatedFilePath);
-        if (f.exists()) {
-            rotatedFilePath = filePath + "." + dupFileDateFormat.format(getCurrentDate()) + ".old";
-        }
-
         if (!new File(filePath).renameTo(new File(rotatedFilePath))) {
             throw new IllegalStateException(
                     "renaming failed. File#renameTo returns false. src file = [" + filePath + "], dest file = [" + rotatedFilePath + "]");
