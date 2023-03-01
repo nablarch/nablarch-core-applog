@@ -138,18 +138,14 @@ public class DateRotatePolicyTest {
 
     /** パスにファイルが存在する場合、次回更新時刻がファイルの更新時刻から正しく計算されていること */
     @Test
-    public void testNextUpdateDateIfFileExistsInInitialize() {
+    public void testNextUpdateDateIfFileExistsInInitialize() throws IOException {
         Calendar cl = Calendar.getInstance();
         cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
         dateTimeMock = new DateTimeMock(cl.getTime());
 
         String path = "./log/testNextUpdateDateIfFileExistsInInitialize-app.log";
         File f = new File(path);
-        try {
-            f.createNewFile();
-        } catch (IOException e) {
-            fail();
-        }
+        f.createNewFile();
 
         // ファイル更新時刻の設定
         Date date = new Date();
@@ -279,7 +275,7 @@ public class DateRotatePolicyTest {
 
     /** 正しくファイルがリネームされること */
     @Test
-    public void testRotate() {
+    public void testRotate() throws IOException {
         Calendar cl = Calendar.getInstance();
         cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
         dateTimeMock = new DateTimeMock(cl.getTime());
@@ -292,14 +288,7 @@ public class DateRotatePolicyTest {
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         File f = new File(path);
-        if (f.exists()) {
-            f.delete();
-        }
-        try {
-            f.createNewFile();
-        } catch (IOException e) {
-            fail();
-        }
+        f.createNewFile();
 
         String expectedPath = "./log/testDateRotate-app.log.old";
         File expectedFile = new File(expectedPath);
@@ -316,7 +305,7 @@ public class DateRotatePolicyTest {
 
     /** ローテーション時に、正しくnextUpdateDateが更新できること */
     @Test
-    public void testNextUpdateDateInRotate() {
+    public void testNextUpdateDateInRotate() throws IOException {
         Calendar cl = Calendar.getInstance();
         cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
         dateTimeMock = new DateTimeMock(cl.getTime());
@@ -332,12 +321,7 @@ public class DateRotatePolicyTest {
         if (f.exists()) {
             f.delete();
         }
-
-        try {
-            f.createNewFile();
-        } catch (IOException e) {
-            fail();
-        }
+        f.createNewFile();
 
         String expectedPath = "./log/testDateRotate-app.log.old";
         File expectedFile = new File(expectedPath);
@@ -385,12 +369,18 @@ public class DateRotatePolicyTest {
     /** 正しく設定情報が取得できること */
     @Test
     public void testGetSetting() {
+        String path = "./log/app.log";
+        File f = new File(path);
+        if (f.exists()) {
+            f.delete();
+        }
+
         Calendar cl = Calendar.getInstance();
         cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
         dateTimeMock = new DateTimeMock(cl.getTime());
 
         Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/app.log");
+        settings.put("appFile.filePath", path);
         settings.put("appFile.encoding", "utf-8");
         settings.put("appFile.updateTime", "0");
 
