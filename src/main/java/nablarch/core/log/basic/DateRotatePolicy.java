@@ -150,8 +150,8 @@ public class DateRotatePolicy implements RotatePolicy {
     @Override
     public String getSettings() {
         return "\tNEXT CHANGE DATE    = [" + dateFormat.format(nextUpdateDate) + "]" + Logger.LS
-                + "\tCURRENT DATE     = [" + dateFormat.format(new Date()) + "]" + Logger.LS
-                + "\tUPDATE TIME      = [" + updateTime + "]" + Logger.LS;
+                + "\tCURRENT DATE        = [" + dateFormat.format(new Date()) + "]" + Logger.LS
+                + "\tUPDATE TIME         = [" + updateTime + "]" + Logger.LS;
     }
 
     /**
