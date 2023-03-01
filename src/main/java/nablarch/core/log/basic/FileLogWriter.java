@@ -126,10 +126,10 @@ public class FileLogWriter extends LogWriterSupport {
     protected String getSettings() {
         return new StringBuilder(512)
                 .append(super.getSettings())
-                .append("\tFILE PATH          = [").append(filePath).append("]").append(Logger.LS)
-                .append("\tENCODING           = [").append(charset.displayName()).append("]").append(Logger.LS)
-                .append("\tOUTPUT BUFFER SIZE = [").append(outputBufferSize).append("]").append(Logger.LS)
-                .append("\tROTATEPOLICY CLASS = [").append(rotatePolicy.getClass().getName()).append("]").append(Logger.LS)
+                .append("\tFILE PATH           = [").append(filePath).append("]").append(Logger.LS)
+                .append("\tENCODING            = [").append(charset.displayName()).append("]").append(Logger.LS)
+                .append("\tOUTPUT BUFFER SIZE  = [").append(outputBufferSize).append("]").append(Logger.LS)
+                .append("\tROTATE POLICY CLASS  = [").append(rotatePolicy.getClass().getName()).append("]").append(Logger.LS)
                 .append(rotatePolicy.getSettings())
                 .toString();
     }

@@ -154,10 +154,10 @@ public abstract class LogWriterSupport implements LogWriter {
      */
     protected String getSettings() {
         return new StringBuilder(256)
-                    .append("\tWRITER NAME        = [").append(getName()).append("]").append(Logger.LS)
-                    .append("\tWRITER CLASS       = [").append(getClass().getName()).append("]").append(Logger.LS)
-                    .append("\tFORMATTER CLASS    = [").append(formatter.getClass().getName()).append("]").append(Logger.LS)
-                    .append("\tLEVEL              = [").append(baseLevel == null ? null : baseLevel.name()).append("]").append(Logger.LS)
+                    .append("\tWRITER NAME         = [").append(getName()).append("]").append(Logger.LS)
+                    .append("\tWRITER CLASS        = [").append(getClass().getName()).append("]").append(Logger.LS)
+                    .append("\tFORMATTER CLASS     = [").append(formatter.getClass().getName()).append("]").append(Logger.LS)
+                    .append("\tLEVEL               = [").append(baseLevel == null ? null : baseLevel.name()).append("]").append(Logger.LS)
                     .toString();
     }
 

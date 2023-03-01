@@ -123,8 +123,8 @@ public class FileSizeRotatePolicy implements RotatePolicy {
      */
     @Override
     public String getSettings() {
-        return "\tFILE AUTO CHANGE   = [" + (maxFileSize > 0) + "]" + Logger.LS
-                + "\tMAX FILE SIZE      = [" + maxFileSize + "]" + Logger.LS
-                + "\tCURRENT FILE SIZE  = [" + currentFileSize + "]" + Logger.LS;
+        return "\tFILE AUTO CHANGE    = [" + (maxFileSize > 0) + "]" + Logger.LS
+                + "\tMAX FILE SIZE       = [" + maxFileSize + "]" + Logger.LS
+                + "\tCURRENT FILE SIZE   = [" + currentFileSize + "]" + Logger.LS;
     }
 }

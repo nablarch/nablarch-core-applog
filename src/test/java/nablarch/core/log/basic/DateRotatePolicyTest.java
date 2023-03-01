@@ -327,9 +327,9 @@ public class DateRotatePolicyTest {
 
         String actual = policy.getSettings();
 
-        String expected = "\tNEXT CHANGE DATE   = [201801020000]" + Logger.LS
-                + "\tCURRENT DATE    = [201801011010]" + Logger.LS
-                + "\tUPDATE TIME     = [0]" + Logger.LS;
+        String expected = "\tNEXT CHANGE DATE    = [201801020000]" + Logger.LS
+                + "\tCURRENT DATE     = [201801011010]" + Logger.LS
+                + "\tUPDATE TIME      = [0]" + Logger.LS;
         ;
 
         assertThat(actual, is(expected));

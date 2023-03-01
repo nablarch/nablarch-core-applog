@@ -118,20 +118,20 @@ public class FileLogWriterTest extends LogTestSupport {
 
         String appLog = LogTestUtil.getLog(appFile);
         assertTrue(appLog.contains("initialized."));
-        assertTrue(appLog.contains("WRITER NAME        = [appFile]"));
+        assertTrue(appLog.contains("WRITER NAME         = [appFile]"));
         assertTrue(appLog.contains(
-                "WRITER CLASS       = [nablarch.core.log.basic.FileLogWriter]"));
+                "WRITER CLASS        = [nablarch.core.log.basic.FileLogWriter]"));
         assertTrue(appLog.contains(
-                "FORMATTER CLASS    = [" + MockLogFormatter.class.getName()
+                "FORMATTER CLASS     = [" + MockLogFormatter.class.getName()
                         + "]"));
-        assertTrue(appLog.contains("LEVEL              = [INFO]"));
+        assertTrue(appLog.contains("LEVEL               = [INFO]"));
         assertTrue(appLog.contains(
-                "FILE PATH          = [./log/initialized-message-app.log]"));
-        assertTrue(appLog.contains("ENCODING           = [UTF-8]"));
-        assertTrue(appLog.contains("OUTPUT BUFFER SIZE = [10000]"));
-        assertTrue(appLog.contains("FILE AUTO CHANGE   = [true]"));
-        assertTrue(appLog.contains("MAX FILE SIZE      = [50000000]"));
-        assertTrue(appLog.contains("CURRENT FILE SIZE  = [0]"));
+                "FILE PATH           = [./log/initialized-message-app.log]"));
+        assertTrue(appLog.contains("ENCODING            = [UTF-8]"));
+        assertTrue(appLog.contains("OUTPUT BUFFER SIZE  = [10000]"));
+        assertTrue(appLog.contains("FILE AUTO CHANGE    = [true]"));
+        assertTrue(appLog.contains("MAX FILE SIZE       = [50000000]"));
+        assertTrue(appLog.contains("CURRENT FILE SIZE   = [0]"));
         assertTrue(appLog.contains("terminated."));
     }
 
