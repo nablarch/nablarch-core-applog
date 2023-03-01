@@ -318,9 +318,6 @@ public class DateRotatePolicyTest {
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         File f = new File(path);
-        if (f.exists()) {
-            f.delete();
-        }
         f.createNewFile();
 
         String expectedPath = "./log/testDateRotate-app.log.old";
