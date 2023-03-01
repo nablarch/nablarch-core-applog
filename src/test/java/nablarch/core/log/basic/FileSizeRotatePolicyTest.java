@@ -62,43 +62,40 @@ public class FileSizeRotatePolicyTest {
     /** ファイルパスが正しく設定されていること */
     @Test
     public void testFilePath() {
+        String path = "./log/app.log";
         Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/app.log");
+        settings.put("appFile.filePath", path);
 
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         String actualFilepath = Deencapsulation.getField(policy, "filePath");
 
-        assertThat(actualFilepath, is("./log/app.log"));
+        assertThat(actualFilepath, is(path));
     }
 
     /** 正しくファイルがリネームされること */
     @Test
-    public void testRotate() {
+    public void testRotate() throws IOException {
+        String path = "./log/testFileSizeRotate-app.log";
+
         Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/testFileSizeRotate-app.log");
+        settings.put("appFile.filePath", path);
         settings.put("appFile.maxFileSize", "20");
 
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
-        File f = new File("./log/testFileSizeRotate-app.log");
-        if (f.exists()) {
-            f.delete();
-        }
-        File expected = new File("./log/testFileSizeRotate-app.log.old");
+        File f = new File(path);
+        f.createNewFile();
+
+        String expectedPath = "./log/testFileSizeRotate-app.log.old";
+        File expected = new File(expectedPath);
         if (expected.exists()) {
             expected.delete();
         }
 
-        try {
-            f.createNewFile();
-        } catch (IOException e) {
-            fail();
-        }
-
-        policy.rotate("./log/testFileSizeRotate-app.log.old");
+        policy.rotate(expectedPath);
 
         if (!expected.exists()) {
             fail();
@@ -108,26 +105,26 @@ public class FileSizeRotatePolicyTest {
     /** ファイルがリネームできない場合に、IllegalStateExceptionが発生すること */
     @Test(expected = IllegalStateException.class)
     public void testInvalidRotate() {
+        String path = "./log/testInvalidFileSizeRotate-app.log";
+
         Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/testInvalidFileSizeRotate-app.log");
+        settings.put("appFile.filePath", path);
         settings.put("appFile.maxFileSize", "20");
 
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
-        File f = new File("./log/testInvalidFileSizeRotate-app.log");
+        File f = new File(path);
 
         if (f.exists()) {
             f.delete();
         }
-
-        Deencapsulation.setField(policy, "currentFileSize", 15 * 1000L);
 
         //filePathファイルが存在しない状態でリネームさせる
         policy.rotate("./log/testInvalidFileSizeRotate-app.log.old");
     }
 
     /** 正しくrotateが必要かどうか判定を行えること
-     *  maxFileSizeが0バイトのためfalseを返す */
+     *  maxFileSizeが0KBのためfalseを返す */
     @Test
     public void testNeedsRotateMaxFileSizeZero() {
         Map<String, String> settings = new HashMap<String, String>();
@@ -138,79 +135,112 @@ public class FileSizeRotatePolicyTest {
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         // maxFileSizeが0バイトのためfalseを返す
-        assertThat(policy.needsRotate("abcde", Charset.forName(System.getProperty("file.encoding"))), is(false));
-   }
+        assertThat(policy.needsRotate("abcde", Charset.defaultCharset()), is(false));
+    }
+
+    /** 指定したバイト数分のランダムな文字列を生成する */
+    private String getAlphaNumericString(int n) {
+        String alphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                + "0123456789"
+                + "abcdefghijklmnopqrstuvxyz";
+
+        StringBuilder sb = new StringBuilder(n);
+
+        for (int i = 0; i < n; i++) {
+            int index
+                    = (int) (alphaNumericString.length()
+                    * Math.random());
+            sb.append(alphaNumericString
+                    .charAt(index));
+        }
+
+        return sb.toString();
+    }
 
     /** 正しくrotateが必要かどうか判定を行えること
-     *  maxFileSizeが20バイトだが、currentFileSizeが10バイトでmsgLengthが5バイトのためrotate不要 */
+     *  maxFileSizeが20KBだが、currentFileSizeが10KBでmsgLengthが5KBのためrotate不要 */
     @Test
-    public void testNeedsRotateIfNotNeeded() {
+    public void testNeedsRotateIfNotNeeded() throws IOException {
+        String path = "./log/app.log";
         Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/app.log");
+        settings.put("appFile.filePath", path);
         settings.put("appFile.maxFileSize", "20");
 
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
-        // maxFileSizeが20バイトだが、currentFileSizeが10バイトでmsgLengthが5バイトのためrotate不要
-        // 20 > 10+5 のためfalseを返す
-        Deencapsulation.setField(policy, "maxFileSize", 20L);
-        Deencapsulation.setField(policy, "currentFileSize", 10L);
-        assertThat(policy.needsRotate("abcde", Charset.forName(System.getProperty("file.encoding"))), is(false));
+        // currentFileSizeを10KBに設定
+        File f = new File(path);
+        f.createNewFile();
+
+        FileWriter filewriter = new FileWriter(f);
+        String str = getAlphaNumericString(10 * 1000);
+        filewriter.write(str);
+        filewriter.close();
+
+        policy.onOpenFile(f);
+
+        assertThat(policy.needsRotate(getAlphaNumericString(5 * 1000), Charset.defaultCharset()), is(false));
     }
 
     /** 正しくrotateが必要かどうか判定を行えること
      *  maxFileSizeが20バイトだが、currentFileSizeが15バイトでmsgLengthが10バイト */
     @Test
-    public void testNeedsRotateIfNeeded() {
+    public void testNeedsRotateIfNeeded() throws IOException {
+        String path = "./log/app.log";
         Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/app.log");
+        settings.put("appFile.filePath", path);
+        settings.put("appFile.maxFileSize", "20");
 
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
-        // maxFileSizeが20バイトだが、currentFileSizeが15バイトでmsgLengthが10バイト
-        // 20 < 15+10 のためtrueを返す
-        Deencapsulation.setField(policy, "maxFileSize", 20L);
-        Deencapsulation.setField(policy, "currentFileSize", 15L);
-        assertThat(policy.needsRotate("abcdeabcde", Charset.forName(System.getProperty("file.encoding"))), is(true));
+        // currentFileSizeを15KBに設定
+        File f = new File(path);
+        f.createNewFile();
+        FileWriter filewriter = new FileWriter(f);
+        String str = getAlphaNumericString(15 * 1000);
+        filewriter.write(str);
+        filewriter.close();
+
+        policy.onOpenFile(f);
+
+        assertThat(policy.needsRotate(getAlphaNumericString(10 * 1000), Charset.defaultCharset()), is(true));
     }
 
     /** 正しくリネーム先のファイルパスが決定できること */
     @Test
-    public void testDecideRotatedFilePath() {
+    public void testDecideRotatedFilePath() throws ParseException {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
-        Deencapsulation.setField(policy, "filePath", "./log/app.log");
+        String path = "./log/app.log";
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", path);
+        settings.put("appFile.maxFileSize", "20");
+
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
         String actual = policy.decideRotatedFilePath();
 
         assertTrue(actual.startsWith("./log/app.log.") && actual.endsWith(".old"));
 
         DateFormat oldFileDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         String oldDate = actual.split("\\.")[3];
-        try {
-            oldFileDateFormat.parse(oldDate);
-        } catch (ParseException e) {
-            fail();
-        }
+
+        oldFileDateFormat.parse(oldDate);
     }
 
     /** currentFileSizeが正しく設定されていること */
     @Test
-    public void testOnOpenFile() {
+    public void testOnOpenFile() throws IOException {
         File file = new File("./log/app.log");
         if (file.exists()) {
             file.delete();
         }
 
-        try{
-            FileWriter filewriter = new FileWriter(file);
+        FileWriter filewriter = new FileWriter(file);
 
-            filewriter.write("aiueo");
+        filewriter.write("aiueo");
 
-            filewriter.close();
-        }catch(IOException e){
-            fail();
-        }
+        filewriter.close();
 
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.onOpenFile(file);
@@ -222,26 +252,41 @@ public class FileSizeRotatePolicyTest {
 
     /** currentFileSizeが正しく計算されていること */
     @Test
-    public void testOnWrite() {
+    public void testOnWrite() throws IOException {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", "./log/app.log");
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
 
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
-        Deencapsulation.setField(policy, "currentFileSize", 10L);
+
+        File file = new File("./log/app.log");
+        if (file.exists()) {
+            file.delete();
+        }
+
+        FileWriter filewriter = new FileWriter(file);
+
+        filewriter.write("aiueo");
+
+        filewriter.close();
+
+        policy.onOpenFile(file);
+
         // 1バイトを加算する
-        policy.onWrite("a", Charset.forName(System.getProperty("file.encoding")));
+        policy.onWrite("a", Charset.defaultCharset());
 
         long actual = Deencapsulation.getField(policy, "currentFileSize");
 
-        assertThat(actual, is(11L));
+        assertThat(actual, is(6L));
     }
 
     /** 正しく設定情報が取得できること */
     @Test
-    public void testGetSetting() {
+    public void testGetSetting() throws IOException {
+        String path = "./log/app.log";
+
         Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/app.log");
+        settings.put("appFile.filePath", path);
         settings.put("appFile.encoding", "utf-8");
         // 単位はKB
         settings.put("appFile.maxFileSize", "20");
@@ -249,14 +294,25 @@ public class FileSizeRotatePolicyTest {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
-        Deencapsulation.setField(policy, "currentFileSize", 10000L);
+        File file = new File(path);
+        if (file.exists()) {
+            file.delete();
+        }
+
+        FileWriter filewriter = new FileWriter(file);
+
+        filewriter.write("aiueo");
+
+        filewriter.close();
+
+        policy.onOpenFile(file);
 
         String actual = policy.getSettings();
 
         // MAX FILE SIZEはインスタンス変数にはバイトで保存されているため変換
         String expected = "\tFILE AUTO CHANGE   = [" + (20L > 0L) + "]" + Logger.LS
                 + "\tMAX FILE SIZE      = [" + 20000L + "]" + Logger.LS
-                + "\tCURRENT FILE SIZE  = [" + 10000L + "]" + Logger.LS;
+                + "\tCURRENT FILE SIZE  = [" + 5L + "]" + Logger.LS;
         ;
 
         assertThat(actual, is(expected));
