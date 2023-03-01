@@ -1,18 +1,17 @@
 package nablarch.core.log.basic;
 
+import mockit.Mock;
+import mockit.MockUp;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.log.LogTestUtil;
 import nablarch.core.log.MockLogSettings;
-import nablarch.core.repository.ObjectLoader;
-import nablarch.core.repository.SystemRepository;
-import nablarch.test.FixedBusinessDateProvider;
-import nablarch.test.FixedSystemTimeProvider;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -298,41 +297,55 @@ public class FileLogWriterTest extends LogTestSupport {
         assertTrue(appLog.indexOf("[[[515]]]") == -1);
     }
 
-    /** システム日付のローテーションでファイルが自動で切り替わること。*/
+    /**
+     * Dateモック用クラス
+     */
+    private DateRotatePolicyTest.DateTimeMock dateTimeMock;
+
+    public static class DateTimeMock extends MockUp<System> {
+        Date mockTime;
+
+        public DateTimeMock(Date date) {
+            mockTime = date;
+        }
+
+        public void SetCurrentTime(Date mockTime) {
+            this.mockTime = mockTime;
+        }
+
+        @Mock
+        public long currentTimeMillis() {
+            return mockTime.getTime();
+        }
+    }
+
+    /** 日次ローテーションでファイルが自動で切り替わること。*/
     @Test
-    public void testSystemDateSwitched() {
-        final FixedSystemTimeProvider systemTimeProvider = new FixedSystemTimeProvider() {{
-            setFixedDate("20161231235959999");
-        }};
-
-        SystemRepository.load(new ObjectLoader() {
-            @Override
-            public Map<String, Object> load() {
-                Map<String, Object> repos = new HashMap<String, Object>();
-                repos.put("systemTimeProvider", systemTimeProvider);
-                return repos;
-            }
-        });
-
+    public void testDateSwitched() throws ParseException {
         File appFile = LogTestUtil.cleanupLog("/switched-app.log");
+
+        Calendar cl = Calendar.getInstance();
+        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
+        dateTimeMock = new DateRotatePolicyTest.DateTimeMock(cl.getTime());
 
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", "./log/switched-app.log");
         settings.put("appFile.encoding", "UTF-8");
         settings.put("appFile.outputBufferSize", "8");
         settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.DateRotatePolicy");
-        settings.put("appFile.dateType", "system");
 
         FileLogWriter writer = new FileLogWriter();
         writer.initialize(
                 new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
-        String[] dateArray = new String[]{"20170101235959999","20170102235959999","20170103135959999"};
+        String[] dateArray = new String[]{"20180102235059999","20180103115159999","20180104205259999"};
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         for (String date: dateArray) {
             writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + date + "]]]",
                     null));
-            systemTimeProvider.setFixedDate(date);
+            dateTimeMock.SetCurrentTime(sdf.parse(date));
         }
+        writer.write(new LogContext(FQCN, LogLevel.DEBUG, "finished", null));
 
         writer.terminate();
 
@@ -341,7 +354,7 @@ public class FileLogWriterTest extends LogTestSupport {
         File dir = appFile.getParentFile();
         assertTrue(dir.listFiles().length >= 3);
 
-        String[] actualDateArray = new String[]{"20161231","20170101"};
+        String[] actualDateArray = new String[]{"201801010000","201801020000","201801030000"};
         for (String date: actualDateArray) {
             File f = new File("./log/switched-app.log"+"."+date+".old");
             if (!f.exists()) {
@@ -365,272 +378,6 @@ public class FileLogWriterTest extends LogTestSupport {
 
         for (int i = 0; i < dateArray.length; i++) {
             assertTrue(appLog.indexOf("[[[" + dateArray[i] + "]]]") != -1);
-        }
-    }
-
-    /** 業務日付のローテーションでファイルが自動で切り替わること。*/
-    @Test
-    public void testBusinessDateSwitched() {
-        final FixedBusinessDateProvider businessTimeProvider = new FixedBusinessDateProvider() {{
-            setDefaultSegment("00");
-            setFixedDate(new HashMap<String, String>() {{
-                put("00", "20110101");
-            }});
-        }};
-
-        SystemRepository.load(new ObjectLoader() {
-            @Override
-            public Map<String, Object> load() {
-                Map<String, Object> repos = new HashMap<String, Object>();
-                repos.put("businessDateProvider", businessTimeProvider);
-                return repos;
-            }
-        });
-
-        File appFile = LogTestUtil.cleanupLog("/switched-app.log");
-
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/switched-app.log");
-        settings.put("appFile.encoding", "UTF-8");
-        settings.put("appFile.outputBufferSize", "8");
-        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.DateRotatePolicy");
-        settings.put("appFile.dateType", "business");
-
-        FileLogWriter writer = new FileLogWriter();
-        writer.initialize(
-                new ObjectSettings(new MockLogSettings(settings), "appFile"));
-
-        String[] dateArray = new String[]{"20110102","20110103","20110104"};
-        for (final String date: dateArray) {
-            writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + date + "]]]",
-                    null));
-            businessTimeProvider.setFixedDate(new HashMap<String, String>() {{
-                put("00", date);
-            }});
-        }
-
-        writer.terminate();
-
-        // ファイルの存在確認
-        StringBuilder sb = new StringBuilder(50 * 1000);
-        File dir = appFile.getParentFile();
-
-        String[] actualDateArray = new String[]{"20110101","20110102"};
-        for (String date: actualDateArray) {
-            File f = new File("./log/switched-app.log"+"."+date+".old");
-            if (!f.exists()) {
-                fail();
-            }
-        }
-
-        // ファイルの内容確認
-        for (File file : dir.listFiles()) {
-            if (!file.getName().startsWith("switched-")) {
-                continue;
-            }
-            String log = LogTestUtil.getLog(file);
-            assertTrue(log.indexOf(
-                    "] change [./log/switched-app.log] -> [./log/switched-app.log.")
-                    != -1);
-            sb.append(log);
-        }
-
-        String appLog = sb.toString();
-
-        for (int i = 0; i < dateArray.length; i++) {
-            assertTrue(appLog.indexOf("[[[" + dateArray[i] + "]]]") != -1);
-        }
-    }
-
-    /** ログが1日目に書き込まれた翌々日に次のログが書き込まれた場合に、ファイルが自動で切り替わること。*/
-    @Test
-    public void testTwoDaysLaterDatePatternSwitched() {
-        final FixedSystemTimeProvider systemTimeProvider = new FixedSystemTimeProvider() {{
-            setFixedDate("20161231235959999");
-        }};
-
-        SystemRepository.load(new ObjectLoader() {
-            @Override
-            public Map<String, Object> load() {
-                Map<String, Object> repos = new HashMap<String, Object>();
-                repos.put("systemTimeProvider", systemTimeProvider);
-                return repos;
-            }
-        });
-
-        File appFile = LogTestUtil.cleanupLog("/switched-app.log");
-
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/switched-app.log");
-        settings.put("appFile.encoding", "UTF-8");
-        settings.put("appFile.outputBufferSize", "8");
-        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.DateRotatePolicy");
-        settings.put("appFile.dateType", "system");
-
-        FileLogWriter writer = new FileLogWriter();
-        writer.initialize(
-                new ObjectSettings(new MockLogSettings(settings), "appFile"));
-
-        String[] dateArray = new String[]{"20170101235959999","20170103135959999","20170104135959999"};
-        for (String date: dateArray) {
-            writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + date + "]]]",
-                    null));
-            systemTimeProvider.setFixedDate(date);
-        }
-
-        writer.terminate();
-
-        // ファイルの存在確認
-        StringBuilder sb = new StringBuilder(50 * 1000);
-        File dir = appFile.getParentFile();
-        assertTrue(dir.listFiles().length >= 2);
-
-        String[] actualDateArray = new String[]{"20161231","20170101"};
-        for (String date: actualDateArray) {
-            File f = new File("./log/switched-app.log"+"."+date+".old");
-            if (!f.exists()) {
-                fail();
-            }
-        }
-
-        // ファイルの内容確認
-        for (File file : dir.listFiles()) {
-            if (!file.getName().startsWith("switched-")) {
-                continue;
-            }
-            String log = LogTestUtil.getLog(file);
-            assertTrue(log.indexOf(
-                    "] change [./log/switched-app.log] -> [./log/switched-app.log.")
-                    != -1);
-            sb.append(log);
-        }
-
-        String appLog = sb.toString();
-
-        for (int i = 0; i < dateArray.length; i++) {
-            assertTrue(appLog.indexOf("[[[" + dateArray[i] + "]]]") != -1);
-        }
-    }
-
-    /** 一度アプリケーションを終了したあと、その日に再起動する場合にファイルが切り替わらないこと。*/
-    @Test
-    public void testRestartTodayPatterSwitched() {
-        final Date currentDate = new Date();
-        final FixedSystemTimeProvider systemTimeProvider = new FixedSystemTimeProvider() {{
-            setFixedDate(new SimpleDateFormat("yyyyMMddHHmmssSSS").format(currentDate));
-        }};
-
-        SystemRepository.load(new ObjectLoader() {
-            @Override
-            public Map<String, Object> load() {
-                Map<String, Object> repos = new HashMap<String, Object>();
-                repos.put("systemTimeProvider", systemTimeProvider);
-                return repos;
-            }
-        });
-
-        File appFile = LogTestUtil.cleanupLog("/switched-app.log");
-
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/switched-app.log");
-        settings.put("appFile.encoding", "UTF-8");
-        settings.put("appFile.outputBufferSize", "8");
-        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.DateRotatePolicy");
-        settings.put("appFile.dateType", "system");
-
-        FileLogWriter writer = new FileLogWriter();
-        writer.initialize(
-                new ObjectSettings(new MockLogSettings(settings), "appFile"));
-        writer.terminate();
-
-        // 再起動
-        writer = new FileLogWriter();
-        writer.initialize(
-                new ObjectSettings(new MockLogSettings(settings), "appFile"));
-
-        writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + currentDate + "]]]",
-                null));
-        writer.terminate();
-
-        // ファイルの存在確認
-        File dir = appFile.getParentFile();
-        assertTrue(dir.listFiles().length >= 1);
-        File newFile = new File("./log/switched-app.log");
-        if (!newFile.exists()) {
-            fail();
-        }
-    }
-
-    /** 一度アプリケーションを終了したあと、次の日に再起動する場合にファイルが自動で切り替わること。*/
-    @Test
-    public void testRestartNextDayPatterSwitched() {
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-        final Date currentDate = new Date();
-        final FixedSystemTimeProvider systemTimeProvider = new FixedSystemTimeProvider() {{
-            setFixedDate(dateFormat.format(currentDate));
-        }};
-
-        SystemRepository.load(new ObjectLoader() {
-            @Override
-            public Map<String, Object> load() {
-                Map<String, Object> repos = new HashMap<String, Object>();
-                repos.put("systemTimeProvider", systemTimeProvider);
-                return repos;
-            }
-        });
-
-        File appFile = LogTestUtil.cleanupLog("/switched-app.log");
-
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/switched-app.log");
-        settings.put("appFile.encoding", "UTF-8");
-        settings.put("appFile.outputBufferSize", "8");
-        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.DateRotatePolicy");
-        settings.put("appFile.dateType", "system");
-
-        FileLogWriter writer = new FileLogWriter();
-        writer.initialize(
-                new ObjectSettings(new MockLogSettings(settings), "appFile"));
-        writer.terminate();
-
-        // 明日の日付で更新する
-        Calendar cl = Calendar.getInstance();
-        cl.setTime(currentDate);
-        cl.add(Calendar.DATE, 1);
-        String dateSt = dateFormat.format(cl.getTime());
-        systemTimeProvider.setFixedDate(dateSt);
-
-        writer = new FileLogWriter();
-        writer.initialize(
-                new ObjectSettings(new MockLogSettings(settings), "appFile"));
-
-        writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + currentDate + "]]]",
-                null));
-        writer.terminate();
-
-        // ファイルの内容確認と内容確認
-        StringBuilder sb = new StringBuilder(50 * 1000);
-        File dir = appFile.getParentFile();
-        assertTrue(dir.listFiles().length >= 2);
-
-        File oldFile = new File("./log/switched-app.log"+"."+new SimpleDateFormat("yyyyMMdd").format(currentDate)+".old");
-        if (!oldFile.exists()) {
-            fail();
-        }
-
-        File newFile = new File("./log/switched-app.log");
-        if (!newFile.exists()) {
-            fail();
-        }
-
-        for (File file : dir.listFiles()) {
-            if (!file.getName().startsWith("switched-")) {
-                continue;
-            }
-            String log = LogTestUtil.getLog(file);
-            assertTrue(log.indexOf(
-                    "] change [./log/switched-app.log] -> [./log/switched-app.log.")
-                    != -1);
         }
     }
 
@@ -816,29 +563,16 @@ public class FileLogWriterTest extends LogTestSupport {
      */
     @Test
     public void testDateRotateMultiThreads() {
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-        final Date date = new Date();
-        final FixedSystemTimeProvider systemTimeProvider = new FixedSystemTimeProvider() {{
-            setFixedDate(dateFormat.format(date));
-        }};
-
-        SystemRepository.load(new ObjectLoader() {
-            @Override
-            public Map<String, Object> load() {
-                Map<String, Object> repos = new HashMap<String, Object>();
-                repos.put("systemTimeProvider", systemTimeProvider);
-                return repos;
-            }
-        });
-
         LogTestUtil.cleanupLog("/multi-threads-app.log");
+
+        Calendar cl = Calendar.getInstance();
+        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
+        dateTimeMock = new DateRotatePolicyTest.DateTimeMock(cl.getTime());
 
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", "./log/multi-threads-app.log");
         settings.put("appFile.encoding", "UTF-8");
-        settings.put("appFile.maxFileSize", "10");
         settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.DateRotatePolicy");
-        settings.put("appFile.dateType", "system");
 
         final FileLogWriter writer = new FileLogWriter();
 
@@ -861,12 +595,12 @@ public class FileLogWriterTest extends LogTestSupport {
                             writer.write(new LogContext(FQCN, LogLevel.DEBUG,
                                     "[[[" + i + "]]]", null));
 
-                            if (i % 5 ==0) {
-                                Date currentDate = systemTimeProvider.getDate();
+                            if (i % 10 ==0) {
+                                Date currentDate = new Date();
                                 Calendar calendar = Calendar.getInstance();
                                 calendar.setTime(currentDate);
                                 calendar.add(Calendar.DATE, 1);
-                                systemTimeProvider.setFixedDate(dateFormat.format(calendar.getTime()));
+                                dateTimeMock.SetCurrentTime(calendar.getTime());
                             }
                         }
                     }
