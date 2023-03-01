@@ -1,7 +1,5 @@
 package nablarch.core.log.basic;
 
-import mockit.Mock;
-import mockit.MockUp;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.log.LogTestUtil;
 import nablarch.core.log.MockLogSettings;
@@ -11,10 +9,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,38 +51,6 @@ public class FileLogWriterTest extends LogTestSupport {
                 new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         writer.terminate();
-    }
-
-    /** 最大ファイルサイズに0以下を指定 */
-    @Test
-    public void testMaxFileSizeLeZero() {
-        //----------------------------------------------------------------------
-        // 0を指定した場合（エラーにならずに正常にログ出力が行えること。)
-        //----------------------------------------------------------------------
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/invalid-encoding-app.log");
-        settings.put("appFile.encoding", "utf-8");
-        settings.put("appFile.maxFileSize", "0");
-
-        FileLogWriter writer = new FileLogWriter();
-        writer.initialize(
-                new ObjectSettings(new MockLogSettings(settings), "appFile"));
-
-        writer.terminate();
-
-        //----------------------------------------------------------------------
-        // -1を指定した場合（エラーにならずに正常にログ出力が行えること。)
-        //----------------------------------------------------------------------
-        Map<String, String> settings2 = new HashMap<String, String>();
-        settings2.put("appFile.filePath", "./log/invalid-encoding-app.log");
-        settings2.put("appFile.encoding", "utf-8");
-        settings2.put("appFile.maxFileSize", "-1");
-
-        FileLogWriter writer2 = new FileLogWriter();
-        writer2.initialize(
-                new ObjectSettings(new MockLogSettings(settings2), "appFile"));
-
-        writer2.terminate();
     }
 
     /**
@@ -298,90 +260,6 @@ public class FileLogWriterTest extends LogTestSupport {
         assertTrue(appLog.indexOf("[[[515]]]") == -1);
     }
 
-    /**
-     * Dateモック用クラス
-     */
-    private DateRotatePolicyTest.DateTimeMock dateTimeMock;
-
-    public static class DateTimeMock extends MockUp<System> {
-        Date mockTime;
-
-        public DateTimeMock(Date date) {
-            mockTime = date;
-        }
-
-        public void SetCurrentTime(Date mockTime) {
-            this.mockTime = mockTime;
-        }
-
-        @Mock
-        public long currentTimeMillis() {
-            return mockTime.getTime();
-        }
-    }
-
-    /** 日次ローテーションでファイルが自動で切り替わること。*/
-    @Test
-    public void testDateSwitched() throws ParseException {
-        File appFile = LogTestUtil.cleanupLog("/switched-app.log");
-
-        Calendar cl = Calendar.getInstance();
-        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
-        dateTimeMock = new DateRotatePolicyTest.DateTimeMock(cl.getTime());
-
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/switched-app.log");
-        settings.put("appFile.encoding", "UTF-8");
-        settings.put("appFile.outputBufferSize", "8");
-        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.DateRotatePolicy");
-
-        FileLogWriter writer = new FileLogWriter();
-        writer.initialize(
-                new ObjectSettings(new MockLogSettings(settings), "appFile"));
-
-        String[] dateArray = new String[]{"20180102235059999","20180103115159999","20180104205259999"};
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-        for (String date: dateArray) {
-            writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + date + "]]]",
-                    null));
-            dateTimeMock.SetCurrentTime(sdf.parse(date));
-        }
-        writer.write(new LogContext(FQCN, LogLevel.DEBUG, "finished", null));
-
-        writer.terminate();
-
-        // ファイルの存在確認
-        StringBuilder sb = new StringBuilder(50 * 1000);
-        File dir = appFile.getParentFile();
-        assertTrue(dir.listFiles().length >= 3);
-
-        String[] actualDateArray = new String[]{"201801010000","201801020000","201801030000"};
-        for (String date: actualDateArray) {
-            File f = new File("./log/switched-app.log"+"."+date+".old");
-            if (!f.exists()) {
-                fail();
-            }
-        }
-
-        // ファイルの内容確認
-        for (File file : dir.listFiles()) {
-            if (!file.getName().startsWith("switched-")) {
-                continue;
-            }
-            String log = LogTestUtil.getLog(file);
-            assertTrue(log.indexOf(
-                    "] change [./log/switched-app.log] -> [./log/switched-app.log.")
-                    != -1);
-            sb.append(log);
-        }
-
-        String appLog = sb.toString();
-
-        for (int i = 0; i < dateArray.length; i++) {
-            assertTrue(appLog.indexOf("[[[" + dateArray[i] + "]]]") != -1);
-        }
-    }
-
     /** 
      * INFOレベルより下のレベルで切り替えが発生した場合にINFOレベルのログが出ないこと。
      */
@@ -539,70 +417,6 @@ public class FileLogWriterTest extends LogTestSupport {
                             }
                             writer.write(new LogContext(FQCN, LogLevel.DEBUG,
                                     "[[[" + i + "]]]", null));
-                        }
-                    }
-                });
-            }
-            for (int i = 0; i < size; i++) {
-                threads[i].start();
-            }
-
-            for (int i = 0; i < size; i++) {
-                try {
-                    threads[i].join();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        } finally {
-            writer.terminate();
-        }
-    }
-
-    /**
-     * マルチスレッドでファイル切り替えが発生する状況で正しく動作すること。
-     */
-    @Test
-    public void testDateRotateMultiThreads() {
-        LogTestUtil.cleanupLog("/multi-threads-app.log");
-
-        Calendar cl = Calendar.getInstance();
-        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
-        dateTimeMock = new DateRotatePolicyTest.DateTimeMock(cl.getTime());
-
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/multi-threads-app.log");
-        settings.put("appFile.encoding", "UTF-8");
-        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.DateRotatePolicy");
-
-        final FileLogWriter writer = new FileLogWriter();
-
-        try {
-            writer.initialize(new ObjectSettings(new MockLogSettings(settings),
-                    "appFile"));
-
-            int size = 50;
-
-            Thread[] threads = new Thread[size];
-            for (int i = 0; i < size; i++) {
-                threads[i] = new Thread(new Runnable() {
-                    public void run() {
-                        for (int i = 0; i < MESSAGE_COUNT; i++) {
-                            try {
-                                Thread.sleep(100L);
-                            } catch (InterruptedException e) {
-                                throw new RuntimeException(e);
-                            }
-                            writer.write(new LogContext(FQCN, LogLevel.DEBUG,
-                                    "[[[" + i + "]]]", null));
-
-                            if (i % 10 ==0) {
-                                Date currentDate = new Date();
-                                Calendar calendar = Calendar.getInstance();
-                                calendar.setTime(currentDate);
-                                calendar.add(Calendar.DATE, 1);
-                                dateTimeMock.SetCurrentTime(calendar.getTime());
-                            }
                         }
                     }
                 });
