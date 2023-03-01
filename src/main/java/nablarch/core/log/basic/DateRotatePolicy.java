@@ -1,13 +1,10 @@
 package nablarch.core.log.basic;
 
-import nablarch.core.date.BusinessDateUtil;
-import nablarch.core.date.SystemTimeUtil;
 import nablarch.core.log.Logger;
 
 import java.io.File;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -19,14 +16,10 @@ import java.util.Date;
  * 下記プロパティは、rotatePolicyに{@link DateRotatePolicy}が設定されている場合に有効である。
  * <dl>
  *
- * <dt>dateType</dt>
- * <dd>日付タイプ。オプション。<br>
- *     日付ごとのローテーション判定に必要な日付の種類を指定する。<br>
- *     システム日付を使用する場合はsystem、業務日付を使用する場合はbusinessを指定する。<br>
- *     デフォルトはsystem。</dd>
- * <dt>segment</dt>
- * <dd>業務日付を取得する場合に使用される区分。オプション。<br>
- *     設定されていない場合は、defaultSegmentを使用して業務日付を取得する。</dd>
+ * <dt>updateTime</dt>
+ * <dd>更新時刻。オプション。<br>
+ *     特定の時刻以降のログファイルをローテーションしたい場合に指定する。<br>
+ *     時刻は24時間表記とする。デフォルトは0。</dd>
  * </dl>
  * @author Kotaro Taki
  */
@@ -35,95 +28,57 @@ public class DateRotatePolicy implements RotatePolicy {
     /** 書き込み先のファイルパス */
     private String filePath;
 
-    /** 日時フォーマット */
-    private final DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+    /** ログファイル名と設定情報の出力に使用する日時フォーマット */
+    private final DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
 
     /** 重複したログファイル名に使用する日時フォーマット */
     private final DateFormat dupFileDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
-    /** 日付タイプ */
-    private DateType dateType;
-
-    /** セグメント */
-    private String segment;
-
-    /** 日付タイプ列挙型 */
-    enum DateType {
-        SYSTEM,
-        BUSINESS
-    }
-
-    /** 次回ローテーション日 */
+    /** 次回ローテーション時刻 */
     private Date nextUpdateDate;
+
+    /** 更新時刻 */
+    private int updateTime;
 
     /**
      * {@inheritDoc}
-     * @throws IllegalArgumentException 不正なdateTypeが指定されている場合
-     * @throws RuntimeException dateTypeがSystemで、既にログパスにファイルが存在する際にファイルの作成時刻が取得できない場合
      */
     @Override
     public void initialize(ObjectSettings settings) {
 
         filePath = settings.getRequiredProp("filePath");
 
-        String dt = settings.getProp("dateType");
-        if (dt == null){
-            dt = "system";
-        }
-
-        if (dt.equals("system")) {
-            dateType = DateType.SYSTEM;
-        } else if (dt.equals("business")) {
-            dateType = DateType.BUSINESS;
-        } else {
-            throw new IllegalArgumentException("dateType was invalid");
-        }
-
         File file = new File(filePath);
 
-        // ファイルが存在、かつシステム日付の場合
-        // 次回ローテーション日をファイルの更新時刻から算出する
-        if (file.exists() && dateType == DateType.SYSTEM) {
-            Date currentDate = new Date(file.lastModified());
-            nextUpdateDate = calcNextUpdateDate(currentDate);
-        }
-
-        segment = settings.getProp("segment");
-    }
-
-    /**
-     * 現在日時を取得する。
-     * @return 現在日時
-     */
-    private Date getCurrentDate() {
-        if (dateType == DateType.SYSTEM) {
-            return SystemTimeUtil.getDate();
-        } else {
-            String currentDateSt;
-            if (segment == null) {
-                 currentDateSt = BusinessDateUtil.getDate();
-            } else {
-                currentDateSt = BusinessDateUtil.getDate(segment);
-            }
-
+        String specificTime = settings.getProp("updateTime");
+        if (specificTime != null) {
             try {
-                return dateFormat.parse(currentDateSt);
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
+                this.updateTime = Integer.parseInt(specificTime);
+            } catch (NumberFormatException e) {
+                this.updateTime = 0;
             }
         }
+
+        // ファイルが存在している場合、次回ローテーション時刻をファイルの更新時刻から算出する
+        Date currentDate;
+        if (file.exists()) {
+            currentDate = new Date(file.lastModified());
+        } else {
+            currentDate = new Date();
+        }
+        nextUpdateDate = calcNextUpdateDate(currentDate);
     }
 
     /**
-     * 次回ローテション日を計算する。
+     * 次回ローテション時刻を計算する。
      * @param currentDate 現在日時
-     * @return 次回ローテション日のCalendarオブジェクト
+     * @return 次回ローテション時刻のCalendarオブジェクト
      */
     private Date calcNextUpdateDate(Date currentDate) {
         Calendar cl = Calendar.getInstance();
         cl.setTime(currentDate);
         // 時・分・秒・ミリ秒を0にする
-        cl.set(Calendar.HOUR_OF_DAY, 0);
+        cl.set(Calendar.HOUR_OF_DAY, updateTime);
         cl.set(Calendar.MINUTE, 0);
         cl.set(Calendar.SECOND, 0);
         cl.set(Calendar.MILLISECOND, 0);
@@ -136,20 +91,19 @@ public class DateRotatePolicy implements RotatePolicy {
 
     /**
      * {@inheritDoc}<br>
-     * 現在時刻 > インスタンス変数として保持している次回ローテション日の場合、ローテーションが必要と判定する。<br>
+     * 現在時刻 > インスタンス変数として保持している次回ローテション時刻の場合、ローテーションが必要と判定する。<br>
      * それ以外の場合は、ローテーションが不要と判定する。
      */
     @Override
     public boolean needsRotate(String message, Charset charset) {
 
-        Date currentDate = getCurrentDate();
+        Date currentDate = new Date();
 
         return currentDate.after(nextUpdateDate) || currentDate.equals(nextUpdateDate);
     }
 
     /**
      * {@inheritDoc}
-     * {@link DateRotatePolicy}では、併せて次回ローテーション日を更新する。
      */
     @Override
     public String decideRotatedFilePath() {
@@ -161,7 +115,7 @@ public class DateRotatePolicy implements RotatePolicy {
 
         File f = new File(rotatedFilePath);
         if (f.exists()) {
-            rotatedFilePath = filePath + "." + dupFileDateFormat.format(getCurrentDate()) + ".old";
+            rotatedFilePath = filePath + "." + dupFileDateFormat.format(new Date()) + ".old";
         }
 
         return rotatedFilePath;
@@ -178,35 +132,26 @@ public class DateRotatePolicy implements RotatePolicy {
                     "renaming failed. File#renameTo returns false. src file = [" + filePath + "], dest file = [" + rotatedFilePath + "]");
         }
 
-        Date currentDate = getCurrentDate();
+        Date currentDate = new Date();
         nextUpdateDate = calcNextUpdateDate(currentDate);
     }
 
     /**
-     * {@inheritDoc}<br>
+     * {@inheritDoc}
      * 設定情報のフォーマットを下記に示す。<br>
      * <br>
-     * DATE TYPE          = [&lt;日付タイプ。&gt;]<br>
+     * NEXT CHANGE DATE   = [&lt;次回更新時刻&gt;]<br>
+     * CURRENT DATE       = [&lt;現在時刻&gt;]<br>
+     * UPDATE TIME = [&lt;更新時刻&gt;]<br>
      *
      * @return 設定情報
      * @see FileLogWriter#getSettings()
      */
     @Override
     public String getSettings() {
-        return "\tDATE TYPE          = [" + dateType + "]" + Logger.LS;
-    }
-
-    /**
-     * {@inheritDoc}<br>
-     * {@link DateRotatePolicy}では、次回ローテーション日が設定されていない場合に次回ローテーション日を計算する。
-     */
-    @Override
-    public void setupAfterSystemRepositoryInitialized() {
-        if (nextUpdateDate == null) {
-            Date currentDate = getCurrentDate();
-
-            nextUpdateDate = calcNextUpdateDate(currentDate);
-        }
+        return "\tNEXT CHANGE DATE   = [" + dateFormat.format(nextUpdateDate) + "]" + Logger.LS
+                + "\tCURRENT DATE    = [" + dateFormat.format(new Date()) + "]" + Logger.LS
+                + "\tUPDATE TIME     = [" + updateTime + "]" + Logger.LS;
     }
 
     /**

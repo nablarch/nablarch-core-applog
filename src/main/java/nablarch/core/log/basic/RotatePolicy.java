@@ -45,13 +45,6 @@ public interface RotatePolicy {
     String getSettings();
 
     /**
-     * 初回ログファイル書き込み前に、必要な設定を一度だけする。<br>
-     * {@link #initialize}は、システムリポジトリのロード前に呼び出されるため、システムリポジトリの参照ができない。
-     * システム日付の取得などシステムリポジトリを参照する初期設定などを独自で実装したい場合に使用する。
-     */
-    void setupAfterSystemRepositoryInitialized();
-
-    /**
      * ログファイル書き込み時に発生するイベント。<br>
      * ファイルサイズによるローテーションなどを独自で実装したい場合に使用する。
      * @param message ログファイルに書き込まれるメッセージ

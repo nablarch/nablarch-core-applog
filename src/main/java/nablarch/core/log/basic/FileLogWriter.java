@@ -71,9 +71,6 @@ public class FileLogWriter extends LogWriterSupport {
     /** ファイルローテーションを行うためのインターフェース */
     private RotatePolicy rotatePolicy;
 
-    /** setUpAfterSystemRepositoryInitializedが呼び出されているか判定するフラグ */
-    private boolean isSetUpSucceeded;
-
     /**
      * {@inheritDoc}
      * <p/>
@@ -159,10 +156,6 @@ public class FileLogWriter extends LogWriterSupport {
      */
     protected void onWrite(String formattedMessage) {
         synchronized (this) {
-            if (!isSetUpSucceeded) {
-                rotatePolicy.setupAfterSystemRepositoryInitialized();
-                isSetUpSucceeded = true;
-            }
             if (out == null) {
                 throw new IllegalStateException(
                         String.format("failed to write for FileLogWriter has already terminated. name = [%s]", getName()));

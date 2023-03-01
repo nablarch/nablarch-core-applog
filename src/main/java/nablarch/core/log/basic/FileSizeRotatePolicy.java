@@ -127,12 +127,4 @@ public class FileSizeRotatePolicy implements RotatePolicy {
                 + "\tMAX FILE SIZE      = [" + maxFileSize + "]" + Logger.LS
                 + "\tCURRENT FILE SIZE  = [" + currentFileSize + "]" + Logger.LS;
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setupAfterSystemRepositoryInitialized() {
-
-    }
 }
