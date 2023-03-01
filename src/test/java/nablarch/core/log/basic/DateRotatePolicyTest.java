@@ -1,6 +1,5 @@
 package nablarch.core.log.basic;
 
-import mockit.Deencapsulation;
 import mockit.Mock;
 import mockit.MockUp;
 import nablarch.core.log.Logger;
@@ -51,121 +50,6 @@ public class DateRotatePolicyTest {
         }
     }
 
-    /** updateTimeが正しく設定されていること */
-    @Test
-    public void testUpDateTimeInInitialize() {
-        Calendar cl = Calendar.getInstance();
-        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
-        dateTimeMock = new DateTimeMock(cl.getTime());
-
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/app.log");
-        settings.put("appFile.updateTime", "3");
-
-        DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
-
-        int actualUpDateTime = Deencapsulation.getField(policy, "updateTime");
-
-        assertThat(actualUpDateTime, is(3));
-    }
-
-    /** updateTimeに不正な値が指定された場合に0が設定されていること */
-    @Test
-    public void testInValidUpDateTimeInInitialize() {
-        Calendar cl = Calendar.getInstance();
-        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
-        dateTimeMock = new DateTimeMock(cl.getTime());
-
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/app.log");
-        settings.put("appFile.updateTime", "aiueo");
-
-        DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
-
-        int actualUpDateTime = Deencapsulation.getField(policy, "updateTime");
-
-        assertThat(actualUpDateTime, is(0));
-    }
-
-    /** filePathが正しく設定されていること */
-    @Test
-    public void testFilePathInInitialize() {
-        Calendar cl = Calendar.getInstance();
-        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
-        dateTimeMock = new DateTimeMock(cl.getTime());
-
-        String path = "./log/app.log";
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", path);
-
-        DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
-
-        String actualFilepath = Deencapsulation.getField(policy, "filePath");
-        assertThat(actualFilepath, is(path));
-    }
-
-    /** パスにファイルが存在しない場合、次回更新時刻が正しく計算されていること */
-    @Test
-    public void testNextUpdateDateInInitialize() throws ParseException {
-        Calendar cl = Calendar.getInstance();
-        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
-        dateTimeMock = new DateTimeMock(cl.getTime());
-
-        String path = "./log/testNextUpdateDateInInitialize-app.log";
-        File f = new File(path);
-        if (f.exists()) {
-            f.delete();
-        }
-
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", path);
-        settings.put("appFile.updateTime", "3");
-
-        DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
-
-        Date actualNextUpdateDate = Deencapsulation.getField(policy, "nextUpdateDate");
-
-        cl.clear();
-        cl.set(2018, Calendar.JANUARY, 2, 3, 0, 0);
-        Date expectedDate = cl.getTime();
-
-        assertThat(actualNextUpdateDate, is(expectedDate));
-    }
-
-    /** パスにファイルが存在する場合、次回更新時刻がファイルの更新時刻から正しく計算されていること */
-    @Test
-    public void testNextUpdateDateIfFileExistsInInitialize() throws IOException {
-        Calendar cl = Calendar.getInstance();
-        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
-        dateTimeMock = new DateTimeMock(cl.getTime());
-
-        String path = "./log/testNextUpdateDateIfFileExistsInInitialize-app.log";
-        File f = new File(path);
-        f.createNewFile();
-
-        // ファイル更新時刻の設定
-        Date date = new Date();
-        f.setLastModified(date.getTime());
-
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", path);
-
-        DateRotatePolicy policy = new DateRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
-
-        Date actualNextUpdateDate = Deencapsulation.getField(policy, "nextUpdateDate");
-
-        cl.clear();
-        cl.set(2018, Calendar.JANUARY, 2, 0, 0, 0);
-        Date expectedNextUpdateDate = cl.getTime();
-
-        assertThat(actualNextUpdateDate, is(expectedNextUpdateDate));
-    }
-
     /** 現在時刻<次回更新日の場合に、正しくrotateが必要かどうか判定を行えること */
     @Test
     public void testNeedsRotateIfNoNeeded() {
@@ -174,6 +58,7 @@ public class DateRotatePolicyTest {
         dateTimeMock = new DateTimeMock(cl.getTime());
 
         String path = "./log/app.log";
+        // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
         File f = new File(path);
         if (f.exists()) {
             f.delete();
@@ -198,12 +83,15 @@ public class DateRotatePolicyTest {
         cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
         dateTimeMock = new DateTimeMock(cl.getTime());
 
-        File f = new File("./log/app.log");
+        String path = "./log/app.log";
+        // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
+        File f = new File(path);
         if (f.exists()) {
             f.delete();
         }
+
         Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/app.log");
+        settings.put("appFile.filePath",path);
 
         DateRotatePolicy policy = new DateRotatePolicy();
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
@@ -218,6 +106,33 @@ public class DateRotatePolicyTest {
         assertThat(actual, is(true));
     }
 
+    /** パスにファイルが存在する場合、正しくrotateが必要かどうか判定を行えること */
+    @Test
+    public void testNeedsIfFileExists() throws IOException {
+        Calendar cl = Calendar.getInstance();
+        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
+        dateTimeMock = new DateTimeMock(cl.getTime());
+
+        String path = "./log/testNeedsIfFileExists-app.log";
+        File f = new File(path);
+        f.createNewFile();
+
+        // ファイル更新時刻の設定
+        cl.clear();
+        cl.set(2017, Calendar.DECEMBER, 31, 10, 10, 10);
+        f.setLastModified(cl.getTime().getTime());
+
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", path);
+
+        DateRotatePolicy policy = new DateRotatePolicy();
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        boolean actual = policy.needsRotate("abcdeabcde", ignored);
+
+        assertThat(actual, is(true));
+    }
+
     /** 正しくリネーム先のファイルパスが決定できること */
     @Test
     public void testDecideRotatedFilePath() {
@@ -226,6 +141,7 @@ public class DateRotatePolicyTest {
         dateTimeMock = new DateTimeMock(cl.getTime());
 
         String path = "./log/app.log";
+        // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
         File f = new File(path);
         if (f.exists()) {
             f.delete();
@@ -255,6 +171,7 @@ public class DateRotatePolicyTest {
         cl.set(Calendar.MILLISECOND, 000);
         dateTimeMock = new DateTimeMock(cl.getTime());
 
+        // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
         File f = new File("./log/app.log");
         if (f.exists()) {
             f.delete();
@@ -284,10 +201,15 @@ public class DateRotatePolicyTest {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", path);
 
+        // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
+        File f = new File(path);
+        if (f.exists()) {
+            f.delete();
+        }
+
         DateRotatePolicy policy = new DateRotatePolicy();
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
-        File f = new File(path);
         f.createNewFile();
 
         String expectedPath = "./log/testDateRotate-app.log.old";
@@ -310,32 +232,50 @@ public class DateRotatePolicyTest {
         cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
         dateTimeMock = new DateTimeMock(cl.getTime());
 
-        String path = "./log/testDateRotate-app.log";
+        String path = "./log/testNextUpdateDate-app.log";
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", path);
+        // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
+        File f = new File(path);
+        if (f.exists()) {
+            f.delete();
+        }
 
         DateRotatePolicy policy = new DateRotatePolicy();
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
-        File f = new File(path);
+        // ローテーションするファイルを作成
         f.createNewFile();
 
-        String expectedPath = "./log/testDateRotate-app.log.old";
+        //ローテーション先にファイルがある場合は削除
+        String expectedPath = "./log/testNextUpdateDate-app.log.old";
         File expectedFile = new File(expectedPath);
         if (expectedFile.exists()) {
             expectedFile.delete();
         }
 
+        // rotateは2018年1月2日のため、次回更新時刻は2018年の1月3日になっている
+        cl.clear();
+        cl.set(2018, Calendar.JANUARY, 2, 23, 59, 59);
+        dateTimeMock.SetCurrentTime(cl.getTime());
         policy.rotate(expectedPath);
 
-        // nextUpdateDateの確認
-        Date actualNextUpdateDate = Deencapsulation.getField(policy, "nextUpdateDate");
+        // 正しくnextUpdateDateが更新できているかの確認
+        cl.clear();
+        cl.set(2018, Calendar.JANUARY, 2, 23, 59, 59);
+        dateTimeMock.SetCurrentTime(cl.getTime());
+
+        boolean actual = policy.needsRotate("abcdeabcde", ignored);
+
+        assertThat(actual, is(false));
 
         cl.clear();
-        cl.set(2018, Calendar.JANUARY, 2, 0, 0, 0);
-        Date expectedNextUpdateDate = cl.getTime();
+        cl.set(2018, Calendar.JANUARY, 3, 0, 0, 0);
+        dateTimeMock.SetCurrentTime(cl.getTime());
 
-        assertThat(actualNextUpdateDate, is(expectedNextUpdateDate));
+        actual = policy.needsRotate("abcdeabcde", ignored);
+
+        assertThat(actual, is(true));
     }
 
     /** ファイルがリネームできない場合に、IllegalStateExceptionが発生すること */
@@ -367,6 +307,7 @@ public class DateRotatePolicyTest {
     @Test
     public void testGetSetting() {
         String path = "./log/app.log";
+        // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
         File f = new File(path);
         if (f.exists()) {
             f.delete();
@@ -379,7 +320,7 @@ public class DateRotatePolicyTest {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", path);
         settings.put("appFile.encoding", "utf-8");
-        settings.put("appFile.updateTime", "0");
+        settings.put("appFile.updateTime", "aiueo");
 
         DateRotatePolicy policy = new DateRotatePolicy();
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
