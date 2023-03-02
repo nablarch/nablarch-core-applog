@@ -1,5 +1,6 @@
 package nablarch.core.log.basic;
 
+import mockit.*;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.log.LogTestUtil;
 import nablarch.core.log.MockLogSettings;
@@ -9,6 +10,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -205,6 +207,146 @@ public class FileLogWriterTest extends LogTestSupport {
             assertTrue(appLog.indexOf("[[[" + i + "]]]") != -1);
         }
         assertTrue(appLog.indexOf("[[[515]]]") == -1);
+    }
+
+    /** ローテーションが不要な場合に、RotatePolicyのインターフェースが正しく呼び出されていること */
+    @Test
+    public void testRotatePolicyWhenNoRotation(@Capturing final RotatePolicy rotatePolicy) {
+        LogTestUtil.cleanupLog("/switched-app.log");
+
+        final String utf8 = "UTF-8";
+        final String path = "./log/switched-app.log";
+        final String message = "HelloWorld";
+
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", path);
+        settings.put("appFile.encoding", utf8);
+        settings.put("appFile.outputBufferSize", "8");
+
+        FileLogWriter writer = new FileLogWriter();
+        final ObjectSettings objectSettings = new ObjectSettings(new MockLogSettings(settings), "appFile");
+
+        new Expectations() {
+            {
+                rotatePolicy.initialize((ObjectSettings) any);
+                rotatePolicy.onOpenFile((File) any);
+                rotatePolicy.getSettings();
+            }
+        };
+
+        writer.initialize(objectSettings);
+
+        // initializeでは、initialize・onOpenFile・getSettingsが１回ずつ呼びされていることの確認
+        new VerificationsInOrder() {
+            {
+                rotatePolicy.initialize(objectSettings);
+                times = 1;
+                rotatePolicy.onOpenFile(new File(path));
+                times = 1;
+                rotatePolicy.getSettings();
+                times = 1;
+            }
+        };
+
+        new Expectations() {
+            {
+                rotatePolicy.onWrite(anyString, (Charset) any);
+                rotatePolicy.needsRotate(anyString, (Charset) any);
+                result = false;
+            }
+        };
+
+        writer.onWrite("HelloWorld");
+
+        // onWriteでは、needsRotate・onWriteが１回ずつ呼びされていることの確認
+        new VerificationsInOrder() {
+            {
+                rotatePolicy.needsRotate(message, Charset.forName(utf8));
+                times = 1;
+                rotatePolicy.onWrite(message, Charset.forName(utf8));
+                times = 1;
+            }
+        };
+    }
+
+    /** ローテーションが必要な場合に、RotatePolicyのインターフェースが正しく呼び出されていること */
+    @Test
+    public void testRotatePolicyWhenRotation(@Capturing final RotatePolicy rotatePolicy) {
+        LogTestUtil.cleanupLog("/switched-app.log");
+
+        final String utf8 = "UTF-8";
+        final String path = "./log/switched-app.log";
+        final String rotatedFilePath = "rotatedFilePath";
+        final String message = "HelloWorld";
+
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", path);
+        settings.put("appFile.encoding", utf8);
+        settings.put("appFile.outputBufferSize", "8");
+
+        FileLogWriter writer = new FileLogWriter();
+        final ObjectSettings objectSettings = new ObjectSettings(new MockLogSettings(settings), "appFile");
+
+        new Expectations() {
+            {
+                rotatePolicy.initialize((ObjectSettings) any);
+                rotatePolicy.onOpenFile((File) any);
+                rotatePolicy.getSettings();
+            }
+        };
+
+        writer.initialize(objectSettings);
+
+        // initializeでは、initialize・onOpenFile・getSettingsが１回ずつ呼びされていることの確認
+        new VerificationsInOrder() {
+            {
+                rotatePolicy.initialize(objectSettings);
+                times = 1;
+                rotatePolicy.onOpenFile(new File(path));
+                times = 1;
+                rotatePolicy.getSettings();
+                times = 1;
+            }
+        };
+
+        new Expectations() {
+            {
+                rotatePolicy.needsRotate(anyString, (Charset) any);
+                result = true;
+
+                rotatePolicy.decideRotatedFilePath();
+                result = rotatedFilePath;
+
+                rotatePolicy.rotate(anyString);
+                rotatePolicy.onOpenFile((File) any);
+                rotatePolicy.getSettings();
+
+                rotatePolicy.onWrite(anyString, (Charset) any);
+            }
+        };
+
+        writer.onWrite(message);
+
+        // onWriteではローテーションが必要な場合に、needsRotate・decideRotatedFilePath・onWrite
+        // rotate・onOpenFile・getSettings・onWriteの順で実装クラスが呼びされていることの確認
+        new VerificationsInOrder() {
+            {
+                rotatePolicy.needsRotate(message, Charset.forName(utf8));
+                times = 1;
+
+                rotatePolicy.decideRotatedFilePath();
+                times = 1;
+                rotatePolicy.rotate(rotatedFilePath);
+                times = 1;
+                rotatePolicy.onOpenFile(new File(path));
+                times = 1;
+                rotatePolicy.getSettings();
+                times = 1;
+
+                rotatePolicy.onWrite(anyString, Charset.forName(utf8));
+                times = 2;
+            }
+        };
     }
 
     /** ファイルが自動で切り替わること。 */
