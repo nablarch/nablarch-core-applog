@@ -10,7 +10,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * 日次によるログのローテーションを行うクラス。<br>
+ * 日時でログのローテーションを行うクラス。<br>
  * <br>
  * プロパティファイルの記述ルールを下記に示す。<br>
  * 下記プロパティは、rotatePolicyに{@link DateRotatePolicy}が設定されている場合に有効である。
