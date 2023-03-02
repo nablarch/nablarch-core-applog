@@ -110,14 +110,14 @@ public class FileLogWriter extends LogWriterSupport {
      * <br>
      * 設定情報のフォーマットを下記に示す。<br>
      * <br>
-     * WRITER NAME        = [&lt;{@link LogWriter}の名称&gt;]<br>
-     * WRITER CLASS       = [&lt;{@link LogWriter}のクラス名&gt;]<br>
-     * FORMATTER CLASS    = [&lt;{@link LogFormatter}のクラス名&gt;]<br>
-     * LEVEL              = [&lt;ログの出力制御の基準とする{@link LogLevel}&gt;]
-     * FILE PATH          = [&lt;書き込み先のファイルパス&gt;]<br>
-     * ENCODING           = [&lt;書き込み時に使用する文字エンコーディング&gt;]<br>
-     * OUTPUT BUFFER SIZE = [&lt;出力バッファのサイズ&gt;]<br>
-     * ROTATEPOLICY CLASS = [&lt;ファイルローテーション実行クラス&gt;]<br>
+     * WRITER NAME         = [&lt;{@link LogWriter}の名称&gt;]<br>
+     * WRITER CLASS        = [&lt;{@link LogWriter}のクラス名&gt;]<br>
+     * FORMATTER CLASS     = [&lt;{@link LogFormatter}のクラス名&gt;]<br>
+     * LEVEL               = [&lt;ログの出力制御の基準とする{@link LogLevel}&gt;]
+     * FILE PATH           = [&lt;書き込み先のファイルパス&gt;]<br>
+     * ENCODING            = [&lt;書き込み時に使用する文字エンコーディング&gt;]<br>
+     * OUTPUT BUFFER SIZE  = [&lt;出力バッファのサイズ&gt;]<br>
+     * ROTATE POLICY CLASS = [&lt;ファイルローテーション実行クラス&gt;]<br>
      * <br>
      * 追加で{@link RotatePolicy#getSettings()}によって得られた設定情報が出力される。<br>
      * @return 設定情報
