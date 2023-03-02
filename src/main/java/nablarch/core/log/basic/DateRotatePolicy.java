@@ -28,17 +28,29 @@ public class DateRotatePolicy implements RotatePolicy {
     /** 書き込み先のファイルパス */
     private String filePath;
 
-    /** ログファイル名と設定情報の出力に使用する日時フォーマット */
-    private final DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmm");
+    /** ログファイル名に使用する日時フォーマット */
+    private final DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
 
     /** 重複したログファイル名に使用する日時フォーマット */
     private final DateFormat dupFileDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+
+    /** 設定情報の出力に使用する日時フォーマット */
+    private final DateFormat settingDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     /** 次回ローテーション時刻 */
     private Date nextUpdateDate;
 
     /** 更新時刻 */
-    private int updateTime;
+    private String updateTime;
+
+    /** 更新時刻(hour) */
+    private int updateTimeHour;
+
+    /** 更新時刻(minutes) */
+    private int updateTimeMinutes;
+
+    /** 更新時刻(seconds) */
+    private int updateTimeSeconds;
 
     /**
      * {@inheritDoc}
@@ -50,12 +62,26 @@ public class DateRotatePolicy implements RotatePolicy {
 
         File file = new File(filePath);
 
-        String specificTime = settings.getProp("updateTime");
-        if (specificTime != null) {
-            try {
-                this.updateTime = Integer.parseInt(specificTime);
-            } catch (NumberFormatException e) {
-                this.updateTime = 0;
+        updateTime = settings.getProp("updateTime");
+        if (updateTime != null) {
+            String[] splits = updateTime.split(":");
+            if (splits.length >= 4 || splits.length == 0) {
+                throw  new IllegalArgumentException("Invalid updateTime");
+            } else {
+                try {
+                    if (splits.length == 1) {
+                        updateTimeHour = Integer.parseInt(updateTime);
+                    } else if (splits.length == 2) {
+                        updateTimeHour = Integer.parseInt(splits[0]);
+                        updateTimeMinutes = Integer.parseInt(splits[1]);
+                    } else {
+                        updateTimeHour = Integer.parseInt(splits[0]);
+                        updateTimeMinutes = Integer.parseInt(splits[1]);
+                        updateTimeSeconds = Integer.parseInt(splits[2]);
+                    }
+                } catch (NumberFormatException e) {
+                    throw  new IllegalArgumentException("Invalid updateTime");
+                }
             }
         }
 
@@ -78,9 +104,9 @@ public class DateRotatePolicy implements RotatePolicy {
         Calendar cl = Calendar.getInstance();
         cl.setTime(currentDate);
         // 時・分・秒・ミリ秒を0にする
-        cl.set(Calendar.HOUR_OF_DAY, updateTime);
-        cl.set(Calendar.MINUTE, 0);
-        cl.set(Calendar.SECOND, 0);
+        cl.set(Calendar.HOUR_OF_DAY, updateTimeHour);
+        cl.set(Calendar.MINUTE, updateTimeMinutes);
+        cl.set(Calendar.SECOND, updateTimeSeconds);
         cl.set(Calendar.MILLISECOND, 0);
 
         // その後、日を+1する
@@ -107,11 +133,7 @@ public class DateRotatePolicy implements RotatePolicy {
      */
     @Override
     public String decideRotatedFilePath() {
-        Calendar cl = Calendar.getInstance();
-        cl.setTime(nextUpdateDate);
-        cl.add(Calendar.DATE, -1);
-        Date rotatedFileDate = cl.getTime();
-        String rotatedFilePath = filePath + "." + dateFormat.format(rotatedFileDate) + ".old";
+        String rotatedFilePath = filePath + "." + dateFormat.format(nextUpdateDate) + ".old";
 
         File f = new File(rotatedFilePath);
         if (f.exists()) {
@@ -149,8 +171,8 @@ public class DateRotatePolicy implements RotatePolicy {
      */
     @Override
     public String getSettings() {
-        return "\tNEXT CHANGE DATE    = [" + dateFormat.format(nextUpdateDate) + "]" + Logger.LS
-                + "\tCURRENT DATE        = [" + dateFormat.format(new Date()) + "]" + Logger.LS
+        return "\tNEXT CHANGE DATE    = [" + settingDateFormat.format(nextUpdateDate) + "]" + Logger.LS
+                + "\tCURRENT DATE        = [" + settingDateFormat.format(new Date()) + "]" + Logger.LS
                 + "\tUPDATE TIME         = [" + updateTime + "]" + Logger.LS;
     }
 
