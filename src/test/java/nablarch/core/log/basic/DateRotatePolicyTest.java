@@ -57,7 +57,7 @@ public class DateRotatePolicyTest {
         cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
         dateTimeMock = new DateTimeMock(cl.getTime());
 
-        String path = "./log/app.log";
+        String path = "./log/testNeedsRotateIfNoNeeded-app.log";
         // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
         File f = new File(path);
         if (f.exists()) {
@@ -83,7 +83,7 @@ public class DateRotatePolicyTest {
         cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
         dateTimeMock = new DateTimeMock(cl.getTime());
 
-        String path = "./log/app.log";
+        String path = "./log/testNeedsRotateIfNeeded-app.log";
         // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
         File f = new File(path);
         if (f.exists()) {
@@ -140,14 +140,14 @@ public class DateRotatePolicyTest {
         cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
         dateTimeMock = new DateTimeMock(cl.getTime());
 
-        String path = "./log/app.log";
+        String path = "./log/testDecideRotatedFilePath-app.log";
         // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
         File f = new File(path);
         if (f.exists()) {
             f.delete();
         }
 
-        String expectedPath = "./log/app.log.201801010000.old";
+        String expectedPath = "./log/testDecideRotatedFilePath-app.log.201801010000.old";
         File expectedFile = new File(expectedPath);
         if (expectedFile.exists()) {
             expectedFile.delete();
@@ -166,28 +166,30 @@ public class DateRotatePolicyTest {
     /** リネーム先のファイルが既に存在する場合に、正しくリネーム先のファイルパスが決定できること */
     @Test
     public void testDecideDupRotatedFilePath() throws IOException {
+        String path = "./log/testDecideDupRotatedFilePath-app.log";
+        String rotatedFilePath = "./log/testDecideDupRotatedFilePath-app.log.201801010000.old";
         Calendar cl = Calendar.getInstance();
         cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
         cl.set(Calendar.MILLISECOND, 000);
         dateTimeMock = new DateTimeMock(cl.getTime());
 
         // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
-        File f = new File("./log/app.log");
+        File f = new File(path);
         if (f.exists()) {
             f.delete();
         }
 
-        File dupF = new File("./log/app.log.201801010000.old");
+        File dupF = new File(rotatedFilePath);
         dupF.createNewFile();
         Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/app.log");
+        settings.put("appFile.filePath", path);
 
         DateRotatePolicy policy = new DateRotatePolicy();
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         String actual = policy.decideRotatedFilePath();
 
-        assertThat(actual, is("./log/app.log.20180101101010000.old"));
+        assertThat(actual, is("./log/testDecideDupRotatedFilePath-app.log.20180101101010000.old"));
     }
 
     /** 正しくファイルがリネームされること */
@@ -306,7 +308,7 @@ public class DateRotatePolicyTest {
     /** 正しく設定情報が取得できること */
     @Test
     public void testGetSetting() {
-        String path = "./log/app.log";
+        String path = "./log/testGetSetting.log";
         // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
         File f = new File(path);
         if (f.exists()) {

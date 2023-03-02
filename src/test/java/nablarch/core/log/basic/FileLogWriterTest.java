@@ -212,10 +212,10 @@ public class FileLogWriterTest extends LogTestSupport {
     /** ローテーションが不要な場合に、RotatePolicyのインターフェースが正しく呼び出されていること */
     @Test
     public void testRotatePolicyWhenNoRotation(@Capturing final RotatePolicy rotatePolicy) {
-        LogTestUtil.cleanupLog("/switched-app.log");
+        LogTestUtil.cleanupLog("/testRotatePolicyWhenNoRotation-app.log");
 
         final String utf8 = "UTF-8";
-        final String path = "./log/switched-app.log";
+        final String path = "./log/testRotatePolicyWhenNoRotation-app.log";
         final String message = "HelloWorld";
 
         Map<String, String> settings = new HashMap<String, String>();
@@ -272,10 +272,10 @@ public class FileLogWriterTest extends LogTestSupport {
     /** ローテーションが必要な場合に、RotatePolicyのインターフェースが正しく呼び出されていること */
     @Test
     public void testRotatePolicyWhenRotation(@Capturing final RotatePolicy rotatePolicy) {
-        LogTestUtil.cleanupLog("/switched-app.log");
+        LogTestUtil.cleanupLog("/testRotatePolicyWhenRotation-app.log");
 
         final String utf8 = "UTF-8";
-        final String path = "./log/switched-app.log";
+        final String path = "./log/testRotatePolicyWhenRotation-app.log";
         final String rotatedFilePath = "rotatedFilePath";
         final String message = "HelloWorld";
 
