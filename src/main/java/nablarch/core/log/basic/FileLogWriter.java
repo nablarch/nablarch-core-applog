@@ -39,9 +39,9 @@ import nablarch.core.util.ObjectUtil;
  *     単位はキロバイト。1000バイトを1キロバイトと換算する。１以上を指定する。指定しなければ8KB。</dd>
  *
  * <dt>rotatePolicy</dt>
- * <dd>ファイルローテーション実行クラス。オプション。<br>
- *     {@link RotatePolicy}が実装されたクラスを指定する。<br>
- *     デフォルト値は{@link FileSizeRotatePolicy}<br>
+ * <dd>ファイルローテーション実行クラスのFQCNを指定する。オプション。<br>
+ *     {@link RotatePolicy}が実装されたクラスのFQCNを指定する。<br>
+ *     デフォルトでは{@link FileSizeRotatePolicy}が使用される。<br>
  *     利用するローテーション実行クラス毎に、追加でプロパティの設定が必要となる。</dd>
  * </dl>
  * 本クラスでは、初期処理と終了処理、ログファイルの切り替え時に、書き込み先のログファイルにINFOレベルでメッセージを出力する。
