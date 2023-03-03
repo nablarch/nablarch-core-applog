@@ -110,11 +110,13 @@ public class FileSizeRotatePolicy implements RotatePolicy {
     /**
      * {@inheritDoc}
      * 設定情報のフォーマットを下記に示す。<br>
-     * <br>
-     * FILE AUTO CHANGE   = [&lt;ログファイルを自動で切り替えるか否か。&gt;]<br>
-     * MAX FILE SIZE      = [&lt;書き込み先ファイルの最大サイズ&gt;]<br>
-     * CURRENT FILE SIZE  = [&lt;書き込み先ファイルの現在のサイズ&gt;]<br>
-     *
+     * <pre>
+     * {@code
+     * FILE AUTO CHANGE    = [<ログファイルを自動で切り替えるか否か。>]
+     * MAX FILE SIZE       = [<書き込み先ファイルの最大サイズ>]
+     * CURRENT FILE SIZE   = [<書き込み先ファイルの現在のサイズ>]
+     * }
+     * </pre>
      * @return 設定情報
      * @see FileLogWriter#getSettings()
      */
