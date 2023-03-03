@@ -136,9 +136,7 @@ public class DateRotatePolicyTest {
     /** リネーム先のファイルが既に存在する場合に、正しくリネーム先のファイルパスが決定できること */
     @Test
     public void testDecideDupRotatedFilePath() throws IOException, ParseException {
-        String rotatedFilePath = "./log/date-rotate-app.log.20180104000000.old";
-
-        File dupF = new File(rotatedFilePath);
+        File dupF = new File("./log/date-rotate-app.log.20180104000000.old");
         dupF.createNewFile();
 
         DateRotatePolicy policy = new FixedDateRotatePolicy(textToDate("2018-01-03 10:10:10"));
