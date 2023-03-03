@@ -302,17 +302,19 @@ public class DateRotatePolicyTest {
     public void testInvalidUpdateTime(@FromDataPoints("invalid") DateFixture dateFixture) throws ParseException {
         String path = "./log/testGetSetting.log";
 
-        Map<String, String> settings = new HashMap<String, String>();
+        final Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", path);
         settings.put("appFile.encoding", "utf-8");
         settings.put("appFile.updateTime", dateFixture.updateTime);
 
-        DateRotatePolicy policy = new FixedDateRotatePolicy(textToDate(dateFixture.currentDate));
-        try{
-            policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
-        }
-        catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(),is("Invalid updateTime"));
-        }
+        final DateRotatePolicy policy = new FixedDateRotatePolicy(textToDate(dateFixture.currentDate));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
+            @Override
+            public void run() throws Throwable {
+                policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+            }
+        });
+        assertThat(exception.getMessage(),is("Invalid updateTime"));
     }
 }
