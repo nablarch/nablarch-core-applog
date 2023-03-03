@@ -9,6 +9,7 @@ import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.FromDataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 
 import java.io.File;
@@ -22,6 +23,7 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 
 /**
@@ -220,9 +222,9 @@ public class DateRotatePolicyTest {
     }
 
     /** ファイルがリネームできない場合に、IllegalStateExceptionが発生すること */
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testInvalidRotate() {
-        DateRotatePolicy policy = new DateRotatePolicy();
+        final DateRotatePolicy policy = new DateRotatePolicy();
         policy.initialize(objectSettings);
 
         File f = new File(logFilePath);
@@ -231,7 +233,15 @@ public class DateRotatePolicyTest {
         }
 
         // fileが存在しない状態でリネームさせる
-        policy.rotate("./log/testInvalidDateRotate-app.log.old");
+        final String rotatedFilePath = "./log/testInvalidDateRotate-app.log.old";
+        IllegalStateException exception = assertThrows(IllegalStateException.class, new ThrowingRunnable() {
+            @Override
+            public void run() throws Throwable {
+                //filePathファイルが存在しない状態でリネームさせる
+                policy.rotate(rotatedFilePath);
+            }
+        });
+        assertThat(exception.getMessage(), is("renaming failed. File#renameTo returns false. src file = [" + logFilePath  + "], dest file = [" + rotatedFilePath + "]"));
     }
 
     @DataPoints("normal")
