@@ -19,7 +19,7 @@ import java.util.Date;
  * <dt>updateTime</dt>
  * <dd>更新時刻。オプション。<br>
  *     特定の時刻以降のログファイルをローテーションしたい場合に指定する。<br>
- *     時刻は24時間表記とする。デフォルトは0。</dd>
+ *     時刻は、HH, HH:mm, HH:mm:ss のいずれかのフォーマットで指定する。デフォルトは0。</dd>
  * </dl>
  * @author Kotaro Taki
  */
