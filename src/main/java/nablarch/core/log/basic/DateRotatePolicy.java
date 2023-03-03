@@ -79,7 +79,7 @@ public class DateRotatePolicy implements RotatePolicy {
         if (logFile.exists()) {
             currentDate = new Date(logFile.lastModified());
         } else {
-            currentDate = new Date();
+            currentDate = currentDate();
         }
         nextUpdateDate = calcNextUpdateDate(currentDate);
     }
@@ -112,7 +112,7 @@ public class DateRotatePolicy implements RotatePolicy {
     @Override
     public boolean needsRotate(String message, Charset charset) {
 
-        Date currentDate = new Date();
+        Date currentDate =currentDate();
 
         return currentDate.after(nextUpdateDate) || currentDate.equals(nextUpdateDate);
     }
@@ -128,7 +128,7 @@ public class DateRotatePolicy implements RotatePolicy {
         File rotatedFile = new File(rotatedFilePath);
         if (rotatedFile .exists()) {
             String dupDatePattern = "yyyyMMddHHmmssSSS";
-            rotatedFilePath = logFilePath  + "." + new SimpleDateFormat(dupDatePattern).format(new Date()) + ".old";
+            rotatedFilePath = logFilePath  + "." + new SimpleDateFormat(dupDatePattern).format(currentDate()) + ".old";
         }
 
         return rotatedFilePath;
@@ -145,8 +145,7 @@ public class DateRotatePolicy implements RotatePolicy {
                     "renaming failed. File#renameTo returns false. src file = [" + logFilePath  + "], dest file = [" + rotatedFilePath + "]");
         }
 
-        Date currentDate = new Date();
-        nextUpdateDate = calcNextUpdateDate(currentDate);
+        nextUpdateDate = calcNextUpdateDate(currentDate());
     }
 
     /**
@@ -167,8 +166,16 @@ public class DateRotatePolicy implements RotatePolicy {
         String settingDatePattern = "yyyy-MM-dd HH:mm:ss";
         DateFormat settingDateFormat = new SimpleDateFormat(settingDatePattern);
         return "\tNEXT CHANGE DATE    = [" + settingDateFormat.format(nextUpdateDate) + "]" + Logger.LS
-                + "\tCURRENT DATE        = [" + settingDateFormat.format(new Date()) + "]" + Logger.LS
+                + "\tCURRENT DATE        = [" + settingDateFormat.format(currentDate()) + "]" + Logger.LS
                 + "\tUPDATE TIME         = [" + updateTime + "]" + Logger.LS;
+    }
+
+    /**
+     * 現在日時を返す。
+     * @return 現在日時
+     */
+    protected Date currentDate() {
+        return new Date();
     }
 
     /**
