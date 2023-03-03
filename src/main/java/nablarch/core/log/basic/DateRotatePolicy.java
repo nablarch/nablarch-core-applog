@@ -81,7 +81,11 @@ public class DateRotatePolicy implements RotatePolicy {
         File logFile = new File(logFilePath);
         Date currentDate;
         if (logFile.exists()) {
-            currentDate = new Date(logFile.lastModified());
+            long lastModifiedDate = logFile.lastModified();
+            if (lastModifiedDate == 0) {
+                throw  new IllegalStateException("failed to read file. file name = [" + logFilePath + "]");
+            }
+            currentDate = new Date(lastModifiedDate);
         } else {
             currentDate = currentDate();
         }

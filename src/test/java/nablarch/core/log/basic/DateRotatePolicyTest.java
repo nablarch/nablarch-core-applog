@@ -1,5 +1,7 @@
 package nablarch.core.log.basic;
 
+import mockit.Mock;
+import mockit.MockUp;
 import nablarch.core.log.Logger;
 import nablarch.core.log.MockLogSettings;
 import org.junit.Before;
@@ -115,6 +117,31 @@ public class DateRotatePolicyTest {
         boolean actual = policy.needsRotate("abcdeabcde", ignored);
 
         assertThat(actual, is(true));
+    }
+
+    /** パスにファイルが存在する場合、ファイルの更新時刻が取得できない場合に例外が発生すること */
+    @Test
+    public void testLastModifiedReturnsZero() throws IOException, ParseException {
+        new MockUp<File>() {
+            @Mock public long lastModified() { return 0; }
+        };
+
+        File logFile = new File(logFilePath);
+        logFile.createNewFile();
+
+        // ファイル更新時刻の設定
+        logFile.setLastModified(textToDate("2017-12-31 10:10:10").getTime());
+
+        final DateRotatePolicy policy = new FixedDateRotatePolicy(textToDate("2018-01-01 10:10:10"));
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, new ThrowingRunnable() {
+            @Override
+            public void run() throws Throwable {
+                policy.initialize(objectSettings);
+            }
+        });
+
+        assertThat(exception.getMessage(), is("failed to read file. file name = [" + logFilePath + "]"));
     }
 
     /** 正しくリネーム先のファイルパスが決定できること */
