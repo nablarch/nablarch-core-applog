@@ -106,7 +106,7 @@ public class DateRotatePolicy implements RotatePolicy {
 
     /**
      * {@inheritDoc}<br>
-     * 現在時刻 > インスタンス変数として保持している次回ローテション時刻の場合、ローテーションが必要と判定する。<br>
+     * 現在時刻 >= インスタンス変数として保持している次回ローテション時刻の場合、ローテーションが必要と判定する。<br>
      * それ以外の場合は、ローテーションが不要と判定する。
      */
     @Override
