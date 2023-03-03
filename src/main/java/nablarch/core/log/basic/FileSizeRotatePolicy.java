@@ -22,8 +22,7 @@ import java.util.Date;
  *     単位はキロバイト。1000バイトを1キロバイトと換算する。指定しなければ自動切替なし。<br>
  *     指定値が解析可能な整数値(Long.parseLong)でない場合は自動切替なし。<br>
  *     指定値が０以下の場合は自動切替なし。<br>
- *     古いログファイル名は、<通常のファイル名>.yyyyMMddHHmmssSSS.old。<br>
- *     このオプションは、rotatePolicyに{@link FileSizeRotatePolicy}が設定されているか、何も設定されていない場合に有効である。</dd>
+ *     古いログファイル名は、<通常のファイル名>.yyyyMMddHHmmssSSS.old。</dd>
  * </dl>
  * @author Kotaro Taki
  */
