@@ -35,7 +35,7 @@ public class FileSizeRotatePolicy implements RotatePolicy {
     private static final int KB = 1000;
 
     /** 書き込み先のファイルパス */
-    private String filePath;
+    private String logFilePath;
 
     /** 書き込み先ファイルの現在のサイズ */
     private long currentFileSize;
@@ -45,7 +45,7 @@ public class FileSizeRotatePolicy implements RotatePolicy {
      */
     @Override
     public void initialize(ObjectSettings settings) {
-        filePath = settings.getRequiredProp("filePath");
+        logFilePath = settings.getRequiredProp("filePath");
 
         try {
             maxFileSize = Long.parseLong(settings.getProp("maxFileSize")) * KB;
@@ -60,9 +60,9 @@ public class FileSizeRotatePolicy implements RotatePolicy {
      */
     @Override
     public void rotate(String rotatedFilePath) {
-        if (!new File(filePath).renameTo(new File(rotatedFilePath))) {
+        if (!new File(logFilePath).renameTo(new File(rotatedFilePath))) {
             throw new IllegalStateException(
-                    "renaming failed. File#renameTo returns false. src file = [" + filePath + "], dest file = [" + rotatedFilePath + "]");
+                    "renaming failed. File#renameTo returns false. src file = [" + logFilePath + "], dest file = [" + rotatedFilePath + "]");
         }
     }
 
@@ -86,7 +86,7 @@ public class FileSizeRotatePolicy implements RotatePolicy {
     @Override
     public String decideRotatedFilePath() {
         DateFormat oldFileDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-        return filePath + "." + oldFileDateFormat.format(new Date()) + ".old";
+        return logFilePath + "." + oldFileDateFormat.format(new Date()) + ".old";
     }
 
     /**
