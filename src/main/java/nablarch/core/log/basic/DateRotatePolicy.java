@@ -5,6 +5,7 @@ import nablarch.core.log.Logger;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -31,17 +32,11 @@ public class DateRotatePolicy implements RotatePolicy {
     /** 次回ローテーション時刻 */
     private Date nextUpdateDate;
 
-    /** 更新時刻 */
+    /** プロパティファイルに設定された更新時刻 */
     private String updateTime;
 
-    /** 更新時刻(hour) */
-    private int updateTimeHour;
-
-    /** 更新時刻(minutes) */
-    private int updateTimeMinutes;
-
-    /** 更新時刻(seconds) */
-    private int updateTimeSeconds;
+    /** プロパティファイルに設定された更新時刻から生成したCalendarオブジェクト */
+    private  Calendar updateCalender;
 
     /**
      * {@inheritDoc}
@@ -54,22 +49,31 @@ public class DateRotatePolicy implements RotatePolicy {
             String[] splits = updateTime.split(":");
             if (splits.length >= 4 || splits.length == 0) {
                 throw  new IllegalArgumentException("Invalid updateTime");
-            } else {
-                try {
-                    if (splits.length == 1) {
-                        updateTimeHour = Integer.parseInt(updateTime);
-                    } else if (splits.length == 2) {
-                        updateTimeHour = Integer.parseInt(splits[0]);
-                        updateTimeMinutes = Integer.parseInt(splits[1]);
-                    } else {
-                        updateTimeHour = Integer.parseInt(splits[0]);
-                        updateTimeMinutes = Integer.parseInt(splits[1]);
-                        updateTimeSeconds = Integer.parseInt(splits[2]);
-                    }
-                } catch (NumberFormatException e) {
-                    throw  new IllegalArgumentException("Invalid updateTime");
-                }
             }
+
+            String formattedUpdateTime;
+            if (splits.length == 1) {
+                formattedUpdateTime = updateTime+":00:00";
+            } else if (splits.length == 2) {
+                formattedUpdateTime = updateTime +":00";
+            } else {
+                formattedUpdateTime = updateTime;
+            }
+
+            SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+            format.setLenient(false);
+            try {
+                updateCalender = Calendar.getInstance();
+                updateCalender.setTime(format.parse(formattedUpdateTime));
+            } catch (ParseException e) {
+                throw new IllegalArgumentException("Invalid updateTime", e);
+            }
+        } else {
+            updateCalender = Calendar.getInstance();
+            updateCalender.set(Calendar.HOUR_OF_DAY, 0);
+            updateCalender.set(Calendar.MINUTE, 0);
+            updateCalender.set(Calendar.SECOND, 0);
+            updateCalender.set(Calendar.MILLISECOND, 0);
         }
 
         // ファイルが存在している場合、次回ローテーション時刻をファイルの更新時刻から算出する
@@ -93,9 +97,9 @@ public class DateRotatePolicy implements RotatePolicy {
         Calendar cl = Calendar.getInstance();
         cl.setTime(currentDate);
         // 時・分・秒・ミリ秒を0にする
-        cl.set(Calendar.HOUR_OF_DAY, updateTimeHour);
-        cl.set(Calendar.MINUTE, updateTimeMinutes);
-        cl.set(Calendar.SECOND, updateTimeSeconds);
+        cl.set(Calendar.HOUR_OF_DAY, updateCalender.get(Calendar.HOUR_OF_DAY));
+        cl.set(Calendar.MINUTE, updateCalender.get(Calendar.MINUTE));
+        cl.set(Calendar.SECOND, updateCalender.get(Calendar.SECOND));
         cl.set(Calendar.MILLISECOND, 0);
 
         // その後、日を+1する
