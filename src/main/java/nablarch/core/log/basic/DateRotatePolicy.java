@@ -49,10 +49,6 @@ public class DateRotatePolicy implements RotatePolicy {
     @Override
     public void initialize(ObjectSettings settings) {
 
-        filePath = settings.getRequiredProp("filePath");
-
-        File file = new File(filePath);
-
         updateTime = settings.getProp("updateTime");
         if (updateTime != null) {
             String[] splits = updateTime.split(":");
@@ -77,6 +73,8 @@ public class DateRotatePolicy implements RotatePolicy {
         }
 
         // ファイルが存在している場合、次回ローテーション時刻をファイルの更新時刻から算出する
+        filePath = settings.getRequiredProp("filePath");
+        File file = new File(filePath);
         Date currentDate;
         if (file.exists()) {
             currentDate = new Date(file.lastModified());
