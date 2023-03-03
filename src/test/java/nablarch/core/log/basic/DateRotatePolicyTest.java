@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.text.ParseException;
-import java.util.Calendar;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +56,7 @@ public class DateRotatePolicyTest {
 
     /** 現在時刻<次回更新日の場合に、正しくrotateが必要かどうか判定を行えること */
     @Test
-    public void testNeedsRotateIfNoNeeded() {
+    public void testNeedsRotateIfNoNeeded() throws ParseException {
         String path = "./log/testNeedsRotateIfNoNeeded-app.log";
         // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
         File f = new File(path);
@@ -67,15 +67,18 @@ public class DateRotatePolicyTest {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", path);
 
-        Calendar cl = Calendar.getInstance();
-        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
-        DateRotatePolicy policy = new FixedDateRotatePolicy(cl.getTime());
+        DateRotatePolicy policy = new FixedDateRotatePolicy(textToDate("2018-01-01 10:10:10"));
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         boolean actual = policy.needsRotate("abcdeabcde",
                 ignored);
 
         assertThat(actual, is(false));
+    }
+
+    private Date textToDate(String textDate) throws ParseException {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        return format.parse(textDate);
     }
 
     /** 現在時刻>次回更新日の場合に、正しくrotateが必要かどうか判定を行えること */
@@ -91,15 +94,11 @@ public class DateRotatePolicyTest {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath",path);
 
-        Calendar cl = Calendar.getInstance();
-        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
-        DateRotatePolicy policy = new FixedDateRotatePolicy(cl.getTime());
+        DateRotatePolicy policy = new FixedDateRotatePolicy(textToDate("2018-01-01 10:10:10"));
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         // 現在時刻の変更
-        cl.clear();
-        cl.set(2018, Calendar.JANUARY, 2, 23, 40, 28);
-        ((FixedDateRotatePolicy)policy).setCurrentDate(cl.getTime());
+        ((FixedDateRotatePolicy)policy).setCurrentDate(textToDate("2018-01-02 23:40:28"));
 
         boolean actual = policy.needsRotate("abcdeabcde", ignored);
 
@@ -108,22 +107,18 @@ public class DateRotatePolicyTest {
 
     /** パスにファイルが存在する場合、正しくrotateが必要かどうか判定を行えること */
     @Test
-    public void testNeedsIfFileExists() throws IOException {
+    public void testNeedsIfFileExists() throws IOException, ParseException {
         String path = "./log/testNeedsIfFileExists-app.log";
         File f = new File(path);
         f.createNewFile();
 
         // ファイル更新時刻の設定
-        Calendar cl = Calendar.getInstance();
-        cl.set(2017, Calendar.DECEMBER, 31, 10, 10, 10);
-        f.setLastModified(cl.getTime().getTime());
+        f.setLastModified(textToDate("2017-12-31 10:10:10").getTime());
 
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", path);
 
-        cl.clear();
-        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
-        DateRotatePolicy policy = new FixedDateRotatePolicy(cl.getTime());
+        DateRotatePolicy policy = new FixedDateRotatePolicy(textToDate("2018-01-01 10:10:10"));
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         boolean actual = policy.needsRotate("abcdeabcde", ignored);
@@ -133,7 +128,7 @@ public class DateRotatePolicyTest {
 
     /** 正しくリネーム先のファイルパスが決定できること */
     @Test
-    public void testDecideRotatedFilePath() {
+    public void testDecideRotatedFilePath() throws ParseException {
         String path = "./log/testDecideRotatedFilePath-app.log";
         // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
         File f = new File(path);
@@ -149,9 +144,7 @@ public class DateRotatePolicyTest {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", path);
 
-        Calendar cl = Calendar.getInstance();
-        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
-        DateRotatePolicy policy = new FixedDateRotatePolicy(cl.getTime());
+        DateRotatePolicy policy = new FixedDateRotatePolicy(textToDate("2018-01-01 10:10:10"));
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         String actual = policy.decideRotatedFilePath();
@@ -161,7 +154,7 @@ public class DateRotatePolicyTest {
 
     /** リネーム先のファイルが既に存在する場合に、正しくリネーム先のファイルパスが決定できること */
     @Test
-    public void testDecideDupRotatedFilePath() throws IOException {
+    public void testDecideDupRotatedFilePath() throws IOException, ParseException {
         String path = "./log/testDecideDupRotatedFilePath-app.log";
         String rotatedFilePath = "./log/testDecideDupRotatedFilePath-app.log.20180102000000.old";
 
@@ -176,10 +169,7 @@ public class DateRotatePolicyTest {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", path);
 
-        Calendar cl = Calendar.getInstance();
-        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
-        cl.set(Calendar.MILLISECOND, 000);
-        DateRotatePolicy policy = new FixedDateRotatePolicy(cl.getTime());
+        DateRotatePolicy policy = new FixedDateRotatePolicy(textToDate("2018-01-01 10:10:10"));
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         String actual = policy.decideRotatedFilePath();
@@ -189,7 +179,7 @@ public class DateRotatePolicyTest {
 
     /** 正しくファイルがリネームされること */
     @Test
-    public void testRotate() throws IOException {
+    public void testRotate() throws IOException, ParseException {
         String path = "./log/testDateRotate-app.log";
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", path);
@@ -200,9 +190,7 @@ public class DateRotatePolicyTest {
             f.delete();
         }
 
-        Calendar cl = Calendar.getInstance();
-        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
-        DateRotatePolicy policy = new FixedDateRotatePolicy(cl.getTime());
+        DateRotatePolicy policy = new FixedDateRotatePolicy(textToDate("2018-01-01 10:10:10"));
 
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
@@ -223,7 +211,7 @@ public class DateRotatePolicyTest {
 
     /** ローテーション時に、正しくnextUpdateDateが更新できること */
     @Test
-    public void testNextUpdateDateInRotate() throws IOException {
+    public void testNextUpdateDateInRotate() throws IOException, ParseException {
         String path = "./log/testNextUpdateDate-app.log";
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", path);
@@ -233,9 +221,7 @@ public class DateRotatePolicyTest {
             f.delete();
         }
 
-        Calendar cl = Calendar.getInstance();
-        cl.set(2018, Calendar.JANUARY, 1, 10, 10, 10);
-        DateRotatePolicy policy = new FixedDateRotatePolicy(cl.getTime());
+        DateRotatePolicy policy = new FixedDateRotatePolicy(textToDate("2018-01-01 10:10:10"));
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         // ローテーションするファイルを作成
@@ -248,24 +234,17 @@ public class DateRotatePolicyTest {
             expectedFile.delete();
         }
 
-        // rotateは2018年1月2日のため、次回更新時刻は2018年の1月3日になっている
-        cl.clear();
-        cl.set(2018, Calendar.JANUARY, 2, 23, 59, 59);
-        ((FixedDateRotatePolicy)policy).setCurrentDate(cl.getTime());
+        // rotateは2018年1月1日のため、次回更新時刻は2018年の1月2日になっている
         policy.rotate(expectedPath);
 
         // 正しくnextUpdateDateが更新できているかの確認
-        cl.clear();
-        cl.set(2018, Calendar.JANUARY, 2, 23, 59, 59);
-        ((FixedDateRotatePolicy)policy).setCurrentDate(cl.getTime());
+        ((FixedDateRotatePolicy)policy).setCurrentDate(textToDate("2018-01-01 23:59:59"));
 
         boolean actual = policy.needsRotate("abcdeabcde", ignored);
 
         assertThat(actual, is(false));
 
-        cl.clear();
-        cl.set(2018, Calendar.JANUARY, 3, 0, 0, 0);
-        ((FixedDateRotatePolicy)policy).setCurrentDate(cl.getTime());
+        ((FixedDateRotatePolicy)policy).setCurrentDate(textToDate("2018-01-02 00:00:00"));
 
         actual = policy.needsRotate("abcdeabcde", ignored);
 
@@ -299,46 +278,34 @@ public class DateRotatePolicyTest {
 
     @DataPoints("normal")
     public static DateFixture[] testFixtures = {
-            new DateFixture("12", "2018-01-02 12:00:00", 2018, Calendar.JANUARY, 1, 10, 10, 10)
-            ,new DateFixture("12:12", "2018-01-02 12:12:00", 2018, Calendar.JANUARY, 1, 10, 10, 10)
-            ,new DateFixture("12:12:12", "2018-01-02 12:12:12", 2018, Calendar.JANUARY, 1, 10, 10, 10)
+            new DateFixture("12", "2018-01-02 12:00:00","2018-01-01 10:10:10")
+            ,new DateFixture("12:12", "2018-01-02 12:12:00", "2018-01-01 10:10:10")
+            ,new DateFixture("12:12:12", "2018-01-02 12:12:12", "2018-01-01 10:10:10")
     };
 
     @DataPoints("invalid")
     public static DateFixture[] InvalidTestFixtures = {
-            new DateFixture("12:aiueo", null, 2018, Calendar.JANUARY, 1, 10, 10, 10)
-            ,new DateFixture(":::::", null, 2018, Calendar.JANUARY, 1, 10, 10, 10)
+            new DateFixture("12:aiueo", null, "2018-01-01 10:10:10")
+            ,new DateFixture(":::::", null, "2018-01-01 10:10:10")
     };
 
     @Ignore
     public static class DateFixture {
         private String updateTime;   // 更新時刻
         private String expectedNextUpdateTime;    //次回更新時刻
-
-        private int year;   // 年
-        private int month;  // 月
-        private int day;    // 日
-        private int hour;    // 時間
-        private int minutes;    // 分
-        private int seconds;    // 秒
+        private String currentDate; // 現在時刻
 
         public DateFixture(String updateTime,String expectedNextUpdateTime,
-                int year,int month,int day,int hour, int minutes,int seconds) {
+                String currentDate) {
             this.updateTime = updateTime;
             this.expectedNextUpdateTime = expectedNextUpdateTime;
-
-            this.year = year;
-            this.month = month;
-            this.day = day;
-            this.hour = hour;
-            this.minutes = minutes;
-            this.seconds = seconds;
+            this.currentDate = currentDate;
         }
     }
 
     /** 正しく設定情報が取得できること */
     @Theory
-    public void testGetSetting(@FromDataPoints("normal") DateFixture dateFixture) {
+    public void testGetSetting(@FromDataPoints("normal") DateFixture dateFixture) throws ParseException {
         String path = "./log/testGetSetting.log";
         // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
         File f = new File(path);
@@ -351,9 +318,7 @@ public class DateRotatePolicyTest {
         settings.put("appFile.encoding", "utf-8");
         settings.put("appFile.updateTime", dateFixture.updateTime);
 
-        Calendar cl = Calendar.getInstance();
-        cl.set(dateFixture.year,dateFixture.month, dateFixture.day,dateFixture.hour, dateFixture.minutes, dateFixture.seconds);
-        DateRotatePolicy policy = new FixedDateRotatePolicy(cl.getTime());
+        DateRotatePolicy policy = new FixedDateRotatePolicy(textToDate(dateFixture.currentDate));
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         String actual = policy.getSettings();
@@ -368,7 +333,7 @@ public class DateRotatePolicyTest {
 
     /** 不正なUpdateTimeを指定した場合に、例外が発生すること */
     @Theory
-    public void testInvalidUpdateTime(@FromDataPoints("invalid") DateFixture dateFixture) {
+    public void testInvalidUpdateTime(@FromDataPoints("invalid") DateFixture dateFixture) throws ParseException {
         String path = "./log/testGetSetting.log";
 
         Map<String, String> settings = new HashMap<String, String>();
@@ -376,9 +341,7 @@ public class DateRotatePolicyTest {
         settings.put("appFile.encoding", "utf-8");
         settings.put("appFile.updateTime", dateFixture.updateTime);
 
-        Calendar cl = Calendar.getInstance();
-        cl.set(dateFixture.year,dateFixture.month, dateFixture.day,dateFixture.hour, dateFixture.minutes, dateFixture.seconds);
-        DateRotatePolicy policy = new FixedDateRotatePolicy(cl.getTime());
+        DateRotatePolicy policy = new FixedDateRotatePolicy(textToDate(dateFixture.currentDate));
         try{
             policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
         }
