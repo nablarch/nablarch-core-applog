@@ -98,8 +98,10 @@ public class FileSizeRotatePolicyTest {
         assertThat(exception.getMessage(), is("renaming failed. File#renameTo returns false. src file = [" + logFilePath + "], dest file = [" + rotatedFilePath + "]"));
     }
 
-    /** 正しくrotateが必要かどうか判定を行えること
-     *  maxFileSizeが0KBのためfalseを返す */
+    /**
+     * 正しくrotateが必要かどうか判定を行えること
+     * maxFileSizeが0KBのためfalseを返す
+     */
     @Test
     public void testNeedsRotateMaxFileSizeZero() {
         Map<String, String> settings = new HashMap<String, String>();
@@ -132,8 +134,10 @@ public class FileSizeRotatePolicyTest {
         return sb.toString();
     }
 
-    /** 正しくrotateが必要かどうか判定を行えること
-     *  maxFileSizeが20KBだが、currentFileSizeが10KBでmsgLengthが5KBのためrotate不要 */
+    /**
+     * 正しくrotateが必要かどうか判定を行えること
+     * maxFileSizeが20KBだが、currentFileSizeが10KBでmsgLengthが5KBのためrotate不要
+     */
     @Test
     public void testNeedsRotateIfNotNeeded() throws IOException {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
@@ -153,8 +157,10 @@ public class FileSizeRotatePolicyTest {
         assertThat(policy.needsRotate(getAlphaNumericString(5 * 1000), Charset.defaultCharset()), is(false));
     }
 
-    /** 正しくrotateが必要かどうか判定を行えること
-     *  maxFileSizeが20バイトだが、currentFileSizeが15バイトでmsgLengthが10バイト */
+    /**
+     * 正しくrotateが必要かどうか判定を行えること
+     * maxFileSizeが20KBだが、currentFileSizeが15KBでmsgLengthが10KBのためrotate必要
+     */
     @Test
     public void testNeedsRotateIfNeeded() throws IOException {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
@@ -175,8 +181,10 @@ public class FileSizeRotatePolicyTest {
         assertThat(policy.needsRotate(getAlphaNumericString(10 * 1000), Charset.defaultCharset()), is(true));
     }
 
-    /** 正しくrotateが必要かどうか判定を行えること
-     *  maxFileSizeが不正な値、currentFileSizeが15バイトでmsgLengthが10バイト */
+    /**
+     * 正しくrotateが必要かどうか判定を行えること
+     * maxFileSizeが不正な値、currentFileSizeが15KBでmsgLengthが10KBのためrotate不要
+     */
     @Test
     public void testIvalidMaxFileSizeNeedsRotate() throws IOException {
         Map<String, String> settings = new HashMap<String, String>();
