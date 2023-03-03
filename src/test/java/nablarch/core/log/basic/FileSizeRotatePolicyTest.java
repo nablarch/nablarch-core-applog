@@ -2,6 +2,7 @@ package nablarch.core.log.basic;
 
 import nablarch.core.log.Logger;
 import nablarch.core.log.MockLogSettings;
+import nablarch.core.util.FileUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -13,6 +14,7 @@ import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -115,23 +117,26 @@ public class FileSizeRotatePolicyTest {
         assertThat(policy.needsRotate("abcde", Charset.defaultCharset()), is(false));
     }
 
-    /** 指定したバイト数分のランダムな文字列を生成する */
-    private String getAlphaNumericString(int n) {
-        String alphaNumericString = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                + "0123456789"
-                + "abcdefghijklmnopqrstuvxyz";
+    private File newFile(String path, int byteSize) throws IOException {
+        String content = generateZeroPaddingString(byteSize);
 
-        StringBuilder sb = new StringBuilder(n);
-
-        for (int i = 0; i < n; i++) {
-            int index
-                    = (int) (alphaNumericString.length()
-                    * Math.random());
-            sb.append(alphaNumericString
-                    .charAt(index));
+        FileWriter fileWriter = null;
+        try {
+            fileWriter = new FileWriter(path);
+            fileWriter.write(content);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            FileUtil.closeQuietly(fileWriter);
         }
 
-        return sb.toString();
+        return new File(path);
+    }
+
+    private String generateZeroPaddingString(int byteSize) {
+        char[] content = new char[byteSize];
+        Arrays.fill(content, '0');
+        return new String(content);
     }
 
     /**
@@ -144,17 +149,11 @@ public class FileSizeRotatePolicyTest {
         policy.initialize(objectSettings);
 
         // currentFileSizeを10KBに設定
-        File f = new File(logFilePath);
-        f.createNewFile();
+        File logFile = newFile(logFilePath,10 * 1000);
 
-        FileWriter filewriter = new FileWriter(f);
-        String str = getAlphaNumericString(10 * 1000);
-        filewriter.write(str);
-        filewriter.close();
+        policy.onOpenFile(logFile);
 
-        policy.onOpenFile(f);
-
-        assertThat(policy.needsRotate(getAlphaNumericString(5 * 1000), Charset.defaultCharset()), is(false));
+        assertThat(policy.needsRotate(generateZeroPaddingString(5 * 1000), Charset.defaultCharset()), is(false));
     }
 
     /**
@@ -167,18 +166,13 @@ public class FileSizeRotatePolicyTest {
         policy.initialize(objectSettings);
 
         // currentFileSizeを15KBに設定
-        File f = new File(logFilePath);
-        f.createNewFile();
-        FileWriter filewriter = new FileWriter(f);
-        String str = getAlphaNumericString(10 * 1000);
-        filewriter.write(str);
-        filewriter.close();
+        File logFile = newFile(logFilePath,10 * 1000);
 
-        policy.onOpenFile(f);
+        policy.onOpenFile(logFile);
 
-        policy.onWrite(getAlphaNumericString(5 * 1000), Charset.defaultCharset());
+        policy.onWrite(generateZeroPaddingString(5 * 1000), Charset.defaultCharset());
 
-        assertThat(policy.needsRotate(getAlphaNumericString(10 * 1000), Charset.defaultCharset()), is(true));
+        assertThat(policy.needsRotate(generateZeroPaddingString(10 * 1000), Charset.defaultCharset()), is(true));
     }
 
     /**
@@ -195,16 +189,11 @@ public class FileSizeRotatePolicyTest {
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         // currentFileSizeを15KBに設定
-        File f = new File(logFilePath);
-        f.createNewFile();
-        FileWriter filewriter = new FileWriter(f);
-        String str = getAlphaNumericString(15 * 1000);
-        filewriter.write(str);
-        filewriter.close();
+        File logFile = newFile(logFilePath,15*1000);
 
-        policy.onOpenFile(f);
+        policy.onOpenFile(logFile);
 
-        assertThat(policy.needsRotate(getAlphaNumericString(10 * 1000), Charset.defaultCharset()), is(false));
+        assertThat(policy.needsRotate(generateZeroPaddingString(10 * 1000), Charset.defaultCharset()), is(false));
     }
 
     /** 正しくリネーム先のファイルパスが決定できること */
