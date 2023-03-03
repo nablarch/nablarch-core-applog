@@ -28,15 +28,6 @@ public class DateRotatePolicy implements RotatePolicy {
     /** 書き込み先のファイルパス */
     private String filePath;
 
-    /** ログファイル名に使用する日時フォーマット */
-    private final DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-
-    /** 重複したログファイル名に使用する日時フォーマット */
-    private final DateFormat dupFileDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-
-    /** 設定情報の出力に使用する日時フォーマット */
-    private final DateFormat settingDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
     /** 次回ローテーション時刻 */
     private Date nextUpdateDate;
 
@@ -133,11 +124,13 @@ public class DateRotatePolicy implements RotatePolicy {
      */
     @Override
     public String decideRotatedFilePath() {
-        String rotatedFilePath = filePath + "." + dateFormat.format(nextUpdateDate) + ".old";
+        String datePattern = "yyyyMMddHHmmss";
+        String rotatedFilePath = filePath + "." + new SimpleDateFormat(datePattern).format(nextUpdateDate) + ".old";
 
         File f = new File(rotatedFilePath);
         if (f.exists()) {
-            rotatedFilePath = filePath + "." + dupFileDateFormat.format(new Date()) + ".old";
+            String dupDatePattern = "yyyyMMddHHmmssSSS";
+            rotatedFilePath = filePath + "." + new SimpleDateFormat(dupDatePattern).format(new Date()) + ".old";
         }
 
         return rotatedFilePath;
@@ -171,6 +164,8 @@ public class DateRotatePolicy implements RotatePolicy {
      */
     @Override
     public String getSettings() {
+        String settingDatePattern = "yyyy-MM-dd HH:mm:ss";
+        DateFormat settingDateFormat = new SimpleDateFormat(settingDatePattern);
         return "\tNEXT CHANGE DATE    = [" + settingDateFormat.format(nextUpdateDate) + "]" + Logger.LS
                 + "\tCURRENT DATE        = [" + settingDateFormat.format(new Date()) + "]" + Logger.LS
                 + "\tUPDATE TIME         = [" + updateTime + "]" + Logger.LS;
