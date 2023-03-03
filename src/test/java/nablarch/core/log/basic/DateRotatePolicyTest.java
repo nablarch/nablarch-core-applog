@@ -3,7 +3,6 @@ package nablarch.core.log.basic;
 import nablarch.core.log.Logger;
 import nablarch.core.log.MockLogSettings;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.FromDataPoints;
@@ -256,8 +255,7 @@ public class DateRotatePolicyTest {
             new DateFixture("12:aiueo", null, "2018-01-01 10:10:10")
             ,new DateFixture(":::::", null, "2018-01-01 10:10:10")
     };
-
-    @Ignore
+    
     public static class DateFixture {
         private String updateTime;   // 更新時刻
         private String expectedNextUpdateTime;    //次回更新時刻
