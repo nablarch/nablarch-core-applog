@@ -157,13 +157,30 @@ public class DateRotatePolicyTest {
         new File(logFilePath).createNewFile();
 
         String expectedPath = "./log/testRotate-app.log.old";
+
+        // ロテート前
+        // リネーム前のファイルが存在すること
+        File logFile = new File(logFilePath);
+        if (!logFile.exists()) {
+            fail();
+        }
+
+        // リネーム後のファイルが存在しないこと
         File expectedFile = new File(expectedPath);
+        expectedFile.delete();
         if (expectedFile.exists()) {
-            expectedFile.delete();
+            fail();
         }
 
         policy.rotate(expectedPath);
 
+        // ロテート後
+        // リネーム前のファイルが存在しないこと
+        if (logFile.exists()) {
+            fail();
+        }
+
+        // リネーム後のファイルが存在すること
         if (!expectedFile.exists()) {
             fail();
         }
