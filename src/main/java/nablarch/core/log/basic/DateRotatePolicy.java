@@ -152,11 +152,13 @@ public class DateRotatePolicy implements RotatePolicy {
     /**
      * {@inheritDoc}
      * 設定情報のフォーマットを下記に示す。<br>
-     * <br>
-     * NEXT CHANGE DATE   = [&lt;次回更新時刻&gt;]<br>
-     * CURRENT DATE       = [&lt;現在時刻&gt;]<br>
-     * UPDATE TIME = [&lt;更新時刻&gt;]<br>
-     *
+     * <pre>
+     * {@code
+     * NEXT CHANGE DATE    = [<次回更新時刻>]
+     * CURRENT DATE        = [<現在時刻>]
+     * UPDATE TIME         = [<更新時刻>]
+     * }
+     * </pre>
      * @return 設定情報
      * @see FileLogWriter#getSettings()
      */
