@@ -226,14 +226,6 @@ public class FileLogWriterTest extends LogTestSupport {
         FileLogWriter writer = new FileLogWriter();
         final ObjectSettings objectSettings = new ObjectSettings(new MockLogSettings(settings), "appFile");
 
-        new Expectations() {
-            {
-                rotatePolicy.initialize((ObjectSettings) any);
-                rotatePolicy.onOpenFile((File) any);
-                rotatePolicy.getSettings();
-            }
-        };
-
         writer.initialize(objectSettings);
 
         // initializeでは、initialize・onOpenFile・getSettingsが１回ずつ呼びされていることの確認
@@ -250,7 +242,6 @@ public class FileLogWriterTest extends LogTestSupport {
 
         new Expectations() {
             {
-                rotatePolicy.onWrite(anyString, (Charset) any);
                 rotatePolicy.needsRotate(anyString, (Charset) any);
                 result = false;
             }
@@ -287,14 +278,6 @@ public class FileLogWriterTest extends LogTestSupport {
         FileLogWriter writer = new FileLogWriter();
         final ObjectSettings objectSettings = new ObjectSettings(new MockLogSettings(settings), "appFile");
 
-        new Expectations() {
-            {
-                rotatePolicy.initialize((ObjectSettings) any);
-                rotatePolicy.onOpenFile((File) any);
-                rotatePolicy.getSettings();
-            }
-        };
-
         writer.initialize(objectSettings);
 
         // initializeでは、initialize・onOpenFile・getSettingsが１回ずつ呼びされていることの確認
@@ -317,11 +300,8 @@ public class FileLogWriterTest extends LogTestSupport {
                 rotatePolicy.decideRotatedFilePath();
                 result = rotatedFilePath;
 
-                rotatePolicy.rotate(anyString);
                 rotatePolicy.onOpenFile((File) any);
                 rotatePolicy.getSettings();
-
-                rotatePolicy.onWrite(anyString, (Charset) any);
             }
         };
 
