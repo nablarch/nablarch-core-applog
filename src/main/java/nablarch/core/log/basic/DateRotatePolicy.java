@@ -26,7 +26,7 @@ import java.util.Date;
 public class DateRotatePolicy implements RotatePolicy {
 
     /** 書き込み先のファイルパス */
-    private String filePath;
+    private String logFilePath ;
 
     /** 次回ローテーション時刻 */
     private Date nextUpdateDate;
@@ -73,11 +73,11 @@ public class DateRotatePolicy implements RotatePolicy {
         }
 
         // ファイルが存在している場合、次回ローテーション時刻をファイルの更新時刻から算出する
-        filePath = settings.getRequiredProp("filePath");
-        File file = new File(filePath);
+        logFilePath  = settings.getRequiredProp("filePath");
+        File logFile = new File(logFilePath);
         Date currentDate;
-        if (file.exists()) {
-            currentDate = new Date(file.lastModified());
+        if (logFile.exists()) {
+            currentDate = new Date(logFile.lastModified());
         } else {
             currentDate = new Date();
         }
@@ -123,12 +123,12 @@ public class DateRotatePolicy implements RotatePolicy {
     @Override
     public String decideRotatedFilePath() {
         String datePattern = "yyyyMMddHHmmss";
-        String rotatedFilePath = filePath + "." + new SimpleDateFormat(datePattern).format(nextUpdateDate) + ".old";
+        String rotatedFilePath = logFilePath  + "." + new SimpleDateFormat(datePattern).format(nextUpdateDate) + ".old";
 
-        File f = new File(rotatedFilePath);
-        if (f.exists()) {
+        File rotatedFile = new File(rotatedFilePath);
+        if (rotatedFile .exists()) {
             String dupDatePattern = "yyyyMMddHHmmssSSS";
-            rotatedFilePath = filePath + "." + new SimpleDateFormat(dupDatePattern).format(new Date()) + ".old";
+            rotatedFilePath = logFilePath  + "." + new SimpleDateFormat(dupDatePattern).format(new Date()) + ".old";
         }
 
         return rotatedFilePath;
@@ -140,9 +140,9 @@ public class DateRotatePolicy implements RotatePolicy {
      */
     @Override
     public void rotate(String rotatedFilePath) {
-        if (!new File(filePath).renameTo(new File(rotatedFilePath))) {
+        if (!new File(logFilePath ).renameTo(new File(rotatedFilePath))) {
             throw new IllegalStateException(
-                    "renaming failed. File#renameTo returns false. src file = [" + filePath + "], dest file = [" + rotatedFilePath + "]");
+                    "renaming failed. File#renameTo returns false. src file = [" + logFilePath  + "], dest file = [" + rotatedFilePath + "]");
         }
 
         Date currentDate = new Date();
