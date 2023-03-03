@@ -2,7 +2,9 @@ package nablarch.core.log.basic;
 
 import nablarch.core.log.Logger;
 import nablarch.core.log.MockLogSettings;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -16,8 +18,7 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * {@link FileSizeRotatePolicy}のテスト。
@@ -26,19 +27,28 @@ import static org.junit.Assert.fail;
  */
 public class FileSizeRotatePolicyTest {
 
+    @Before
+    public  void setup() {
+        // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
+        File logFile = new File(logFilePath);
+        if (logFile.exists()) {
+            logFile.delete();
+        }
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", logFilePath);
+        settings.put("appFile.maxFileSize", "20");
+        objectSettings = new ObjectSettings(new MockLogSettings(settings),"appFile");
+    }
+    private String logFilePath = "./log/file-size-rotate-app.log";
+    private ObjectSettings objectSettings;
+
     /** 正しくファイルがリネームされること */
     @Test
     public void testRotate() throws IOException {
-        String path = "./log/testFileSizeRotate-app.log";
-
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", path);
-        settings.put("appFile.maxFileSize", "20");
-
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+        policy.initialize(objectSettings);
 
-        File f = new File(path);
+        File f = new File(logFilePath);
         f.createNewFile();
 
         String expectedPath = "./log/testFileSizeRotate-app.log.old";
@@ -57,21 +67,10 @@ public class FileSizeRotatePolicyTest {
     /** ファイルがリネームできない場合に、IllegalStateExceptionが発生すること */
     @Test(expected = IllegalStateException.class)
     public void testInvalidRotate() {
-        String path = "./log/testInvalidFileSizeRotate-app.log";
+        final FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
+        policy.initialize(objectSettings);
+        new File(logFilePath).delete();
 
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", path);
-        settings.put("appFile.maxFileSize", "20");
-
-        FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
-        File f = new File(path);
-
-        if (f.exists()) {
-            f.delete();
-        }
-
-        //filePathファイルが存在しない状態でリネームさせる
         policy.rotate("./log/testInvalidFileSizeRotate-app.log.old");
     }
 
@@ -80,7 +79,7 @@ public class FileSizeRotatePolicyTest {
     @Test
     public void testNeedsRotateMaxFileSizeZero() {
         Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/app.log");
+        settings.put("appFile.filePath", logFilePath);
         settings.put("appFile.maxFileSize", "0");
 
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
@@ -113,16 +112,11 @@ public class FileSizeRotatePolicyTest {
      *  maxFileSizeが20KBだが、currentFileSizeが10KBでmsgLengthが5KBのためrotate不要 */
     @Test
     public void testNeedsRotateIfNotNeeded() throws IOException {
-        String path = "./log/app.log";
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", path);
-        settings.put("appFile.maxFileSize", "20");
-
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+        policy.initialize(objectSettings);
 
         // currentFileSizeを10KBに設定
-        File f = new File(path);
+        File f = new File(logFilePath);
         f.createNewFile();
 
         FileWriter filewriter = new FileWriter(f);
@@ -139,16 +133,11 @@ public class FileSizeRotatePolicyTest {
      *  maxFileSizeが20バイトだが、currentFileSizeが15バイトでmsgLengthが10バイト */
     @Test
     public void testNeedsRotateIfNeeded() throws IOException {
-        String path = "./log/app.log";
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", path);
-        settings.put("appFile.maxFileSize", "20");
-
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+        policy.initialize(objectSettings);
 
         // currentFileSizeを15KBに設定
-        File f = new File(path);
+        File f = new File(logFilePath);
         f.createNewFile();
         FileWriter filewriter = new FileWriter(f);
         String str = getAlphaNumericString(10 * 1000);
@@ -166,16 +155,15 @@ public class FileSizeRotatePolicyTest {
      *  maxFileSizeが不正な値、currentFileSizeが15バイトでmsgLengthが10バイト */
     @Test
     public void testIvalidMaxFileSizeNeedsRotate() throws IOException {
-        String path = "./log/app.log";
         Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", path);
+        settings.put("appFile.filePath", logFilePath);
         settings.put("appFile.maxFileSize", "aiueo");
 
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         // currentFileSizeを15KBに設定
-        File f = new File(path);
+        File f = new File(logFilePath);
         f.createNewFile();
         FileWriter filewriter = new FileWriter(f);
         String str = getAlphaNumericString(15 * 1000);
@@ -191,15 +179,10 @@ public class FileSizeRotatePolicyTest {
     @Test
     public void testDecideRotatedFilePath() throws ParseException {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
-        String path = "./log/app.log";
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", path);
-        settings.put("appFile.maxFileSize", "20");
-
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+        policy.initialize(objectSettings);
         String actual = policy.decideRotatedFilePath();
 
-        assertTrue(actual.startsWith("./log/app.log.") && actual.endsWith(".old"));
+        assertTrue(actual.startsWith(logFilePath) && actual.endsWith(".old"));
 
         DateFormat oldFileDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         String oldDate = actual.split("\\.")[3];
@@ -210,22 +193,10 @@ public class FileSizeRotatePolicyTest {
     /** 正しく設定情報が取得できること */
     @Test
     public void testGetSetting() throws IOException {
-        String path = "./log/app.log";
-
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", path);
-        settings.put("appFile.encoding", "utf-8");
-        // 単位はKB
-        settings.put("appFile.maxFileSize", "20");
-
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
-        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+        policy.initialize(objectSettings);
 
-        File file = new File(path);
-        if (file.exists()) {
-            file.delete();
-        }
-
+        File file = new File(logFilePath);
         FileWriter filewriter = new FileWriter(file);
 
         filewriter.write("aiueo");
