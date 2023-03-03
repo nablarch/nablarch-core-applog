@@ -203,12 +203,15 @@ public class FileSizeRotatePolicyTest {
         policy.initialize(objectSettings);
         String actual = policy.decideRotatedFilePath();
 
+        // リネーム先ファイル名の末尾が.oldであるかどうかの確認
         assertThat(actual, allOf(
                 startsWith(logFilePath),
                 endsWith(".old")
         ));
 
+        // ファイル名の日付を出力している部分をパースしてエラーにならないことを確認
         DateFormat oldFileDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+        oldFileDateFormat.setLenient(false);
         String oldDate = actual.split("\\.")[3];
 
         oldFileDateFormat.parse(oldDate);
