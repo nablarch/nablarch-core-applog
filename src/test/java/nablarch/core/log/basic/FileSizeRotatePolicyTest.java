@@ -18,7 +18,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
@@ -203,7 +203,10 @@ public class FileSizeRotatePolicyTest {
         policy.initialize(objectSettings);
         String actual = policy.decideRotatedFilePath();
 
-        assertTrue(actual.startsWith(logFilePath) && actual.endsWith(".old"));
+        assertThat(actual, allOf(
+                startsWith(logFilePath),
+                endsWith(".old")
+        ));
 
         DateFormat oldFileDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         String oldDate = actual.split("\\.")[3];
