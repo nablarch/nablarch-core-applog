@@ -235,9 +235,9 @@ public class FileSizeRotatePolicyTest {
         String actual = policy.getSettings();
 
         // MAX FILE SIZEはインスタンス変数にはバイトで保存されているため変換
-        String expected = "\tFILE AUTO CHANGE    = [" + (20L > 0L) + "]" + Logger.LS
-                + "\tMAX FILE SIZE       = [" + 20000L + "]" + Logger.LS
-                + "\tCURRENT FILE SIZE   = [" + 5L + "]" + Logger.LS;
+        String expected = "\tFILE AUTO CHANGE    = [true]" + Logger.LS
+                + "\tMAX FILE SIZE       = [20000]" + Logger.LS
+                + "\tCURRENT FILE SIZE   = [5]" + Logger.LS;
         ;
 
         assertThat(actual, is(expected));
