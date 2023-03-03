@@ -48,18 +48,34 @@ public class FileSizeRotatePolicyTest {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(objectSettings);
 
-        File f = new File(logFilePath);
-        f.createNewFile();
+        new File(logFilePath).createNewFile();
 
         String expectedPath = "./log/testFileSizeRotate-app.log.old";
-        File expected = new File(expectedPath);
-        if (expected.exists()) {
-            expected.delete();
+
+        // ロテート前
+        // リネーム前のファイルが存在すること
+        File logFile = new File(logFilePath);
+        if (!logFile.exists()) {
+            fail();
+        }
+
+        // リネーム後のファイルが存在しないこと
+        File expectedFile = new File(expectedPath);
+        expectedFile.delete();
+        if (expectedFile.exists()) {
+            fail();
         }
 
         policy.rotate(expectedPath);
 
-        if (!expected.exists()) {
+        // ロテート後
+        // リネーム前のファイルが存在しないこと
+        if (logFile.exists()) {
+            fail();
+        }
+
+        // リネーム後のファイルが存在すること
+        if (!expectedFile.exists()) {
             fail();
         }
     }
