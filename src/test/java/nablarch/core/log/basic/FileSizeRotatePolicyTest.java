@@ -81,13 +81,21 @@ public class FileSizeRotatePolicyTest {
     }
 
     /** ファイルがリネームできない場合に、IllegalStateExceptionが発生すること */
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testInvalidRotate() {
         final FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(objectSettings);
         new File(logFilePath).delete();
 
-        policy.rotate("./log/testInvalidFileSizeRotate-app.log.old");
+        final String rotatedFilePath = "./log/testInvalidFileSizeRotate-app.log.old";
+        IllegalStateException exception = assertThrows(IllegalStateException.class, new ThrowingRunnable() {
+            @Override
+            public void run() throws Throwable {
+                //filePathファイルが存在しない状態でリネームさせる
+                policy.rotate(rotatedFilePath);
+            }
+        });
+        assertThat(exception.getMessage(), is("renaming failed. File#renameTo returns false. src file = [" + logFilePath + "], dest file = [" + rotatedFilePath + "]"));
     }
 
     /** 正しくrotateが必要かどうか判定を行えること
