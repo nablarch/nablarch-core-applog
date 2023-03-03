@@ -59,9 +59,9 @@ public class DateRotatePolicyTest {
     @Before
     public  void setup() {
         // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
-        File f = new File(logFilePath);
-        if (f.exists()) {
-            f.delete();
+        File logFile = new File(logFilePath);
+        if (logFile.exists()) {
+            logFile.delete();
         }
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", logFilePath);
@@ -102,11 +102,11 @@ public class DateRotatePolicyTest {
     /** パスにファイルが存在する場合、正しくrotateが必要かどうか判定を行えること */
     @Test
     public void testNeedsIfFileExists() throws IOException, ParseException {
-        File f = new File(logFilePath);
-        f.createNewFile();
+        File logFile = new File(logFilePath);
+        logFile.createNewFile();
 
         // ファイル更新時刻の設定
-        f.setLastModified(textToDate("2017-12-31 10:10:10").getTime());
+        logFile.setLastModified(textToDate("2017-12-31 10:10:10").getTime());
 
         DateRotatePolicy policy = new FixedDateRotatePolicy(textToDate("2018-01-01 10:10:10"));
         policy.initialize(objectSettings);
@@ -136,8 +136,8 @@ public class DateRotatePolicyTest {
     /** リネーム先のファイルが既に存在する場合に、正しくリネーム先のファイルパスが決定できること */
     @Test
     public void testDecideDupRotatedFilePath() throws IOException, ParseException {
-        File dupF = new File("./log/date-rotate-app.log.20180104000000.old");
-        dupF.createNewFile();
+        File dupLogFile = new File("./log/date-rotate-app.log.20180104000000.old");
+        dupLogFile.createNewFile();
 
         DateRotatePolicy policy = new FixedDateRotatePolicy(textToDate("2018-01-03 10:10:10"));
         policy.initialize(objectSettings);
