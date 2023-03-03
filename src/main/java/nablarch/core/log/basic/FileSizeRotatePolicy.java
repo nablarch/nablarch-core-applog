@@ -40,9 +40,6 @@ public class FileSizeRotatePolicy implements RotatePolicy {
     /** 書き込み先ファイルの現在のサイズ */
     private long currentFileSize;
 
-    /** 古いログファイル名に使用する日時フォーマット */
-    private final DateFormat oldFileDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-
     /**
      * {@inheritDoc}
      */
@@ -88,6 +85,7 @@ public class FileSizeRotatePolicy implements RotatePolicy {
      */
     @Override
     public String decideRotatedFilePath() {
+        DateFormat oldFileDateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         return filePath + "." + oldFileDateFormat.format(new Date()) + ".old";
     }
 
