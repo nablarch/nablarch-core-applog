@@ -4,7 +4,9 @@ import mockit.*;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.log.LogTestUtil;
 import nablarch.core.log.MockLogSettings;
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -14,6 +16,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
 
@@ -27,32 +30,45 @@ public class FileLogWriterTest extends LogTestSupport {
     private static final String FQCN = FileLogWriterTest.class.getName();
 
     /** ファイルパスが存在しない場合は初期処理に失敗すること。 */
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidFilePath() {
 
-        Map<String, String> settings = new HashMap<String, String>();
+        final Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", "./unknown/app.log");
 
-        FileLogWriter writer = new FileLogWriter();
-        writer.initialize(
-                new ObjectSettings(new MockLogSettings(settings), "appFile"));
-        writer.terminate();
+        final FileLogWriter writer = new FileLogWriter();
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
+            @Override
+            public void run() throws Throwable {
+                writer.initialize(
+                        new ObjectSettings(new MockLogSettings(settings), "appFile"));
+            }
+        });
+
+        assertThat(exception.getMessage(), CoreMatchers.is("failed to create java.io.Writer. file name = [./unknown/app.log], encoding = [UTF-8], buffer size =[8000]"));
     }
 
     /** 不正な文字エンコーディングが設定された場合は初期処理に失敗すること。 */
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testInvalidEncoding() {
 
-        Map<String, String> settings = new HashMap<String, String>();
+        final Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", "./log/invalid-encoding-app.log");
         settings.put("appFile.encoding", "UNKNOWN");
         settings.put("appFile.outputBufferSize", "8");
 
-        FileLogWriter writer = new FileLogWriter();
-        writer.initialize(
-                new ObjectSettings(new MockLogSettings(settings), "appFile"));
+        final FileLogWriter writer = new FileLogWriter();
 
-        writer.terminate();
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
+            @Override
+            public void run() throws Throwable {
+                writer.initialize(
+                        new ObjectSettings(new MockLogSettings(settings), "appFile"));
+            }
+        });
+
+        assertThat(exception.getMessage(), CoreMatchers.is("UNKNOWN"));
     }
 
     /**
