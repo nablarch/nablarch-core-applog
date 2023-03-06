@@ -45,6 +45,7 @@ public class DateRotatePolicy implements RotatePolicy {
     public void initialize(ObjectSettings settings) {
 
         updateTime = settings.getProp("updateTime");
+        updateCalender = Calendar.getInstance();
         if (updateTime != null) {
             String[] splits = updateTime.split(":");
             if (splits.length >= 4 || splits.length == 0) {
@@ -63,17 +64,14 @@ public class DateRotatePolicy implements RotatePolicy {
             SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
             format.setLenient(false);
             try {
-                updateCalender = Calendar.getInstance();
                 updateCalender.setTime(format.parse(formattedUpdateTime));
             } catch (ParseException e) {
                 throw new IllegalArgumentException("Invalid updateTime", e);
             }
         } else {
-            updateCalender = Calendar.getInstance();
             updateCalender.set(Calendar.HOUR_OF_DAY, 0);
             updateCalender.set(Calendar.MINUTE, 0);
             updateCalender.set(Calendar.SECOND, 0);
-            updateCalender.set(Calendar.MILLISECOND, 0);
         }
 
         // ファイルが存在している場合、次回ローテーション時刻をファイルの更新時刻から算出する

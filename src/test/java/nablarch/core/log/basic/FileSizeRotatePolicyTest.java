@@ -31,7 +31,6 @@ public class FileSizeRotatePolicyTest {
 
     @Before
     public  void setup() {
-        // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
         File logFile = new File(logFilePath);
         if (logFile.exists()) {
             logFile.delete();
@@ -158,14 +157,14 @@ public class FileSizeRotatePolicyTest {
 
     /**
      * 正しくrotateが必要かどうか判定を行えること
-     * maxFileSizeが20KBだが、currentFileSizeが19KBでmsgLengthが999Bのためrotate不要
+     * maxFileSize 20000byte > currentFileSize 19000byte + msgLength 999byte のためrotate不要
      */
     @Test
     public void testNeedsRotateIfNotNeeded() throws IOException {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(objectSettings);
 
-        // currentFileSizeを19KBに設定
+        // currentFileSizeを19000byteに設定
         File logFile = newFile(logFilePath,19 * 1000);
 
         policy.onOpenFile(logFile);
@@ -175,14 +174,14 @@ public class FileSizeRotatePolicyTest {
 
     /**
      * 正しくrotateが必要かどうか判定を行えること
-     * maxFileSizeが20KBだが、currentFileSizeが19KBでmsgLengthが1000Bのためrotate不要
+     * maxFileSize 20000byte = currentFileSize 19000byte + msgLength 1000byte のためrotate不要
      */
     @Test
     public void testNeedsRotateIfCurrentEqualsMaxFileSize() throws IOException {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(objectSettings);
 
-        // currentFileSizeを19KBに設定
+        // currentFileSizeを19000byteに設定
         File logFile = newFile(logFilePath,19 * 1000);
 
         policy.onOpenFile(logFile);
@@ -192,18 +191,19 @@ public class FileSizeRotatePolicyTest {
 
     /**
      * 正しくrotateが必要かどうか判定を行えること
-     * maxFileSizeが20KBだが、currentFileSizeが15KBでmsgLengthが1001Bのためrotate必要
+     * maxFileSize 20000byte > currentFileSize 19000byte + msgLength 1001byte のためrotate不要
      */
     @Test
     public void testNeedsRotateIfNeeded() throws IOException {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(objectSettings);
 
-        // currentFileSizeを19KBに設定
+        // currentFileSizeを14000byteに設定
         File logFile = newFile(logFilePath,14 * 1000);
 
         policy.onOpenFile(logFile);
 
+        // currentFileSizeに5000byteを加えて、19000byteに設定
         policy.onWrite(generateZeroPaddingString(5000), Charset.defaultCharset());
 
         assertThat(policy.needsRotate(generateZeroPaddingString(1001), Charset.defaultCharset()), is(true));
@@ -211,10 +211,10 @@ public class FileSizeRotatePolicyTest {
 
     /**
      * 正しくrotateが必要かどうか判定を行えること
-     * maxFileSizeが不正な値、currentFileSizeが15KBでmsgLengthが10KBのためrotate不要
+     * maxFileSizeが不正な値のためrotate不要
      */
     @Test
-    public void testIvalidMaxFileSizeNeedsRotate() throws IOException {
+    public void testNeedsRotateIfIvalidMaxFileSize() throws IOException {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", logFilePath);
         settings.put("appFile.maxFileSize", "aiueo");
@@ -222,7 +222,7 @@ public class FileSizeRotatePolicyTest {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
-        // currentFileSizeを15KBに設定
+        // currentFileSizeを15000byteに設定
         File logFile = newFile(logFilePath,15*1000);
 
         policy.onOpenFile(logFile);
@@ -257,14 +257,14 @@ public class FileSizeRotatePolicyTest {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(objectSettings);
 
-        File file = new File(logFilePath);
-        FileWriter filewriter = new FileWriter(file);
+        File logFile = new File(logFilePath);
+        FileWriter filewriter = new FileWriter(logFile);
 
         filewriter.write("aiueo");
 
         filewriter.close();
 
-        policy.onOpenFile(file);
+        policy.onOpenFile(logFile);
 
         String actual = policy.getSettings();
 
