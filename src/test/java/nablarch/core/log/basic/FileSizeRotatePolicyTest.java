@@ -158,38 +158,55 @@ public class FileSizeRotatePolicyTest {
 
     /**
      * 正しくrotateが必要かどうか判定を行えること
-     * maxFileSizeが20KBだが、currentFileSizeが10KBでmsgLengthが5KBのためrotate不要
+     * maxFileSizeが20KBだが、currentFileSizeが19KBでmsgLengthが999Bのためrotate不要
      */
     @Test
     public void testNeedsRotateIfNotNeeded() throws IOException {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(objectSettings);
 
-        // currentFileSizeを10KBに設定
-        File logFile = newFile(logFilePath,10 * 1000);
+        // currentFileSizeを19KBに設定
+        File logFile = newFile(logFilePath,19 * 1000);
 
         policy.onOpenFile(logFile);
 
-        assertThat(policy.needsRotate(generateZeroPaddingString(5 * 1000), Charset.defaultCharset()), is(false));
+        assertThat(policy.needsRotate(generateZeroPaddingString(999), Charset.defaultCharset()), is(false));
     }
 
     /**
      * 正しくrotateが必要かどうか判定を行えること
-     * maxFileSizeが20KBだが、currentFileSizeが15KBでmsgLengthが10KBのためrotate必要
+     * maxFileSizeが20KBだが、currentFileSizeが19KBでmsgLengthが1000Bのためrotate不要
+     */
+    @Test
+    public void testNeedsRotateIfCurrentEqualsMaxFileSize() throws IOException {
+        FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
+        policy.initialize(objectSettings);
+
+        // currentFileSizeを19KBに設定
+        File logFile = newFile(logFilePath,19 * 1000);
+
+        policy.onOpenFile(logFile);
+
+        assertThat(policy.needsRotate(generateZeroPaddingString(1000), Charset.defaultCharset()), is(false));
+    }
+
+    /**
+     * 正しくrotateが必要かどうか判定を行えること
+     * maxFileSizeが20KBだが、currentFileSizeが15KBでmsgLengthが1001Bのためrotate必要
      */
     @Test
     public void testNeedsRotateIfNeeded() throws IOException {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(objectSettings);
 
-        // currentFileSizeを15KBに設定
-        File logFile = newFile(logFilePath,10 * 1000);
+        // currentFileSizeを19KBに設定
+        File logFile = newFile(logFilePath,14 * 1000);
 
         policy.onOpenFile(logFile);
 
-        policy.onWrite(generateZeroPaddingString(5 * 1000), Charset.defaultCharset());
+        policy.onWrite(generateZeroPaddingString(5000), Charset.defaultCharset());
 
-        assertThat(policy.needsRotate(generateZeroPaddingString(10 * 1000), Charset.defaultCharset()), is(true));
+        assertThat(policy.needsRotate(generateZeroPaddingString(1001), Charset.defaultCharset()), is(true));
     }
 
     /**
