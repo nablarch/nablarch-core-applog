@@ -272,9 +272,9 @@ public class DateRotatePolicyTest {
 
     @DataPoints("normal")
     public static DateFixture[] testFixtures = {
-            new DateFixture("12", "2018-01-02 12:00:00","2018-01-01 10:10:10")
-            ,new DateFixture("12:12", "2018-01-02 12:12:00", "2018-01-01 10:10:10")
-            ,new DateFixture("12:12:12", "2018-01-02 12:12:12", "2018-01-01 10:10:10")
+            new DateFixture("12", "2018-01-01 12:00:00","2018-01-01 10:10:10")
+            ,new DateFixture("12:12", "2018-01-02 12:12:00", "2018-01-01 13:10:10")
+            ,new DateFixture("12:12:12", "2018-01-02 12:12:12", "2018-01-01 13:10:10")
     };
 
     @DataPoints("invalid")
@@ -296,7 +296,7 @@ public class DateRotatePolicyTest {
         }
     }
 
-    /** 正しく設定情報が取得できること */
+    /** 複数のupdateTimeのパターンで正しく設定情報が取得できること */
     @Theory
     public void testGetSetting(@FromDataPoints("normal") DateFixture dateFixture) throws ParseException {
         String path = "./log/testGetSetting.log";
@@ -317,7 +317,7 @@ public class DateRotatePolicyTest {
         String actual = policy.getSettings();
 
         String expected = "\tNEXT CHANGE DATE    = ["+dateFixture.expectedNextUpdateTime +"]" + Logger.LS
-                + "\tCURRENT DATE        = [2018-01-01 10:10:10]" + Logger.LS
+                + "\tCURRENT DATE        = ["+dateFixture.currentDate +"]" + Logger.LS
                 + "\tUPDATE TIME         = ["+dateFixture.updateTime+"]" + Logger.LS;
         ;
 

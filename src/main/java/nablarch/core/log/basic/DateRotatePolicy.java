@@ -98,18 +98,20 @@ public class DateRotatePolicy implements RotatePolicy {
      * @return 次回ローテション時刻のCalendarオブジェクト
      */
     private Date calcNextUpdateDate(Date currentDate) {
-        Calendar cl = Calendar.getInstance();
-        cl.setTime(currentDate);
+        Calendar nextUpdateCalender = Calendar.getInstance();
+        nextUpdateCalender.setTime(currentDate);
         // 時・分・秒・ミリ秒を0にする
-        cl.set(Calendar.HOUR_OF_DAY, updateCalender.get(Calendar.HOUR_OF_DAY));
-        cl.set(Calendar.MINUTE, updateCalender.get(Calendar.MINUTE));
-        cl.set(Calendar.SECOND, updateCalender.get(Calendar.SECOND));
-        cl.set(Calendar.MILLISECOND, 0);
+        nextUpdateCalender.set(Calendar.HOUR_OF_DAY, updateCalender.get(Calendar.HOUR_OF_DAY));
+        nextUpdateCalender.set(Calendar.MINUTE, updateCalender.get(Calendar.MINUTE));
+        nextUpdateCalender.set(Calendar.SECOND, updateCalender.get(Calendar.SECOND));
+        nextUpdateCalender.set(Calendar.MILLISECOND, 0);
 
-        // その後、日を+1する
-        cl.add(Calendar.DATE, 1);
+        // 現在時刻の時分秒 > nextUpdateTimeの時分秒の場合は、日付に1を加える
+        if (currentDate.after(nextUpdateCalender.getTime())) {
+            nextUpdateCalender.add(Calendar.DATE, 1);
+        }
 
-        return cl.getTime();
+        return nextUpdateCalender.getTime();
     }
 
     /**
