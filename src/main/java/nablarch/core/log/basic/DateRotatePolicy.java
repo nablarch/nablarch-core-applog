@@ -13,8 +13,7 @@ import java.util.Date;
 /**
  * 日時でログのローテーションを行うクラス。<br>
  * <br>
- * プロパティファイルの記述ルールを下記に示す。<br>
- * 下記プロパティは、rotatePolicyに{@link DateRotatePolicy}が設定されている場合に有効である。
+ * プロパティファイルの記述ルールを下記に示す。
  * <dl>
  *
  * <dt>updateTime</dt>
