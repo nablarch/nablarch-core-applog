@@ -272,9 +272,9 @@ public class DateRotatePolicyTest {
         final DateRotatePolicy policy = new DateRotatePolicy();
         policy.initialize(objectSettings);
 
-        File f = new File(logFilePath);
-        if (f.exists()) {
-            f.delete();
+        File logFile = new File(logFilePath);
+        if (logFile.exists()) {
+            logFile.delete();
         }
 
         // fileが存在しない状態でリネームさせる
@@ -320,9 +320,9 @@ public class DateRotatePolicyTest {
     public void testGetSetting(@FromDataPoints("normal") DateFixture dateFixture) throws ParseException {
         String path = "./log/testGetSetting.log";
         // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
-        File f = new File(path);
-        if (f.exists()) {
-            f.delete();
+        File logFile = new File(path);
+        if (logFile.exists()) {
+            logFile.delete();
         }
 
         Map<String, String> settings = new HashMap<String, String>();
