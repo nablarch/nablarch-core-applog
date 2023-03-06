@@ -24,6 +24,7 @@ import static org.junit.Assert.*;
 
 /**
  * {@link FileSizeRotatePolicy}のテスト。
+ * FileLogWriterが1000byteを1KBと計算しているため、本クラスでも1000byte=1KBとしてテストを行う。
  *
  * @author Kotaro Taki
  */
@@ -219,7 +220,7 @@ public class FileSizeRotatePolicyTest {
 
         policy.onOpenFile(logFile);
 
-        assertThat(policy.needsRotate(generateZeroPaddingString(10 * 1024), Charset.defaultCharset()), is(false));
+        assertThat(policy.needsRotate(generateZeroPaddingString(10 * 1000), Charset.defaultCharset()), is(false));
     }
 
     /** 正しくリネーム先のファイルパスが決定できること */
