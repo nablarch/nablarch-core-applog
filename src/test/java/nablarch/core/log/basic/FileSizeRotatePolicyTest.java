@@ -56,29 +56,21 @@ public class FileSizeRotatePolicyTest {
         // ロテート前
         // リネーム前のファイルが存在すること
         File logFile = new File(logFilePath);
-        if (!logFile.exists()) {
-            fail();
-        }
+        assertThat(logFile.exists(), is(true));
 
         // リネーム後のファイルが存在しないこと
         File expectedFile = new File(expectedPath);
         expectedFile.delete();
-        if (expectedFile.exists()) {
-            fail();
-        }
+        assertThat(expectedFile.exists(), is(false));
 
         policy.rotate(expectedPath);
 
         // ロテート後
         // リネーム前のファイルが存在しないこと
-        if (logFile.exists()) {
-            fail();
-        }
+        assertThat(logFile.exists(), is(false));
 
         // リネーム後のファイルが存在すること
-        if (!expectedFile.exists()) {
-            fail();
-        }
+        assertThat(expectedFile.exists(), is(true));
     }
 
     /** ファイルがリネームできない場合に、IllegalStateExceptionが発生すること */

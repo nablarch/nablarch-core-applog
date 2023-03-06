@@ -208,29 +208,21 @@ public class DateRotatePolicyTest {
         // ロテート前
         // リネーム前のファイルが存在すること
         File logFile = new File(logFilePath);
-        if (!logFile.exists()) {
-            fail();
-        }
+        assertThat(logFile.exists(), is(true));
 
         // リネーム後のファイルが存在しないこと
         File expectedFile = new File(expectedPath);
         expectedFile.delete();
-        if (expectedFile.exists()) {
-            fail();
-        }
+        assertThat(expectedFile.exists(), is(false));
 
         policy.rotate(expectedPath);
 
         // ロテート後
         // リネーム前のファイルが存在しないこと
-        if (logFile.exists()) {
-            fail();
-        }
+        assertThat(logFile.exists(), is(false));
 
         // リネーム後のファイルが存在すること
-        if (!expectedFile.exists()) {
-            fail();
-        }
+        assertThat(expectedFile.exists(), is(true));
     }
 
     /** ローテーション時に、正しくnextUpdateDateが更新できること */
