@@ -227,7 +227,7 @@ public class FileSizeRotatePolicyTest {
 
         policy.onOpenFile(logFile);
 
-        assertThat(policy.needsRotate(generateZeroPaddingString(10 * 1000), Charset.defaultCharset()), is(false));
+        assertThat(policy.needsRotate(generateZeroPaddingString(10 * 1024), Charset.defaultCharset()), is(false));
     }
 
     /** 正しくリネーム先のファイルパスが決定できること */
