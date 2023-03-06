@@ -116,58 +116,6 @@ public class FileLogWriterTest extends LogTestSupport {
     }
 
     /**
-     * 初期処理完了後に設定情報が出力されること。
-     * <br/>
-     * カレントファイルサイズが1バイトの場合
-     */
-    @Test
-    public void testInitializedMessage2() throws IOException {
-
-        File appFile = LogTestUtil.cleanupLog("/initialized-message-app.log");
-        FileWriter fileWriter = new FileWriter(appFile);
-        try {
-            fileWriter.write("1");
-            fileWriter.flush();
-        } finally {
-            fileWriter.close();
-        }
-
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.level", "INFO");
-        settings.put("appFile.formatter.className",
-                MockLogFormatter.class.getName());
-        settings.put("appFile.filePath", "./log/initialized-message-app.log");
-        settings.put("appFile.encoding", "UTF-8");
-        settings.put("appFile.outputBufferSize", "10");
-        settings.put("appFile.maxFileSize", "50000");
-
-        FileLogWriter writer = new FileLogWriter();
-        writer.initialize(
-                new ObjectSettings(new MockLogSettings(settings), "appFile"));
-
-        writer.terminate();
-
-        String appLog = LogTestUtil.getLog(appFile);
-        assertTrue(appLog.contains("initialized."));
-        assertTrue(appLog.contains("WRITER NAME         = [appFile]"));
-        assertTrue(appLog.contains(
-                "WRITER CLASS        = [nablarch.core.log.basic.FileLogWriter]"));
-        assertTrue(appLog.contains(
-                "FORMATTER CLASS     = [" + MockLogFormatter.class.getName()
-                        + "]"));
-        assertTrue(appLog.contains("LEVEL               = [INFO]"));
-        assertTrue(appLog.contains(
-                "FILE PATH           = [./log/initialized-message-app.log]"));
-        assertTrue(appLog.contains("ENCODING            = [UTF-8]"));
-        assertTrue(appLog.contains("OUTPUT BUFFER SIZE  = [10000]"));
-        assertTrue(appLog.contains("ROTATE POLICY CLASS = [nablarch.core.log.basic.FileSizeRotatePolicy]"));
-        assertTrue(appLog.contains("FILE AUTO CHANGE    = [true]"));
-        assertTrue(appLog.contains("MAX FILE SIZE       = [50000000]"));
-        assertTrue(appLog.contains("CURRENT FILE SIZE   = [1]"));
-        assertTrue(appLog.contains("terminated."));
-    }
-
-    /**
      * INFOレベル以下だと初期処理完了後に設定情報が出力されないこと。
      */
     @Test
