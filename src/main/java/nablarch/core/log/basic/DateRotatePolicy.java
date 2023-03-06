@@ -97,10 +97,11 @@ public class DateRotatePolicy implements RotatePolicy {
     private Date calcNextUpdateDate(Date currentDate) {
         Calendar nextUpdateCalender = Calendar.getInstance();
         nextUpdateCalender.setTime(currentDate);
-        // 時・分・秒・ミリ秒を0にする
+        // 時・分・秒としてupdateTimeに指定された値を設定する
         nextUpdateCalender.set(Calendar.HOUR_OF_DAY, updateCalender.get(Calendar.HOUR_OF_DAY));
         nextUpdateCalender.set(Calendar.MINUTE, updateCalender.get(Calendar.MINUTE));
         nextUpdateCalender.set(Calendar.SECOND, updateCalender.get(Calendar.SECOND));
+        // ミリ秒を0にする
         nextUpdateCalender.set(Calendar.MILLISECOND, 0);
 
         // 現在時刻の時分秒 > nextUpdateTimeの時分秒の場合は、日付に1を加える
