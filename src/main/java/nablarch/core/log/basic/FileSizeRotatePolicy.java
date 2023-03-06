@@ -31,9 +31,6 @@ public class FileSizeRotatePolicy implements RotatePolicy {
     /** 書き込み先ファイルの最大サイズ */
     private long maxFileSize;
 
-    /** キロバイトを算出するための係数 */
-    private static final int KB = 1000;
-
     /** 書き込み先のファイルパス */
     private String logFilePath;
 
@@ -48,7 +45,7 @@ public class FileSizeRotatePolicy implements RotatePolicy {
         logFilePath = settings.getRequiredProp("filePath");
 
         try {
-            maxFileSize = Long.parseLong(settings.getProp("maxFileSize")) * KB;
+            maxFileSize = Long.parseLong(settings.getProp("maxFileSize")) * FileLogWriter.KB;
         } catch (NumberFormatException e) {
             maxFileSize = 0;
         }

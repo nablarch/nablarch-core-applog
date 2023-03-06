@@ -54,7 +54,7 @@ public class FileLogWriter extends LogWriterSupport {
     private static final String FQCN = FileLogWriter.class.getName();
 
     /** キロバイトを算出するための係数 */
-    private static final int KB = 1000;
+    public static final int KB = 1000;
 
     /** 書き込み先のファイルパス */
     private String filePath;
