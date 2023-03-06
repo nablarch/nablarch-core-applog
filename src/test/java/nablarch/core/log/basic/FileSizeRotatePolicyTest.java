@@ -150,15 +150,15 @@ public class FileSizeRotatePolicyTest {
 
     /**
      * 正しくrotateが必要かどうか判定を行えること
-     * maxFileSize 20000byte > currentFileSize 19000byte + msgLength 999byte のためrotate不要
+     * maxFileSize 20KB > currentFileSize 19KB + msgLength 999byte のためrotate不要
      */
     @Test
     public void testNeedsRotateIfNotNeeded() throws IOException {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(objectSettings);
 
-        // currentFileSizeを19000byteに設定
-        File logFile = newFile(logFilePath,19 * 1000);
+        // currentFileSizeを19KBに設定
+        File logFile = newFile(logFilePath,19 * FileLogWriter.KB);
 
         policy.onOpenFile(logFile);
 
@@ -167,39 +167,39 @@ public class FileSizeRotatePolicyTest {
 
     /**
      * 正しくrotateが必要かどうか判定を行えること
-     * maxFileSize 20000byte = currentFileSize 19000byte + msgLength 1000byte のためrotate不要
+     * maxFileSize 20KB = currentFileSize 19KB + msgLength 1KB のためrotate不要
      */
     @Test
     public void testNeedsRotateIfCurrentEqualsMaxFileSize() throws IOException {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(objectSettings);
 
-        // currentFileSizeを19000byteに設定
-        File logFile = newFile(logFilePath,19 * 1000);
+        // currentFileSizeを19KBに設定
+        File logFile = newFile(logFilePath,19 * FileLogWriter.KB);
 
         policy.onOpenFile(logFile);
 
-        assertThat(policy.needsRotate(generateZeroPaddingString(1000), Charset.defaultCharset()), is(false));
+        assertThat(policy.needsRotate(generateZeroPaddingString(1 * FileLogWriter.KB), Charset.defaultCharset()), is(false));
     }
 
     /**
      * 正しくrotateが必要かどうか判定を行えること
-     * maxFileSize 20000byte > currentFileSize 19000byte + msgLength 1001byte のためrotate不要
+     * maxFileSize 20KB > currentFileSize 20KB + msgLength 1byte のためrotate必要
      */
     @Test
     public void testNeedsRotateIfNeeded() throws IOException {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(objectSettings);
 
-        // currentFileSizeを14000byteに設定
-        File logFile = newFile(logFilePath,14 * 1000);
+        // currentFileSizeを15KBに設定
+        File logFile = newFile(logFilePath,15 * FileLogWriter.KB);
 
         policy.onOpenFile(logFile);
 
-        // currentFileSizeに5000byteを加えて、19000byteに設定
-        policy.onWrite(generateZeroPaddingString(5000), Charset.defaultCharset());
+        // currentFileSizeに5KBを加えて、19KBに設定
+        policy.onWrite(generateZeroPaddingString(5 * FileLogWriter.KB), Charset.defaultCharset());
 
-        assertThat(policy.needsRotate(generateZeroPaddingString(1001), Charset.defaultCharset()), is(true));
+        assertThat(policy.needsRotate(generateZeroPaddingString(1), Charset.defaultCharset()), is(true));
     }
 
     /**
