@@ -117,6 +117,23 @@ public class FileSizeRotatePolicyTest {
         assertThat(policy.needsRotate("abcde", Charset.defaultCharset()), is(false));
     }
 
+    /**
+     * 正しくrotateが必要かどうか判定を行えること
+     * maxFileSizeが-1KBのためfalseを返す
+     */
+    @Test
+    public void testNeedsRotateNegativeMaxFileSize() {
+        Map<String, String> settings = new HashMap<String, String>();
+        settings.put("appFile.filePath", logFilePath);
+        settings.put("appFile.maxFileSize", "-1");
+
+        FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        // maxFileSizeが-1KBのためfalseを返す
+        assertThat(policy.needsRotate("abcde", Charset.defaultCharset()), is(false));
+    }
+
     private File newFile(String path, int byteSize) throws IOException {
         String content = generateZeroPaddingString(byteSize);
 
