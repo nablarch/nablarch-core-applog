@@ -214,7 +214,8 @@ public class FileLogWriterTest extends LogTestSupport {
         writer.onWrite("HelloWorld");
 
         // onWriteでは、needsRotate・onWriteが１回ずつ呼びされていることの確認
-        new VerificationsInOrder() {
+        // その他のメソッドは呼ばれていないことの確認
+        new FullVerifications() {
             {
                 rotatePolicy.needsRotate(message, Charset.forName(utf8));
                 times = 1;
