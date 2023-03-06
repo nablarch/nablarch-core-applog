@@ -241,7 +241,12 @@ public class FileSizeRotatePolicyTest {
         oldFileDateFormat.setLenient(false);
         String oldDate = actual.split("\\.")[3];
 
-        oldFileDateFormat.parse(oldDate);
+        try {
+            oldFileDateFormat.parse(oldDate);
+        }
+        catch (Exception e) {
+            fail("パースできる形式で日付が出力されていない");
+        }
     }
 
     /** 正しく設定情報が取得できること */
