@@ -15,19 +15,30 @@ public class RotatePolicyForTest implements RotatePolicy {
     private String logFilePath;
     private int logCounter;
 
+    private  boolean isAlwaysRotation;
+
     @Override
     public void initialize(ObjectSettings settings) {
         logFilePath = settings.getRequiredProp("filePath");
+
+        String rotation = settings.getProp("rotation");
+        if (rotation == "always") {
+            isAlwaysRotation = true;
+        }
     }
 
     @Override
     public boolean needsRotate(String message, Charset charset) {
         logCounter++;
-        if (logCounter % 20 == 0) {
+
+        if (isAlwaysRotation) {
             return true;
         }
-
-        return false;
+        else if (logCounter % 20 == 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override

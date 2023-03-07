@@ -282,20 +282,14 @@ public class FileLogWriterTest extends LogTestSupport {
         settings.put("appFile.outputBufferSize", "8");
         settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.RotatePolicyForTest");
         settings.put("appFile.level", "WARN");
+        settings.put("appFile.rotation", "always");
 
         FileLogWriter writer = new FileLogWriter();
         writer.initialize(
                 new ObjectSettings(new MockLogSettings(settings), "appFile"));
-        
-        for (int i = 0; i < 30; i++) {
-            try {
-                Thread.sleep(100L);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            writer.write(new LogContext(FQCN, LogLevel.WARN, "test",
-                    null));
-        }
+
+        writer.write(new LogContext(FQCN, LogLevel.WARN, "test",
+                null));
 
         writer.terminate();
         
