@@ -157,7 +157,7 @@ public class FileLogWriterTest extends LogTestSupport {
         writer.initialize(objectSettings);
 
         // initializeでは、initialize・onOpenFile・getSettingsが１回ずつ呼びされていることの確認
-        new VerificationsInOrder() {
+        new FullVerificationsInOrder() {
             {
                 rotatePolicy.initialize(objectSettings);
                 times = 1;
@@ -165,12 +165,14 @@ public class FileLogWriterTest extends LogTestSupport {
                 times = 1;
                 rotatePolicy.getSettings();
                 times = 1;
+                rotatePolicy.onWrite(anyString,Charset.forName(utf8));
+                times = 1;
             }
         };
 
         new Expectations() {
             {
-                rotatePolicy.needsRotate(anyString, (Charset) any);
+                rotatePolicy.needsRotate(message, Charset.forName(utf8));
                 result = false;
             }
         };
@@ -179,7 +181,7 @@ public class FileLogWriterTest extends LogTestSupport {
 
         // onWriteでは、needsRotate・onWriteが１回ずつ呼びされていることの確認
         // その他のメソッドは呼ばれていないことの確認
-        new FullVerifications() {
+        new FullVerificationsInOrder() {
             {
                 rotatePolicy.needsRotate(message, Charset.forName(utf8));
                 times = 1;
@@ -211,7 +213,7 @@ public class FileLogWriterTest extends LogTestSupport {
         writer.initialize(objectSettings);
 
         // initializeでは、initialize・onOpenFile・getSettingsが１回ずつ呼びされていることの確認
-        new VerificationsInOrder() {
+        new FullVerificationsInOrder() {
             {
                 rotatePolicy.initialize(objectSettings);
                 times = 1;
@@ -219,18 +221,20 @@ public class FileLogWriterTest extends LogTestSupport {
                 times = 1;
                 rotatePolicy.getSettings();
                 times = 1;
+                rotatePolicy.onWrite(anyString, Charset.forName(utf8));
+                times = 1;
             }
         };
 
         new Expectations() {
             {
-                rotatePolicy.needsRotate(anyString, (Charset) any);
+                rotatePolicy.needsRotate(message, Charset.forName(utf8));
                 result = true;
 
                 rotatePolicy.decideRotatedFilePath();
                 result = rotatedFilePath;
 
-                rotatePolicy.onOpenFile((File) any);
+                rotatePolicy.onOpenFile(new File(path));
                 rotatePolicy.getSettings();
             }
         };
@@ -239,12 +243,14 @@ public class FileLogWriterTest extends LogTestSupport {
 
         // onWriteではローテーションが必要な場合に、needsRotate・decideRotatedFilePath・onWrite
         // rotate・onOpenFile・getSettings・onWriteの順で実装クラスが呼びされていることの確認
-        new VerificationsInOrder() {
+        new FullVerificationsInOrder() {
             {
                 rotatePolicy.needsRotate(message, Charset.forName(utf8));
                 times = 1;
 
                 rotatePolicy.decideRotatedFilePath();
+                times = 1;
+                rotatePolicy.onWrite(anyString, Charset.forName(utf8));
                 times = 1;
                 rotatePolicy.rotate(rotatedFilePath);
                 times = 1;
