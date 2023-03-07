@@ -267,6 +267,7 @@ public class DateRotatePolicyTest {
             new DateFixture("12", "2018-01-01 12:00:00","2018-01-01 10:10:10.000")
             ,new DateFixture("12:12", "2018-01-02 12:12:00", "2018-01-01 13:10:10.000")
             ,new DateFixture("12:12:12", "2018-01-02 12:12:12", "2018-01-01 13:10:10.000")
+            ,new DateFixture("", "2018-01-02 00:00:00", "2018-01-01 13:10:10.000")
     };
 
     @DataPoints("invalid")
@@ -296,7 +297,9 @@ public class DateRotatePolicyTest {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", path);
         settings.put("appFile.encoding", "utf-8");
-        settings.put("appFile.updateTime", dateFixture.updateTime);
+        if (!dateFixture.updateTime.isEmpty()) {
+            settings.put("appFile.updateTime", dateFixture.updateTime);
+        }
 
         DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate(dateFixture.currentDate));
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
@@ -307,7 +310,9 @@ public class DateRotatePolicyTest {
 
         String[] splits = dateFixture.updateTime.split(":");
         String formattedUpdateTime;
-        if (splits.length == 1) {
+        if (dateFixture.updateTime.isEmpty()) {
+            formattedUpdateTime = "00:00:00";
+        } else if (splits.length == 1) {
             formattedUpdateTime = dateFixture.updateTime+":00:00";
         } else if (splits.length == 2) {
             formattedUpdateTime = dateFixture.updateTime +":00";
