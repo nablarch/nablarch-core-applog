@@ -4,7 +4,6 @@ import nablarch.core.log.Logger;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -36,6 +35,10 @@ public class DateRotatePolicy implements RotatePolicy {
 
     /**
      * {@inheritDoc}
+     * 起動時にログファイルパスにログファイルが既に存在する場合は、ファイルの更新時刻から次回ローテーション時刻を算出する。
+     * この初期化処理により、例えば2023年3月6日にログファイルに書き込み後アプリを停止。２日後にアプリを再起動する場合、
+     * 起動時に本クラスが保持する次回ローテーション時刻は2023年3月7日 となる。
+     * そのため起動後の初回ログ書き込み時にローテーションを行い、古いログファイル名は <ログファイルパス>.20230307000000.old となる。
      */
     @Override
     public void initialize(ObjectSettings settings) {
@@ -122,6 +125,10 @@ public class DateRotatePolicy implements RotatePolicy {
 
     /**
      * {@inheritDoc}
+     * 古いログファイル名は、 <ログファイルパス>.yyyyMMddHHmmss.old のフォーマットで出力される。
+     * 日時には、 本クラスが保持している次回ローテーション時刻が出力される。
+     * もし、ローテーション先に同名のファイルが存在している場合、 <ログファイルパス>.yyyyMMddHHmmssSSS.old のフォーマット で出力される。
+     * この時、日時にはローテーション実施時刻が出力される。
      */
     @Override
     public String decideRotatedFilePath() {

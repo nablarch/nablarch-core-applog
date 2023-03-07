@@ -19,10 +19,9 @@ import java.util.Date;
  *
  * <dt>maxFileSize</dt>
  * <dd>書き込み先ファイルの最大サイズ。オプション。<br>
- *     単位はキロバイト。1000バイトを1キロバイトと換算する。指定しなければ自動切替なし。<br>
+ *     単位はキロバイト。1000バイトを1キロバイトと換算する。<br>
  *     指定値が解析可能な整数値(Long.parseLong)でない場合は自動切替なし。<br>
- *     指定値が０以下の場合は自動切替なし。<br>
- *     古いログファイル名は、<通常のファイル名>.yyyyMMddHHmmssSSS.old。</dd>
+ *     指定値が０以下の場合は自動切替なし。</dd>
  * </dl>
  * @author Kotaro Taki
  */
@@ -79,6 +78,8 @@ public class FileSizeRotatePolicy implements RotatePolicy {
 
     /**
      * {@inheritDoc}
+     * 古いログファイル名は、 <ログファイルパス>.yyyyMMddHHmmssSSS.old のフォーマットで出力される。
+     * 日時には、ローテーション実施時刻が出力される。
      */
     @Override
     public String decideRotatedFilePath() {
