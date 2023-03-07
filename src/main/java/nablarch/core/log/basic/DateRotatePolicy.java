@@ -91,25 +91,25 @@ public class DateRotatePolicy implements RotatePolicy {
      * @return 次回ローテション時刻のCalendarオブジェクト
      */
     private Date calcNextUpdateDate(Date currentDate) {
-        Calendar nextUpdateCalender = Calendar.getInstance();
-        nextUpdateCalender.setTime(currentDate);
+        Calendar nextUpdateCalendar = Calendar.getInstance();
+        nextUpdateCalendar.setTime(currentDate);
 
         Calendar nextUpdateTimeCalendar = Calendar.getInstance();
         nextUpdateTimeCalendar.setTime(nextUpdateTime);
 
         // 時・分・秒としてupdateTimeに指定された値を設定する
-        nextUpdateCalender.set(Calendar.HOUR_OF_DAY, nextUpdateTimeCalendar.get(Calendar.HOUR_OF_DAY));
-        nextUpdateCalender.set(Calendar.MINUTE, nextUpdateTimeCalendar.get(Calendar.MINUTE));
-        nextUpdateCalender.set(Calendar.SECOND, nextUpdateTimeCalendar.get(Calendar.SECOND));
+        nextUpdateCalendar.set(Calendar.HOUR_OF_DAY, nextUpdateTimeCalendar.get(Calendar.HOUR_OF_DAY));
+        nextUpdateCalendar.set(Calendar.MINUTE, nextUpdateTimeCalendar.get(Calendar.MINUTE));
+        nextUpdateCalendar.set(Calendar.SECOND, nextUpdateTimeCalendar.get(Calendar.SECOND));
         // ミリ秒を0にする
-        nextUpdateCalender.set(Calendar.MILLISECOND, 0);
+        nextUpdateCalendar.set(Calendar.MILLISECOND, 0);
 
         // 現在時刻の時分秒 > nextUpdateTimeの時分秒の場合は、日付に1を加える
-        if (currentDate.getTime() > nextUpdateCalender.getTime().getTime()) {
-            nextUpdateCalender.add(Calendar.DATE, 1);
+        if (currentDate.getTime() > nextUpdateCalendar.getTime().getTime()) {
+            nextUpdateCalendar.add(Calendar.DATE, 1);
         }
 
-        return nextUpdateCalender.getTime();
+        return nextUpdateCalendar.getTime();
     }
 
     /**
