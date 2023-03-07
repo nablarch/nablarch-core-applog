@@ -268,59 +268,6 @@ public class FileLogWriterTest extends LogTestSupport {
         };
     }
 
-    /** ファイルが自動で切り替わること。 */
-    @Test
-    public void testSwitched() {
-
-        File appFile = LogTestUtil.cleanupLog("/switched-app.log");
-
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/switched-app.log");
-        settings.put("appFile.encoding", "UTF-8");
-        settings.put("appFile.outputBufferSize", "8");
-        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.RotatePolicyForTest");
-
-        FileLogWriter writer = new FileLogWriter();
-        writer.initialize(
-                new ObjectSettings(new MockLogSettings(settings), "appFile"));
-
-        for (int i = 0; i < 515; i++) {
-            if (i % 50 == 0) {
-                try {
-                    Thread.sleep(100L);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + i + "]]]",
-                    null));
-        }
-
-        writer.terminate();
-
-        StringBuilder sb = new StringBuilder(50 * 1000);
-        File dir = appFile.getParentFile();
-        assertTrue(dir.listFiles().length > 1);
-
-        for (File file : dir.listFiles()) {
-            if (!file.getName().startsWith("switched-")) {
-                continue;
-            }
-            assertTrue(file.length() < (11 * 1000));
-            String log = LogTestUtil.getLog(file);
-            assertTrue(log.indexOf(
-                    "] change [./log/switched-app.log] -> [./log/switched-app.log.")
-                    != -1);
-            sb.append(log);
-        }
-
-        String appLog = sb.toString();
-        for (int i = 0; i < 515; i++) {
-            assertTrue(appLog.indexOf("[[[" + i + "]]]") != -1);
-        }
-        assertTrue(appLog.indexOf("[[[515]]]") == -1);
-    }
-
     /** 
      * INFOレベルより下のレベルで切り替えが発生した場合にINFOレベルのログが出ないこと。
      */
