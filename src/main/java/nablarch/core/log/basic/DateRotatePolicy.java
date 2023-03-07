@@ -125,13 +125,11 @@ public class DateRotatePolicy implements RotatePolicy {
      */
     @Override
     public String decideRotatedFilePath() {
-        String datePattern = "yyyyMMddHHmmss";
-        String rotatedFilePath = logFilePath  + "." + new SimpleDateFormat(datePattern).format(nextUpdateDate) + ".old";
+        String rotatedFilePath = logFilePath  + "." + new SimpleDateFormat("yyyyMMddHHmmss").format(nextUpdateDate) + ".old";
 
         File rotatedFile = new File(rotatedFilePath);
         if (rotatedFile .exists()) {
-            String dupDatePattern = "yyyyMMddHHmmssSSS";
-            rotatedFilePath = logFilePath  + "." + new SimpleDateFormat(dupDatePattern).format(currentDate()) + ".old";
+            rotatedFilePath = logFilePath  + "." + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(currentDate()) + ".old";
         }
 
         return rotatedFilePath;
@@ -166,10 +164,8 @@ public class DateRotatePolicy implements RotatePolicy {
      */
     @Override
     public String getSettings() {
-        String settingDatePattern = "yyyy-MM-dd HH:mm:ss";
-        DateFormat settingDateFormat = new SimpleDateFormat(settingDatePattern);
-        String updateTimeDatePattern = "HH:mm:ss";
-        DateFormat updateTimeDateFormat = new SimpleDateFormat(updateTimeDatePattern);
+        SimpleDateFormat settingDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat updateTimeDateFormat = new SimpleDateFormat("HH:mm:ss");
         return "\tNEXT CHANGE DATE    = [" + settingDateFormat.format(nextUpdateDate) + "]" + Logger.LS
                 + "\tCURRENT DATE        = [" + settingDateFormat.format(currentDate()) + "]" + Logger.LS
                 + "\tUPDATE TIME         = [" + updateTimeDateFormat.format(nextUpdateTime) + "]" + Logger.LS;
