@@ -56,8 +56,8 @@ public class DateRotatePolicyTest {
         }
     }
 
-    private Charset ignored = Charset.defaultCharset();
-    private String logFilePath = "./log/date-rotate-app.log";
+    private final Charset ignored = Charset.defaultCharset();
+    private final String logFilePath = "./log/date-rotate-app.log";
     private ObjectSettings objectSettings;
 
     @Before
