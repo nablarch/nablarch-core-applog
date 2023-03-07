@@ -78,11 +78,11 @@ public class DateRotatePolicyTest {
     /** 現在時刻<次回更新日の場合に、正しくrotateが必要かどうか判定を行えること */
     @Test
     public void testNeedsRotateIfNoNeeded() throws ParseException {
-        DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
+        DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
         policy.initialize(objectSettings);
 
         // 現在時刻の変更
-        ((DateRotatePolicyForTest)policy).setCurrentDate(textToDate("2018-01-01 23:59:59.999"));
+        policy.setCurrentDate(textToDate("2018-01-01 23:59:59.999"));
 
         boolean actual = policy.needsRotate("abcdeabcde",
                 ignored);
@@ -93,11 +93,11 @@ public class DateRotatePolicyTest {
     /** 現在時刻=次回更新日の場合に、正しくrotateが必要かどうか判定を行えること */
     @Test
     public void testNeedsRotateIfCurrentDateEqualsNextUpdateDate() throws ParseException {
-        DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
+        DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
         policy.initialize(objectSettings);
 
         // 現在時刻の変更
-        ((DateRotatePolicyForTest)policy).setCurrentDate(textToDate("2018-01-02 00:00:00.000"));
+        policy.setCurrentDate(textToDate("2018-01-02 00:00:00.000"));
 
         boolean actual = policy.needsRotate("abcdeabcde",
                 ignored);
@@ -108,11 +108,11 @@ public class DateRotatePolicyTest {
     /** 現在時刻>次回更新日の場合に、正しくrotateが必要かどうか判定を行えること */
     @Test
     public void testNeedsRotateIfNeeded() throws ParseException {
-        DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
+        DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
         policy.initialize(objectSettings);
 
         // 現在時刻の変更
-        ((DateRotatePolicyForTest)policy).setCurrentDate(textToDate("2018-01-02 00:00:00.001"));
+        policy.setCurrentDate(textToDate("2018-01-02 00:00:00.001"));
 
         boolean actual = policy.needsRotate("abcdeabcde", ignored);
 
