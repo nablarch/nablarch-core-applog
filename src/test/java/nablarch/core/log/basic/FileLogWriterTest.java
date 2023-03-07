@@ -86,7 +86,7 @@ public class FileLogWriterTest extends LogTestSupport {
         settings.put("appFile.filePath", "./log/initialized-message-app.log");
         settings.put("appFile.encoding", "UTF-8");
         settings.put("appFile.outputBufferSize", "10");
-        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.MockRotatePolicy");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.RotatePolicyForTest");
 
         FileLogWriter writer = new FileLogWriter();
         writer.initialize(
@@ -107,7 +107,7 @@ public class FileLogWriterTest extends LogTestSupport {
                 "FILE PATH           = [./log/initialized-message-app.log]"));
         assertTrue(appLog.contains("ENCODING            = [UTF-8]"));
         assertTrue(appLog.contains("OUTPUT BUFFER SIZE  = [10000]"));
-        assertTrue(appLog.contains("ROTATE POLICY CLASS = [nablarch.core.log.basic.MockRotatePolicy]"));
+        assertTrue(appLog.contains("ROTATE POLICY CLASS = [nablarch.core.log.basic.RotatePolicyForTest]"));
         assertTrue(appLog.contains("terminated."));
     }
 
@@ -126,7 +126,7 @@ public class FileLogWriterTest extends LogTestSupport {
         settings.put("appFile.filePath", "./log/initialized-message-app.log");
         settings.put("appFile.encoding", "UTF-8");
         settings.put("appFile.outputBufferSize", "10");
-        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.MockRotatePolicy");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.RotatePolicyForTest");
 
         FileLogWriter writer = new FileLogWriter();
         writer.initialize(
@@ -270,7 +270,7 @@ public class FileLogWriterTest extends LogTestSupport {
         settings.put("appFile.filePath", "./log/switched-app.log");
         settings.put("appFile.encoding", "UTF-8");
         settings.put("appFile.outputBufferSize", "8");
-        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.MockRotatePolicy");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.RotatePolicyForTest");
 
         FileLogWriter writer = new FileLogWriter();
         writer.initialize(
@@ -325,7 +325,7 @@ public class FileLogWriterTest extends LogTestSupport {
         settings.put("appFile.filePath", "./log/switched-app.log");
         settings.put("appFile.encoding", "UTF-8");
         settings.put("appFile.outputBufferSize", "8");
-        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.MockRotatePolicy");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.RotatePolicyForTest");
         settings.put("appFile.level", "WARN");
 
         FileLogWriter writer = new FileLogWriter();
@@ -383,7 +383,7 @@ public class FileLogWriterTest extends LogTestSupport {
         settings.put("appFile.filePath", "./log/flush-app.log");
         settings.put("appFile.encoding", "UTF-8");
         settings.put("appFile.outputBufferSize", "50");
-        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.MockRotatePolicy");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.RotatePolicyForTest");
 
         FileLogWriter writer = new FileLogWriter();
         writer.initialize(
@@ -426,7 +426,7 @@ public class FileLogWriterTest extends LogTestSupport {
         settings.put("appFile.filePath", "./log/switched-app.log");
         settings.put("appFile.encoding", "UTF-8");
         settings.put("appFile.outputBufferSize", "8");
-        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.MockRotatePolicy");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.RotatePolicyForTest");
 
         FileLogWriter writer = new FileLogWriter();
         writer.initialize(
@@ -454,7 +454,7 @@ public class FileLogWriterTest extends LogTestSupport {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", "./log/multi-threads-app.log");
         settings.put("appFile.encoding", "UTF-8");
-        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.MockRotatePolicy");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.RotatePolicyForTest");
 
         final FileLogWriter writer = new FileLogWriter();
 
