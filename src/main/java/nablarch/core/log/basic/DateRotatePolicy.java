@@ -31,11 +31,8 @@ public class DateRotatePolicy implements RotatePolicy {
     /** 次回ローテーション時刻 */
     private Date nextUpdateDate;
 
-    /** プロパティファイルに設定された更新時刻 */
-    private String updateTime;
-
-    /** プロパティファイルに設定された更新時刻から生成したCalendarオブジェクト */
-    private  Calendar updateCalender;
+    /** プロパティファイルに設定された更新時刻から生成したDateオブジェクト */
+    private  Date nextUpdateTime;
 
     /**
      * {@inheritDoc}
@@ -43,8 +40,8 @@ public class DateRotatePolicy implements RotatePolicy {
     @Override
     public void initialize(ObjectSettings settings) {
 
-        updateTime = settings.getProp("updateTime");
-        updateCalender = Calendar.getInstance();
+        String updateTime = settings.getProp("updateTime");
+
         String formattedUpdateTime;
         if (updateTime == null) {
             formattedUpdateTime = "00:00:00";
@@ -66,7 +63,7 @@ public class DateRotatePolicy implements RotatePolicy {
         SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
         format.setLenient(false);
         try {
-            updateCalender.setTime(format.parse(formattedUpdateTime));
+            nextUpdateTime = format.parse(formattedUpdateTime);
         } catch (ParseException e) {
             throw new IllegalArgumentException("Invalid updateTime", e);
         }
@@ -96,9 +93,9 @@ public class DateRotatePolicy implements RotatePolicy {
         Calendar nextUpdateCalender = Calendar.getInstance();
         nextUpdateCalender.setTime(currentDate);
         // 時・分・秒としてupdateTimeに指定された値を設定する
-        nextUpdateCalender.set(Calendar.HOUR_OF_DAY, updateCalender.get(Calendar.HOUR_OF_DAY));
-        nextUpdateCalender.set(Calendar.MINUTE, updateCalender.get(Calendar.MINUTE));
-        nextUpdateCalender.set(Calendar.SECOND, updateCalender.get(Calendar.SECOND));
+        nextUpdateCalender.set(Calendar.HOUR_OF_DAY, nextUpdateTime.getHours());
+        nextUpdateCalender.set(Calendar.MINUTE, nextUpdateTime.getMinutes());
+        nextUpdateCalender.set(Calendar.SECOND, nextUpdateTime.getSeconds());
         // ミリ秒を0にする
         nextUpdateCalender.set(Calendar.MILLISECOND, 0);
 
@@ -171,9 +168,11 @@ public class DateRotatePolicy implements RotatePolicy {
     public String getSettings() {
         String settingDatePattern = "yyyy-MM-dd HH:mm:ss";
         DateFormat settingDateFormat = new SimpleDateFormat(settingDatePattern);
+        String updateTimeDatePattern = "HH:mm:ss";
+        DateFormat updateTimeDateFormat = new SimpleDateFormat(updateTimeDatePattern);
         return "\tNEXT CHANGE DATE    = [" + settingDateFormat.format(nextUpdateDate) + "]" + Logger.LS
                 + "\tCURRENT DATE        = [" + settingDateFormat.format(currentDate()) + "]" + Logger.LS
-                + "\tUPDATE TIME         = [" + updateTime + "]" + Logger.LS;
+                + "\tUPDATE TIME         = [" + updateTimeDateFormat.format(nextUpdateTime) + "]" + Logger.LS;
     }
 
     /**

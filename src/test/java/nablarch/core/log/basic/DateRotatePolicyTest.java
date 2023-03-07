@@ -309,9 +309,19 @@ public class DateRotatePolicyTest {
         String settingDatePattern = "yyyy-MM-dd HH:mm:ss";
         DateFormat settingDateFormat = new SimpleDateFormat(settingDatePattern);
 
+        String[] splits = dateFixture.updateTime.split(":");
+        String formattedUpdateTime;
+        if (splits.length == 1) {
+            formattedUpdateTime = dateFixture.updateTime+":00:00";
+        } else if (splits.length == 2) {
+            formattedUpdateTime = dateFixture.updateTime +":00";
+        } else {
+            formattedUpdateTime = dateFixture.updateTime;
+        }
+
         String expected = "\tNEXT CHANGE DATE    = ["+dateFixture.expectedNextUpdateTime +"]" + Logger.LS
                 + "\tCURRENT DATE        = ["+settingDateFormat.format(textToDate(dateFixture.currentDate)) +"]" + Logger.LS
-                + "\tUPDATE TIME         = ["+dateFixture.updateTime+"]" + Logger.LS;
+                + "\tUPDATE TIME         = ["+formattedUpdateTime+"]" + Logger.LS;
         ;
 
         assertThat(actual, is(expected));
