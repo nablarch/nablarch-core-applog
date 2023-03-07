@@ -240,8 +240,7 @@ public class FileSizeRotatePolicyTest {
 
         try {
             oldFileDateFormat.parse(oldDate);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             fail("パースできる形式で日付が出力されていない");
         }
     }
