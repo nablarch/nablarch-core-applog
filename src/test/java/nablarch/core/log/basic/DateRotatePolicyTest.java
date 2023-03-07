@@ -59,6 +59,7 @@ public class DateRotatePolicyTest {
     private final Charset ignored = Charset.defaultCharset();
     private final String logFilePath = "./log/date-rotate-app.log";
     private ObjectSettings objectSettings;
+    private final String message = "dummy-message";
 
     @Before
     public  void setup() {
@@ -84,7 +85,7 @@ public class DateRotatePolicyTest {
         // 現在時刻の変更
         policy.setCurrentDate(textToDate("2018-01-01 23:59:59.999"));
 
-        boolean actual = policy.needsRotate("abcdeabcde",
+        boolean actual = policy.needsRotate(message,
                 ignored);
 
         assertThat(actual, is(false));
@@ -99,7 +100,7 @@ public class DateRotatePolicyTest {
         // 現在時刻の変更
         policy.setCurrentDate(textToDate("2018-01-02 00:00:00.000"));
 
-        boolean actual = policy.needsRotate("abcdeabcde",
+        boolean actual = policy.needsRotate(message,
                 ignored);
 
         assertThat(actual, is(true));
@@ -114,7 +115,7 @@ public class DateRotatePolicyTest {
         // 現在時刻の変更
         policy.setCurrentDate(textToDate("2018-01-02 00:00:00.001"));
 
-        boolean actual = policy.needsRotate("abcdeabcde", ignored);
+        boolean actual = policy.needsRotate(message, ignored);
 
         assertThat(actual, is(true));
     }
@@ -131,7 +132,7 @@ public class DateRotatePolicyTest {
         DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
         policy.initialize(objectSettings);
 
-        boolean actual = policy.needsRotate("abcdeabcde", ignored);
+        boolean actual = policy.needsRotate(message, ignored);
 
         assertThat(actual, is(true));
     }
@@ -233,13 +234,13 @@ public class DateRotatePolicyTest {
         // 正しくnextUpdateDateが更新できているかの確認
         policy.setCurrentDate(textToDate("2018-01-02 23:59:59.000"));
 
-        boolean actual = policy.needsRotate("abcdeabcde", ignored);
+        boolean actual = policy.needsRotate(message, ignored);
 
         assertThat(actual, is(false));
 
         policy.setCurrentDate(textToDate("2018-01-03 00:00:00.000"));
 
-        actual = policy.needsRotate("abcdeabcde", ignored);
+        actual = policy.needsRotate(message, ignored);
 
         assertThat(actual, is(true));
     }
