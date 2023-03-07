@@ -105,7 +105,8 @@ public class DateRotatePolicy implements RotatePolicy {
         nextUpdateCalendar.set(Calendar.MILLISECOND, 0);
 
         // 現在時刻の時分秒 > nextUpdateTimeの時分秒の場合は、日付に1を加える
-        if (currentDate.getTime() > nextUpdateCalendar.getTime().getTime()) {
+        Date nextUpdateDate = nextUpdateCalendar.getTime();
+        if (currentDate.getTime() > nextUpdateDate.getTime()) {
             nextUpdateCalendar.add(Calendar.DATE, 1);
         }
 
