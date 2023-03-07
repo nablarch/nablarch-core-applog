@@ -192,14 +192,13 @@ public class DateRotatePolicyTest {
         DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
 
         policy.initialize(objectSettings);
-
-        new File(logFilePath).createNewFile();
+        File logFile = new File(logFilePath);
+        logFile.createNewFile();
 
         String expectedPath = "./log/testRotate-app.log.old";
 
         // ロテート前
         // リネーム前のファイルが存在すること
-        File logFile = new File(logFilePath);
         assertThat(logFile.exists(), is(true));
 
         // リネーム後のファイルが存在しないこと
