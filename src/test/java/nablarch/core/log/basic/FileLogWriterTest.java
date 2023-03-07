@@ -107,6 +107,7 @@ public class FileLogWriterTest extends LogTestSupport {
         assertTrue(appLog.contains("ENCODING            = [UTF-8]"));
         assertTrue(appLog.contains("OUTPUT BUFFER SIZE  = [10000]"));
         assertTrue(appLog.contains("ROTATE POLICY CLASS = [nablarch.core.log.basic.RotatePolicyForTest]"));
+        assertTrue(appLog.contains("RotatePolicyForTest getSettings was called"));
         assertTrue(appLog.contains("terminated."));
     }
 

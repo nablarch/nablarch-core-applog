@@ -46,7 +46,7 @@ public class RotatePolicyForTest implements RotatePolicy {
 
     @Override
     public String getSettings() {
-        return null;
+        return "RotatePolicyForTest getSettings was called";
     }
 
     @Override
