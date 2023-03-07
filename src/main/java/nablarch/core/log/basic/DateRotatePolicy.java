@@ -152,6 +152,7 @@ public class DateRotatePolicy implements RotatePolicy {
 
     /**
      * {@inheritDoc}
+     * リネーム完了後に、 次回ローテション時刻を更新する。
      * @throws IllegalStateException ログファイルのリネームができない場合
      */
     @Override
