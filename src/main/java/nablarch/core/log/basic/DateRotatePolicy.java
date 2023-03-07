@@ -45,10 +45,8 @@ public class DateRotatePolicy implements RotatePolicy {
 
         String updateTime = settings.getProp("updateTime");
 
-        String formattedUpdateTime;
-        if (updateTime == null) {
-            formattedUpdateTime = "00:00:00";
-        } else {
+        String formattedUpdateTime = "00:00:00";
+        if (updateTime != null) {
             String[] splits = updateTime.split(":");
             if (splits.length >= 4 || splits.length == 0) {
                 throw  new IllegalArgumentException("Invalid updateTime");
