@@ -17,7 +17,6 @@ import org.junit.runner.RunWith;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -139,7 +138,7 @@ public class DateRotatePolicyTest {
 
     /** パスにファイルが存在する場合、ファイルの更新時刻が取得できない場合に例外が発生すること */
     @Test
-    public void testLastModifiedReturnsZero() throws IOException, ParseException {
+    public void testLastModifiedReturnsZero() throws IOException {
         new MockUp<File>() {
             @Mock public long lastModified() { return 0; }
         };
@@ -151,7 +150,7 @@ public class DateRotatePolicyTest {
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, new ThrowingRunnable() {
             @Override
-            public void run() throws Throwable {
+            public void run() {
                 policy.initialize(objectSettings);
             }
         });
@@ -254,7 +253,7 @@ public class DateRotatePolicyTest {
         final String rotatedFilePath = "./log/testInvalidDateRotate-app.log.old";
         IllegalStateException exception = assertThrows(IllegalStateException.class, new ThrowingRunnable() {
             @Override
-            public void run() throws Throwable {
+            public void run() {
                 //filePathファイルが存在しない状態でリネームさせる
                 policy.rotate(rotatedFilePath);
             }
@@ -277,10 +276,10 @@ public class DateRotatePolicyTest {
     };
     
     public static class DateFixture {
-        private String updateTime;   // 更新時刻
-        private String expectedNextUpdateTime;    //次回更新時刻
-        private String currentDate; // 現在時刻
-        private String expectedUpdateTime; //フォーマット後の更新時刻
+        private final String updateTime;   // 更新時刻
+        private final String expectedNextUpdateTime;    //次回更新時刻
+        private final String currentDate; // 現在時刻
+        private final String expectedUpdateTime; //フォーマット後の更新時刻
 
         public DateFixture(String updateTime,String expectedNextUpdateTime,
                 String currentDate,String formattedUpdateTime) {
@@ -311,7 +310,6 @@ public class DateRotatePolicyTest {
         String expected = "\tNEXT CHANGE DATE    = ["+dateFixture.expectedNextUpdateTime +"]" + Logger.LS
                 + "\tCURRENT DATE        = ["+dateFixture.currentDate +"]" + Logger.LS
                 + "\tUPDATE TIME         = ["+dateFixture.expectedUpdateTime +"]" + Logger.LS;
-        ;
 
         assertThat(actual, is(expected));
     }
@@ -330,7 +328,7 @@ public class DateRotatePolicyTest {
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
             @Override
-            public void run() throws Throwable {
+            public void run() {
                 policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
             }
         });

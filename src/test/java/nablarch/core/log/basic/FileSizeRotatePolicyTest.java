@@ -42,7 +42,7 @@ public class FileSizeRotatePolicyTest {
         settings.put("appFile.maxFileSize", "20");
         objectSettings = new ObjectSettings(new MockLogSettings(settings),"appFile");
     }
-    private String logFilePath = "./log/file-size-rotate-app.log";
+    private final String logFilePath = "./log/file-size-rotate-app.log";
     private ObjectSettings objectSettings;
 
     /** 正しくファイルがリネームされること */
@@ -83,7 +83,7 @@ public class FileSizeRotatePolicyTest {
         final String rotatedFilePath = "./log/testInvalidFileSizeRotate-app.log.old";
         IllegalStateException exception = assertThrows(IllegalStateException.class, new ThrowingRunnable() {
             @Override
-            public void run() throws Throwable {
+            public void run() {
                 //filePathファイルが存在しない状態でリネームさせる
                 policy.rotate(rotatedFilePath);
             }
@@ -125,7 +125,7 @@ public class FileSizeRotatePolicyTest {
         assertThat(policy.needsRotate(message, Charset.defaultCharset()), is(false));
     }
 
-    private File newFile(String path, int byteSize) throws IOException {
+    private File newFile(String path, int byteSize) {
         String content = generateZeroPaddingString(byteSize);
 
         FileWriter fileWriter = null;
@@ -224,7 +224,7 @@ public class FileSizeRotatePolicyTest {
 
     /** 正しくリネーム先のファイルパスが決定できること */
     @Test
-    public void testDecideRotatedFilePath() throws ParseException {
+    public void testDecideRotatedFilePath() {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(objectSettings);
         String actual = policy.decideRotatedFilePath();
@@ -268,7 +268,6 @@ public class FileSizeRotatePolicyTest {
         String expected = "\tFILE AUTO CHANGE    = [true]" + Logger.LS
                 + "\tMAX FILE SIZE       = [20000]" + Logger.LS
                 + "\tCURRENT FILE SIZE   = [5]" + Logger.LS;
-        ;
 
         assertThat(actual, is(expected));
     }

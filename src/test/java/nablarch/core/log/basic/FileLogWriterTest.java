@@ -37,7 +37,7 @@ public class FileLogWriterTest extends LogTestSupport {
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
             @Override
-            public void run() throws Throwable {
+            public void run() {
                 writer.initialize(
                         new ObjectSettings(new MockLogSettings(settings), "appFile"));
             }
@@ -59,7 +59,7 @@ public class FileLogWriterTest extends LogTestSupport {
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
             @Override
-            public void run() throws Throwable {
+            public void run() {
                 writer.initialize(
                         new ObjectSettings(new MockLogSettings(settings), "appFile"));
             }
@@ -345,7 +345,7 @@ public class FileLogWriterTest extends LogTestSupport {
                 new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         String appLog = LogTestUtil.getLog(appFile);
-        assertTrue(appLog.indexOf("initialized.") != -1);
+        assertTrue(appLog.contains("initialized."));
 
         for (int i = 0; i < 1030; i++) {
             if (i % 250 == 0) {
@@ -358,12 +358,12 @@ public class FileLogWriterTest extends LogTestSupport {
             writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + i + "]]]",
                     null));
             appLog = LogTestUtil.getLog(appFile);
-            assertTrue(appLog.indexOf("[[[" + i + "]]]") != -1);
+            assertTrue(appLog.contains("[[[" + i + "]]]"));
         }
 
         writer.terminate();
         appLog = LogTestUtil.getLog(appFile);
-        assertTrue(appLog.indexOf("terminated.") != -1);
+        assertTrue(appLog.contains("terminated."));
     }
     
     /**
