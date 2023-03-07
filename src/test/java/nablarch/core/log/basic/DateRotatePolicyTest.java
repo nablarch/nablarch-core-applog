@@ -221,7 +221,7 @@ public class DateRotatePolicyTest {
     /** ローテーション時に、正しくnextUpdateDateが更新できること */
     @Test
     public void testNextUpdateDateInRotate() throws IOException, ParseException {
-        DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
+        DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
         policy.initialize(objectSettings);
 
         // ローテーションするファイルを作成
@@ -235,13 +235,13 @@ public class DateRotatePolicyTest {
         policy.rotate(expectedPath);
 
         // 正しくnextUpdateDateが更新できているかの確認
-        ((DateRotatePolicyForTest)policy).setCurrentDate(textToDate("2018-01-01 23:59:59.000"));
+        policy.setCurrentDate(textToDate("2018-01-01 23:59:59.000"));
 
         boolean actual = policy.needsRotate("abcdeabcde", ignored);
 
         assertThat(actual, is(false));
 
-        ((DateRotatePolicyForTest)policy).setCurrentDate(textToDate("2018-01-02 00:00:00.000"));
+        policy.setCurrentDate(textToDate("2018-01-02 00:00:00.000"));
 
         actual = policy.needsRotate("abcdeabcde", ignored);
 
