@@ -86,9 +86,14 @@ public class DateRotatePolicy implements RotatePolicy {
     }
 
     /**
-     * 次回ローテション時刻を計算する。
+     * 次回ローテション時刻を以下の通り計算する。<br>
+     * <br>
+     * 年月日 : 現在時刻の時分秒 > 設定されたupdateTimeの時分秒 の場合は、現在日+1日。それ以外の場合は、現在時刻と同じ日付。
+     * updateTimeが設定されていない場合は、現在日付+1日とする。<br>
+     * 時分秒 : updateTimeに設定されている時刻とする。設定されていない場合は、00:00:00とする。<br>
+     * ミリ秒 : 000とする。
      * @param currentDate 現在日時
-     * @return 次回ローテション時刻のCalendarオブジェクト
+     * @return 次回ローテション時刻のDateオブジェクト
      */
     private Date calcNextUpdateDate(Date currentDate) {
         Calendar nextUpdateCalendar = Calendar.getInstance();
