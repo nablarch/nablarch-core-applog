@@ -2,6 +2,7 @@ package nablarch.core.log.basic;
 
 import mockit.Mock;
 import mockit.MockUp;
+import nablarch.core.log.LogTestUtil;
 import nablarch.core.log.Logger;
 import nablarch.core.log.MockLogSettings;
 import org.junit.Before;
@@ -26,7 +27,6 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.fail;
 
 /**
  * {@link DateRotatePolicy}のテスト。
@@ -63,10 +63,8 @@ public class DateRotatePolicyTest {
     @Before
     public  void setup() {
         // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
-        File logFile = new File(logFilePath);
-        if (logFile.exists()) {
-            logFile.delete();
-        }
+        LogTestUtil.cleanupLog(logFilePath);
+
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", logFilePath);
         objectSettings = new ObjectSettings(new MockLogSettings(settings),"appFile");
@@ -167,10 +165,6 @@ public class DateRotatePolicyTest {
     @Test
     public void testDecideRotatedFilePath() throws ParseException {
         String expectedPath = "./log/date-rotate-app.log.20180102000000.old";
-        File expectedFile = new File(expectedPath);
-        if (expectedFile.exists()) {
-            expectedFile.delete();
-        }
 
         DateRotatePolicy policy = new FixedDateRotatePolicy(textToDate("2018-01-01 10:10:10:000"));
         policy.initialize(objectSettings);
@@ -212,7 +206,6 @@ public class DateRotatePolicyTest {
 
         // リネーム後のファイルが存在しないこと
         File expectedFile = new File(expectedPath);
-        expectedFile.delete();
         assertThat(expectedFile.exists(), is(false));
 
         policy.rotate(expectedPath);
@@ -237,9 +230,6 @@ public class DateRotatePolicyTest {
         //ローテーション先にファイルがある場合は削除
         String expectedPath = "./log/testNextUpdateDateInRotate-app.log.old";
         File expectedFile = new File(expectedPath);
-        if (expectedFile.exists()) {
-            expectedFile.delete();
-        }
 
         // rotateは2018年1月1日のため、次回更新時刻は2018年の1月2日になっている
         policy.rotate(expectedPath);
@@ -263,11 +253,6 @@ public class DateRotatePolicyTest {
     public void testInvalidRotate() {
         final DateRotatePolicy policy = new DateRotatePolicy();
         policy.initialize(objectSettings);
-
-        File logFile = new File(logFilePath);
-        if (logFile.exists()) {
-            logFile.delete();
-        }
 
         // fileが存在しない状態でリネームさせる
         final String rotatedFilePath = "./log/testInvalidDateRotate-app.log.old";
@@ -311,11 +296,6 @@ public class DateRotatePolicyTest {
     @Theory
     public void testGetSetting(@FromDataPoints("normal") DateFixture dateFixture) throws ParseException {
         String path = "./log/testGetSetting.log";
-        // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
-        File logFile = new File(path);
-        if (logFile.exists()) {
-            logFile.delete();
-        }
 
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", path);

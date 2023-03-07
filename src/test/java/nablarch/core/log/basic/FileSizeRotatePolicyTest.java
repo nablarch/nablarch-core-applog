@@ -1,5 +1,6 @@
 package nablarch.core.log.basic;
 
+import nablarch.core.log.LogTestUtil;
 import nablarch.core.log.Logger;
 import nablarch.core.log.MockLogSettings;
 import nablarch.core.util.FileUtil;
@@ -32,10 +33,8 @@ public class FileSizeRotatePolicyTest {
 
     @Before
     public  void setup() {
-        File logFile = new File(logFilePath);
-        if (logFile.exists()) {
-            logFile.delete();
-        }
+        LogTestUtil.cleanupLog(logFilePath);
+
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", logFilePath);
         settings.put("appFile.maxFileSize", "20");
@@ -61,7 +60,6 @@ public class FileSizeRotatePolicyTest {
 
         // リネーム後のファイルが存在しないこと
         File expectedFile = new File(expectedPath);
-        expectedFile.delete();
         assertThat(expectedFile.exists(), is(false));
 
         policy.rotate(expectedPath);
@@ -79,7 +77,6 @@ public class FileSizeRotatePolicyTest {
     public void testInvalidRotate() {
         final FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(objectSettings);
-        new File(logFilePath).delete();
 
         final String rotatedFilePath = "./log/testInvalidFileSizeRotate-app.log.old";
         IllegalStateException exception = assertThrows(IllegalStateException.class, new ThrowingRunnable() {
