@@ -4,7 +4,6 @@ import mockit.*;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.log.LogTestUtil;
 import nablarch.core.log.MockLogSettings;
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
@@ -14,8 +13,8 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.*;
 
 /**
@@ -44,7 +43,7 @@ public class FileLogWriterTest extends LogTestSupport {
             }
         });
 
-        assertThat(exception.getMessage(), CoreMatchers.is("failed to create java.io.Writer. file name = [./unknown/app.log], encoding = [UTF-8], buffer size =[8000]"));
+        assertThat(exception.getMessage(), is("failed to create java.io.Writer. file name = [./unknown/app.log], encoding = [UTF-8], buffer size =[8000]"));
     }
 
     /** 不正な文字エンコーディングが設定された場合は初期処理に失敗すること。 */
@@ -66,7 +65,7 @@ public class FileLogWriterTest extends LogTestSupport {
             }
         });
 
-        assertThat(exception.getMessage(), CoreMatchers.is("UNKNOWN"));
+        assertThat(exception.getMessage(), is("UNKNOWN"));
     }
 
     /**
