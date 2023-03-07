@@ -128,7 +128,7 @@ public class DateRotatePolicyTest {
         // ファイル更新時刻の設定
         logFile.setLastModified(textToDate("2017-12-31 10:10:10.000").getTime());
 
-        DateRotatePolicy policy = new DateRotatePolicy();
+        DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
         policy.initialize(objectSettings);
 
         boolean actual = policy.needsRotate("abcdeabcde", ignored);
@@ -145,8 +145,8 @@ public class DateRotatePolicyTest {
 
         File logFile = new File(logFilePath);
         logFile.createNewFile();
-        
-        final DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
+
+        final DateRotatePolicy policy = new DateRotatePolicy();
 
         IllegalStateException exception = assertThrows(IllegalStateException.class, new ThrowingRunnable() {
             @Override
