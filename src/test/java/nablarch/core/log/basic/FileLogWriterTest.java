@@ -365,10 +365,7 @@ public class FileLogWriterTest extends LogTestSupport {
         appLog = LogTestUtil.getLog(appFile);
         assertTrue(appLog.indexOf("terminated.") != -1);
     }
-
-    /**
-     * リソース解放後(terminated呼び出し後)にログ出力を行った場合は、エラーとなること。
-     */
+    
     /**
      * 終了処理の後に書き込み処理が呼ばれた場合に例外がスローされること。
      */
