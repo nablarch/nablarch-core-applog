@@ -213,11 +213,11 @@ public class FileSizeRotatePolicyTest {
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         // currentFileSizeを15000byteに設定
-        File logFile = newFile(logFilePath,15*1000);
+        File logFile = newFile(logFilePath,15*FileLogWriter.KB);
 
         policy.onOpenFile(logFile);
 
-        assertThat(policy.needsRotate(generateZeroPaddingString(10 * 1000), Charset.defaultCharset()), is(false));
+        assertThat(policy.needsRotate(generateZeroPaddingString(10 * FileLogWriter.KB), Charset.defaultCharset()), is(false));
     }
 
     /** 正しくリネーム先のファイルパスが決定できること */
