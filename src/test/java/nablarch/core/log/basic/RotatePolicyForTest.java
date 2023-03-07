@@ -22,7 +22,7 @@ public class RotatePolicyForTest implements RotatePolicy {
         logFilePath = settings.getRequiredProp("filePath");
 
         String rotation = settings.getProp("rotation");
-        if (rotation == "always") {
+        if ("always".equals(rotation)) {
             isAlwaysRotation = true;
         }
     }
@@ -34,11 +34,8 @@ public class RotatePolicyForTest implements RotatePolicy {
         if (isAlwaysRotation) {
             return true;
         }
-        else if (logCounter % 20 == 0) {
-            return true;
-        } else {
-            return false;
-        }
+
+        return logCounter % 20 == 0;
     }
 
     @Override

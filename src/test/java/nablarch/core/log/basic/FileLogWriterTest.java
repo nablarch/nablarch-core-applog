@@ -301,9 +301,15 @@ public class FileLogWriterTest extends LogTestSupport {
                 return pathname.getName().contains("switched-app.log.");
             }
         };
-        assertTrue("1回はスイッチされていること", dir.listFiles(appFileFilter).length >= 1);
+
+        File[] files = dir.listFiles(appFileFilter);
+        if (files == null) {
+            fail();
+        }
+
+        assertTrue("1回はスイッチされていること", files.length >= 1);
         
-        for (File file : dir.listFiles(appFileFilter)) {
+        for (File file : files) {
             String log = LogTestUtil.getLog(file);
             assertFalse(log.contains(
                     "] change [./log/switched-app.log] -> [./log/switched-app.log."));
