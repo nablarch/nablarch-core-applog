@@ -227,7 +227,6 @@ public class DateRotatePolicyTest {
         // ローテーションするファイルを作成
         new File(logFilePath).createNewFile();
 
-        //ローテーション先にファイルがある場合は削除
         String expectedPath = "./log/testNextUpdateDateInRotate-app.log.old";
 
         policy.setCurrentDate(textToDate("2018-01-02 13:59:59.000"));
