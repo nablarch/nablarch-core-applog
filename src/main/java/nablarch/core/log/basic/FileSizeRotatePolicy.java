@@ -89,7 +89,7 @@ public class FileSizeRotatePolicy implements RotatePolicy {
 
     /**
      * {@inheritDoc}<br>
-     * {@link FileSizeRotatePolicy}では、読み込んだファイルサイズを現在のファイルサイズとして、インスタンス変数に保持する。
+     * 読み込んだファイルサイズを現在のファイルサイズとして、インスタンス変数に保持する。
      */
     @Override
     public void onOpenFile(File file) {
@@ -98,7 +98,7 @@ public class FileSizeRotatePolicy implements RotatePolicy {
 
     /**
      * {@inheritDoc}<br>
-     * {@link FileSizeRotatePolicy}では、ファイルサイズに書き込むメッセージサイズを足すことで、現在のファイルサイズを更新する。
+     * ファイルサイズに書き込むメッセージサイズを足すことで、現在のファイルサイズを更新する。
      */
     @Override
     public void onWrite(String message, Charset charset) {
