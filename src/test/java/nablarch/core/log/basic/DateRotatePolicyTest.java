@@ -307,11 +307,9 @@ public class DateRotatePolicyTest {
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         String actual = policy.getSettings();
-        String settingDatePattern = "yyyy-MM-dd HH:mm:ss";
-        DateFormat settingDateFormat = new SimpleDateFormat(settingDatePattern);
 
         String expected = "\tNEXT CHANGE DATE    = ["+dateFixture.expectedNextUpdateTime +"]" + Logger.LS
-                + "\tCURRENT DATE        = ["+settingDateFormat.format(textToDate(dateFixture.currentDate+ ".000")) +"]" + Logger.LS
+                + "\tCURRENT DATE        = ["+dateFixture.currentDate +"]" + Logger.LS
                 + "\tUPDATE TIME         = ["+dateFixture.expectedUpdateTime +"]" + Logger.LS;
         ;
 
