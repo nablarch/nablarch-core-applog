@@ -116,7 +116,7 @@ public class DateRotatePolicy implements RotatePolicy {
             nextUpdateCalendar.add(Calendar.DATE, 1);
         }
 
-        return nextUpdateDate;
+        return nextUpdateCalendar.getTime();
     }
 
     /**
