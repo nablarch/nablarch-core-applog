@@ -31,6 +31,8 @@ import static org.junit.Assert.*;
  */
 public class FileSizeRotatePolicyTest {
 
+    private final String message = "dummy-message";
+
     @Before
     public  void setup() {
         LogTestUtil.cleanupLog(logFilePath);
@@ -103,7 +105,7 @@ public class FileSizeRotatePolicyTest {
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         // maxFileSizeが0バイトのためfalseを返す
-        assertThat(policy.needsRotate("abcde", Charset.defaultCharset()), is(false));
+        assertThat(policy.needsRotate(message, Charset.defaultCharset()), is(false));
     }
 
     /**
@@ -120,7 +122,7 @@ public class FileSizeRotatePolicyTest {
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         // maxFileSizeが-1KBのためfalseを返す
-        assertThat(policy.needsRotate("abcde", Charset.defaultCharset()), is(false));
+        assertThat(policy.needsRotate(message, Charset.defaultCharset()), is(false));
     }
 
     private File newFile(String path, int byteSize) throws IOException {
