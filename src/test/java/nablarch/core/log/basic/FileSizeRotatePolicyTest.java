@@ -193,7 +193,7 @@ public class FileSizeRotatePolicyTest {
 
         policy.onOpenFile(logFile);
 
-        // currentFileSizeに5KBを加えて、19KBに設定
+        // currentFileSizeに5KBを加えて、20KBに設定
         policy.onWrite(generateZeroPaddingString(5 * FileLogWriter.KB), Charset.defaultCharset());
 
         assertThat(policy.needsRotate(generateZeroPaddingString(1), Charset.defaultCharset()), is(true));
