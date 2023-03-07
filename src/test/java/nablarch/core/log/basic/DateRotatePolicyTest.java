@@ -264,16 +264,16 @@ public class DateRotatePolicyTest {
 
     @DataPoints("normal")
     public static DateFixture[] testFixtures = {
-            new DateFixture("12", "2018-01-01 12:00:00","2018-01-01 10:10:10.000" ,"12:00:00")
-            ,new DateFixture("12:12", "2018-01-02 12:12:00", "2018-01-01 13:10:10.000","12:12:00")
-            ,new DateFixture("12:12:12", "2018-01-02 12:12:12", "2018-01-01 13:10:10.000","12:12:12")
-            ,new DateFixture("", "2018-01-02 00:00:00", "2018-01-01 13:10:10.000","00:00:00")
+            new DateFixture("12", "2018-01-01 12:00:00","2018-01-01 10:10:10" ,"12:00:00")
+            ,new DateFixture("12:12", "2018-01-02 12:12:00", "2018-01-01 13:10:10","12:12:00")
+            ,new DateFixture("12:12:12", "2018-01-02 12:12:12", "2018-01-01 13:10:10","12:12:12")
+            ,new DateFixture("", "2018-01-02 00:00:00", "2018-01-01 13:10:10","00:00:00")
     };
 
     @DataPoints("invalid")
     public static DateFixture[] InvalidTestFixtures = {
-            new DateFixture("12:aiueo", null, "2018-01-01 10:10:10.000", null)
-            ,new DateFixture(":::::", null, "2018-01-01 10:10:10.000", null)
+            new DateFixture("12:aiueo", null, "2018-01-01 10:10:10", null)
+            ,new DateFixture(":::::", null, "2018-01-01 10:10:10", null)
     };
     
     public static class DateFixture {
@@ -303,7 +303,7 @@ public class DateRotatePolicyTest {
             settings.put("appFile.updateTime", dateFixture.updateTime);
         }
 
-        DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate(dateFixture.currentDate));
+        DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate(dateFixture.currentDate + ".000"));
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         String actual = policy.getSettings();
@@ -311,7 +311,7 @@ public class DateRotatePolicyTest {
         DateFormat settingDateFormat = new SimpleDateFormat(settingDatePattern);
 
         String expected = "\tNEXT CHANGE DATE    = ["+dateFixture.expectedNextUpdateTime +"]" + Logger.LS
-                + "\tCURRENT DATE        = ["+settingDateFormat.format(textToDate(dateFixture.currentDate)) +"]" + Logger.LS
+                + "\tCURRENT DATE        = ["+settingDateFormat.format(textToDate(dateFixture.currentDate+ ".000")) +"]" + Logger.LS
                 + "\tUPDATE TIME         = ["+dateFixture.expectedUpdateTime +"]" + Logger.LS;
         ;
 
