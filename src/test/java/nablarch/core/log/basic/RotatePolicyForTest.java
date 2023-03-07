@@ -10,7 +10,7 @@ import java.util.Date;
  * RotatePolicyの実装クラスのモック
  * ログが20回書き込まれるごとにローテーションする
  * */
-public class MockRotatePolicy implements RotatePolicy {
+public class RotatePolicyForTest implements RotatePolicy {
 
     private String logFilePath;
     private int logCounter;
