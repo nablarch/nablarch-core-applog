@@ -229,19 +229,19 @@ public class DateRotatePolicyTest {
 
         //ローテーション先にファイルがある場合は削除
         String expectedPath = "./log/testNextUpdateDateInRotate-app.log.old";
-        File expectedFile = new File(expectedPath);
 
-        // rotateは2018年1月1日のため、次回更新時刻は2018年の1月2日になっている
+        policy.setCurrentDate(textToDate("2018-01-02 13:59:59.000"));
+        // rotateは2018年1月2日のため、次回更新時刻は2018年の1月3日になっている
         policy.rotate(expectedPath);
 
         // 正しくnextUpdateDateが更新できているかの確認
-        policy.setCurrentDate(textToDate("2018-01-01 23:59:59.000"));
+        policy.setCurrentDate(textToDate("2018-01-02 23:59:59.000"));
 
         boolean actual = policy.needsRotate("abcdeabcde", ignored);
 
         assertThat(actual, is(false));
 
-        policy.setCurrentDate(textToDate("2018-01-02 00:00:00.000"));
+        policy.setCurrentDate(textToDate("2018-01-03 00:00:00.000"));
 
         actual = policy.needsRotate("abcdeabcde", ignored);
 
