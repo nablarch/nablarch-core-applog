@@ -227,7 +227,7 @@ public class DateRotatePolicyTest {
         String expectedPath = "./log/testNextUpdateDateInRotate-app.log.old";
 
         policy.setCurrentDate(textToDate("2018-01-02 13:59:59.000"));
-        // rotateは2018年1月2日のため、次回更新時刻は2018年の1月3日になっている
+        // 現在日時は2018年1月2日のため、次回更新時刻は2018年の1月3日になっている
         policy.rotate(expectedPath);
 
         // 正しくnextUpdateDateが更新できているかの確認
