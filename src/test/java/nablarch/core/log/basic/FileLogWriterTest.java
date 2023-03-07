@@ -10,8 +10,6 @@ import org.junit.function.ThrowingRunnable;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -88,7 +86,7 @@ public class FileLogWriterTest extends LogTestSupport {
         settings.put("appFile.filePath", "./log/initialized-message-app.log");
         settings.put("appFile.encoding", "UTF-8");
         settings.put("appFile.outputBufferSize", "10");
-        settings.put("appFile.maxFileSize", "50000");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.MockRotatePolicy");
 
         FileLogWriter writer = new FileLogWriter();
         writer.initialize(
@@ -109,9 +107,7 @@ public class FileLogWriterTest extends LogTestSupport {
                 "FILE PATH           = [./log/initialized-message-app.log]"));
         assertTrue(appLog.contains("ENCODING            = [UTF-8]"));
         assertTrue(appLog.contains("OUTPUT BUFFER SIZE  = [10000]"));
-        assertTrue(appLog.contains("FILE AUTO CHANGE    = [true]"));
-        assertTrue(appLog.contains("MAX FILE SIZE       = [50000000]"));
-        assertTrue(appLog.contains("CURRENT FILE SIZE   = [0]"));
+        assertTrue(appLog.contains("ROTATE POLICY CLASS = [nablarch.core.log.basic.MockRotatePolicy]"));
         assertTrue(appLog.contains("terminated."));
     }
 
@@ -130,7 +126,7 @@ public class FileLogWriterTest extends LogTestSupport {
         settings.put("appFile.filePath", "./log/initialized-message-app.log");
         settings.put("appFile.encoding", "UTF-8");
         settings.put("appFile.outputBufferSize", "10");
-        settings.put("appFile.maxFileSize", "50000");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.MockRotatePolicy");
 
         FileLogWriter writer = new FileLogWriter();
         writer.initialize(
@@ -140,37 +136,6 @@ public class FileLogWriterTest extends LogTestSupport {
 
         String appLog = LogTestUtil.getLog(appFile);
         assertEquals("", appLog);
-    }
-
-    /** ファイルが切り替わらないこと。 */
-    @Test
-    public void testNotSwitched() {
-
-        File appFile = LogTestUtil.cleanupLog("/not-switched-app.log");
-
-        Map<String, String> settings = new HashMap<String, String>();
-        settings.put("appFile.filePath", "./log/not-switched-app.log");
-        settings.put("appFile.encoding", "UTF-8");
-        settings.put("appFile.outputBufferSize", "8");
-
-        FileLogWriter writer = new FileLogWriter();
-        writer.initialize(
-                new ObjectSettings(new MockLogSettings(settings), "appFile"));
-
-        for (int i = 0; i < 515; i++) {
-            writer.write(new LogContext(FQCN, LogLevel.DEBUG, "[[[" + i + "]]]",
-                    null));
-        }
-
-        writer.terminate();
-
-        String appLog = LogTestUtil.getLog(appFile);
-        assertTrue(appLog.indexOf("initialized.") != -1);
-        assertTrue(appLog.indexOf("terminated.") != -1);
-        for (int i = 0; i < 515; i++) {
-            assertTrue(appLog.indexOf("[[[" + i + "]]]") != -1);
-        }
-        assertTrue(appLog.indexOf("[[[515]]]") == -1);
     }
 
     /** ローテーションが不要な場合に、RotatePolicyのインターフェースが正しく呼び出されていること */
@@ -240,6 +205,7 @@ public class FileLogWriterTest extends LogTestSupport {
         settings.put("appFile.encoding", utf8);
         settings.put("appFile.outputBufferSize", "8");
 
+
         FileLogWriter writer = new FileLogWriter();
         final ObjectSettings objectSettings = new ObjectSettings(new MockLogSettings(settings), "appFile");
 
@@ -304,7 +270,7 @@ public class FileLogWriterTest extends LogTestSupport {
         settings.put("appFile.filePath", "./log/switched-app.log");
         settings.put("appFile.encoding", "UTF-8");
         settings.put("appFile.outputBufferSize", "8");
-        settings.put("appFile.maxFileSize", "10");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.MockRotatePolicy");
 
         FileLogWriter writer = new FileLogWriter();
         writer.initialize(
@@ -351,7 +317,7 @@ public class FileLogWriterTest extends LogTestSupport {
      * INFOレベルより下のレベルで切り替えが発生した場合にINFOレベルのログが出ないこと。
      */
     @Test
-    public void testSwitchedUnderInfoLevel() throws Throwable {
+    public void testSwitchedUnderInfoLevel() {
 
         File appFile = LogTestUtil.cleanupLog("/switched-app.log");
 
@@ -359,14 +325,19 @@ public class FileLogWriterTest extends LogTestSupport {
         settings.put("appFile.filePath", "./log/switched-app.log");
         settings.put("appFile.encoding", "UTF-8");
         settings.put("appFile.outputBufferSize", "8");
-        settings.put("appFile.maxFileSize", "2");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.MockRotatePolicy");
         settings.put("appFile.level", "WARN");
 
         FileLogWriter writer = new FileLogWriter();
         writer.initialize(
                 new ObjectSettings(new MockLogSettings(settings), "appFile"));
         
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 30; i++) {
+            try {
+                Thread.sleep(100L);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             writer.write(new LogContext(FQCN, LogLevel.WARN, "test",
                     null));
         }
@@ -412,7 +383,7 @@ public class FileLogWriterTest extends LogTestSupport {
         settings.put("appFile.filePath", "./log/flush-app.log");
         settings.put("appFile.encoding", "UTF-8");
         settings.put("appFile.outputBufferSize", "50");
-        settings.put("appFile.maxFileSize", "50");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.MockRotatePolicy");
 
         FileLogWriter writer = new FileLogWriter();
         writer.initialize(
@@ -455,7 +426,7 @@ public class FileLogWriterTest extends LogTestSupport {
         settings.put("appFile.filePath", "./log/switched-app.log");
         settings.put("appFile.encoding", "UTF-8");
         settings.put("appFile.outputBufferSize", "8");
-        settings.put("appFile.maxFileSize", "10");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.MockRotatePolicy");
 
         FileLogWriter writer = new FileLogWriter();
         writer.initialize(
@@ -483,7 +454,7 @@ public class FileLogWriterTest extends LogTestSupport {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", "./log/multi-threads-app.log");
         settings.put("appFile.encoding", "UTF-8");
-        settings.put("appFile.maxFileSize", "10");
+        settings.put("appFile.rotatePolicy", "nablarch.core.log.basic.MockRotatePolicy");
 
         final FileLogWriter writer = new FileLogWriter();
 
