@@ -264,28 +264,30 @@ public class DateRotatePolicyTest {
 
     @DataPoints("normal")
     public static DateFixture[] testFixtures = {
-            new DateFixture("12", "2018-01-01 12:00:00","2018-01-01 10:10:10.000")
-            ,new DateFixture("12:12", "2018-01-02 12:12:00", "2018-01-01 13:10:10.000")
-            ,new DateFixture("12:12:12", "2018-01-02 12:12:12", "2018-01-01 13:10:10.000")
-            ,new DateFixture("", "2018-01-02 00:00:00", "2018-01-01 13:10:10.000")
+            new DateFixture("12", "2018-01-01 12:00:00","2018-01-01 10:10:10.000" ,"12:00:00")
+            ,new DateFixture("12:12", "2018-01-02 12:12:00", "2018-01-01 13:10:10.000","12:12:00")
+            ,new DateFixture("12:12:12", "2018-01-02 12:12:12", "2018-01-01 13:10:10.000","12:12:12")
+            ,new DateFixture("", "2018-01-02 00:00:00", "2018-01-01 13:10:10.000","00:00:00")
     };
 
     @DataPoints("invalid")
     public static DateFixture[] InvalidTestFixtures = {
-            new DateFixture("12:aiueo", null, "2018-01-01 10:10:10.000")
-            ,new DateFixture(":::::", null, "2018-01-01 10:10:10.000")
+            new DateFixture("12:aiueo", null, "2018-01-01 10:10:10.000", null)
+            ,new DateFixture(":::::", null, "2018-01-01 10:10:10.000", null)
     };
     
     public static class DateFixture {
         private String updateTime;   // 更新時刻
         private String expectedNextUpdateTime;    //次回更新時刻
         private String currentDate; // 現在時刻
+        private String expectedUpdateTime; //フォーマット後の更新時刻
 
         public DateFixture(String updateTime,String expectedNextUpdateTime,
-                String currentDate) {
+                String currentDate,String formattedUpdateTime) {
             this.updateTime = updateTime;
             this.expectedNextUpdateTime = expectedNextUpdateTime;
             this.currentDate = currentDate;
+            this.expectedUpdateTime = formattedUpdateTime;
         }
     }
 
@@ -308,21 +310,9 @@ public class DateRotatePolicyTest {
         String settingDatePattern = "yyyy-MM-dd HH:mm:ss";
         DateFormat settingDateFormat = new SimpleDateFormat(settingDatePattern);
 
-        String[] splits = dateFixture.updateTime.split(":");
-        String formattedUpdateTime;
-        if (dateFixture.updateTime.isEmpty()) {
-            formattedUpdateTime = "00:00:00";
-        } else if (splits.length == 1) {
-            formattedUpdateTime = dateFixture.updateTime+":00:00";
-        } else if (splits.length == 2) {
-            formattedUpdateTime = dateFixture.updateTime +":00";
-        } else {
-            formattedUpdateTime = dateFixture.updateTime;
-        }
-
         String expected = "\tNEXT CHANGE DATE    = ["+dateFixture.expectedNextUpdateTime +"]" + Logger.LS
                 + "\tCURRENT DATE        = ["+settingDateFormat.format(textToDate(dateFixture.currentDate)) +"]" + Logger.LS
-                + "\tUPDATE TIME         = ["+formattedUpdateTime+"]" + Logger.LS;
+                + "\tUPDATE TIME         = ["+dateFixture.expectedUpdateTime +"]" + Logger.LS;
         ;
 
         assertThat(actual, is(expected));
