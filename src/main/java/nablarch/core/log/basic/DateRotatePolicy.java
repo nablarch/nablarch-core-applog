@@ -31,15 +31,13 @@ import java.util.Date;
  * 次に、基準日時の時刻と rotateTime の時刻を比較して、次回ローテーション日時の日付を決定する。<br>
  * 基準日時の時刻 <= rotateTime → システム日付<br>
  * rotateTime < 基準日時の時刻 → システム日付 + 1日<br>
- * この日付に rotateTime の時刻を設定したものを、システム起動時の次回ローテーション日時とする。
+ * この日付に rotateTime の時刻を設定したものを、システム起動時の次回ローテーション日時とする。<br>
  * 例えば、rotateTimeに 12:00:00 が設定されており、基準日時が 2023-03-25 11:59:59 の場合、
- * 次回ローテーション日時は 2023-03-25 12:00:00 となる。
+ * 次回ローテーション日時は 2023-03-25 12:00:00 となる。<br>
  * rotateTimeに 12:00:00 が設定されており、基準日時が 2023-03-25 12:00:01 の場合、
- * 次回ローテーション日時は 2023-03-26 12:00:00 となる。
- * ローテーション後のログファイル名は、 <ログファイルパス>.yyyyMMddHHmmss.old となる。
- * yyyyMMddHHmmssは、 次回ローテーション日時。<br>
- * ローテーション先に同名のファイルが存在している場合は、 <ログファイルパス>.yyyyMMddHHmmssSSS.old となる。
- * この時、yyyyMMddHHmmssSSSにはローテーション実施時刻が出力される。
+ * 次回ローテーション日時は 2023-03-26 12:00:00 となる。<br>
+ * ローテーション後のログファイル名は、 <ログファイルパス>.yyyyMMddHHmmssSSS.old となる。
+ * yyyyMMddHHmmssSSSにはローテーション実施時刻が出力される。
  *
  * @author Kotaro Taki
  */
@@ -59,7 +57,6 @@ public class DateRotatePolicy implements RotatePolicy {
      * 起動時にログファイルパスにログファイルが既に存在する場合は、ファイルの更新時刻から次回ローテーション日時を算出する。
      * この初期化処理により、例えば2023年3月6日にログファイルに書き込み後アプリを停止。２日後にアプリを再起動する場合、
      * 起動時に本クラスが保持する次回ローテーション日時は2023年3月7日 となる。
-     * そのため起動後の初回ログ書き込み時にローテーションを行い、古いログファイル名は <ログファイルパス>.20230307000000.old となる。
      */
     @Override
     public void initialize(ObjectSettings settings) {
@@ -156,21 +153,12 @@ public class DateRotatePolicy implements RotatePolicy {
 
     /**
      * {@inheritDoc}
-     * 古いログファイル名は、 <ログファイルパス>.yyyyMMddHHmmss.old のフォーマットで出力される。
-     * 日時には、 本クラスが保持している次回ローテーション日時が出力される。
-     * もし、ローテーション先に同名のファイルが存在している場合、 <ログファイルパス>.yyyyMMddHHmmssSSS.old のフォーマット で出力される。
-     * この時、日時にはローテーション実施時刻が出力される。
+     * 古いログファイル名は、 <ログファイルパス>.yyyyMMddHHmmssSSS.old のフォーマットで出力される。
+     * 日時には、ローテーション実施時刻が出力される。
      */
     @Override
     public String decideRotatedFilePath() {
-        String rotatedFilePath = logFilePath + "." + new SimpleDateFormat("yyyyMMddHHmmss").format(nextRotateDateTime) + ".old";
-
-        File rotatedFile = new File(rotatedFilePath);
-        if (rotatedFile.exists()) {
-            rotatedFilePath = logFilePath + "." + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(currentDate()) + ".old";
-        }
-
-        return rotatedFilePath;
+        return logFilePath + "." + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(currentDate()) + ".old";
     }
 
     /**

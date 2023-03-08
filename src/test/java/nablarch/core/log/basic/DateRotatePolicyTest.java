@@ -166,28 +166,14 @@ public class DateRotatePolicyTest {
     /** 正しくリネーム先のファイルパスが決定できること */
     @Test
     public void testDecideRotatedFilePath() throws ParseException {
-        String expectedPath = "./log/date-rotate-app.log.20180102000000.old";
+        String expectedPath = "./log/date-rotate-app.log.20180101101010123.old";
 
-        DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
+        DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.123"));
         policy.initialize(objectSettings);
 
         String actual = policy.decideRotatedFilePath();
 
         assertThat(actual, is(expectedPath));
-    }
-
-    /** リネーム先のファイルが既に存在する場合に、正しくリネーム先のファイルパスが決定できること */
-    @Test
-    public void testDecideDupRotatedFilePath() throws IOException, ParseException {
-        File dupLogFile = new File("./log/date-rotate-app.log.20180104000000.old");
-        dupLogFile.createNewFile();
-
-        DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate("2018-01-03 10:10:10.000"));
-        policy.initialize(objectSettings);
-
-        String actual = policy.decideRotatedFilePath();
-
-        assertThat(actual, is("./log/date-rotate-app.log.20180103101010000.old"));
     }
 
     /** 正しくファイルがリネームされること */
