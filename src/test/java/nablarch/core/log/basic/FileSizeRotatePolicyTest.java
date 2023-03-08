@@ -253,16 +253,20 @@ public class FileSizeRotatePolicyTest {
 
     /** 正しく設定情報が取得できること */
     @Test
-    public void testGetSetting() throws IOException {
+    public void testGetSetting() {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(objectSettings);
 
         File logFile = new File(logFilePath);
-        FileWriter filewriter = new FileWriter(logFile);
-
-        filewriter.write("aiueo");
-
-        filewriter.close();
+        FileWriter filewriter = null;
+        try {
+            filewriter = new FileWriter(logFile);
+            filewriter.write("aiueo");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            FileUtil.closeQuietly(filewriter);
+        }
 
         policy.onOpenFile(logFile);
 
