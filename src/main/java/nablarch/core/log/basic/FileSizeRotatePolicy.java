@@ -16,13 +16,15 @@ import java.util.Date;
  * <br>
  * プロパティファイルの記述ルールを下記に示す。<br>
  * <dl>
- *
  * <dt>maxFileSize</dt>
  * <dd>書き込み先ファイルの最大サイズ。オプション。<br>
  *     単位はキロバイト。1000バイトを1キロバイトと換算する。<br>
  *     指定値が解析可能な整数値(Long.parseLong)でない場合は自動切替なし。<br>
  *     指定値が０以下の場合は自動切替なし。</dd>
  * </dl>
+ * ローテーション後のログファイル名は、 <ログファイルパス>.yyyyMMddHHmmssSSS.old となる。
+ * yyyyMMddHHmmssSSSはローテーション実施時刻。
+ *
  * @author Kotaro Taki
  */
 public class FileSizeRotatePolicy implements RotatePolicy {
@@ -52,6 +54,7 @@ public class FileSizeRotatePolicy implements RotatePolicy {
 
     /**
      * {@inheritDoc}
+     *
      * @throws IllegalStateException ログファイルのリネームができない場合
      */
     @Override
@@ -115,6 +118,7 @@ public class FileSizeRotatePolicy implements RotatePolicy {
      * CURRENT FILE SIZE   = [<書き込み先ファイルの現在のサイズ>]
      * }
      * </pre>
+     *
      * @return 設定情報
      * @see FileLogWriter#getSettings()
      */

@@ -14,24 +14,37 @@ import java.util.Date;
  * <br>
  * プロパティファイルの記述ルールを下記に示す。
  * <dl>
- *
  * <dt>updateTime</dt>
  * <dd>更新時刻。オプション。<br>
  *     特定の時刻にログファイルをローテーションしたい場合に指定する。<br>
  *     時刻は、HH, HH:mm, HH:mm:ss のいずれかのフォーマットで指定する。デフォルトは00:00:00。</dd>
  * </dl>
+ * ログ書き込み時の現在時刻 >= インスタンス変数として保持している次回ローテション時刻の場合、ローテーションを行う。<br>
+ * 次回ローテーション時刻は以下の通り算出する。
+ * ただし、初期化の際に書き込み先のログファイルが存在する場合は、ログファイルの最終更新日時を現在日時として扱う。
+ * それ以外の場合は、システムの現在日時を次回ローテーション時刻算出に使用する。
+ * <ol>
+ *     <li>現在日時の時刻部分をupdateTimeに設定されている時刻とする</li>
+ *     <li>1.で算出した日時 >= 現在日時 の場合は、1.で算出した日時を次回ローテーション時刻とする</li>
+ *     <li>1.で算出した日時 < 現在日時の場合は、1.で算出した日時 + 1日を次回ローテーション時刻とする</li>
+ * </ol>
+ * ローテーション後のログファイル名は、 <ログファイルパス>.yyyyMMddHHmmss.old となる。
+ * yyyyMMddHHmmssは、 次回ローテーション時刻。<br>
+ * ローテーション先に同名のファイルが存在している場合は、 <ログファイルパス>.yyyyMMddHHmmssSSS.old となる。
+ * この時、yyyyMMddHHmmssSSSにはローテーション実施時刻が出力される。
+ *
  * @author Kotaro Taki
  */
 public class DateRotatePolicy implements RotatePolicy {
 
     /** 書き込み先のファイルパス */
-    private String logFilePath ;
+    private String logFilePath;
 
     /** 次回ローテーション時刻 */
     private Date nextUpdateDate;
 
     /** プロパティファイルに設定された更新時刻から生成したDateオブジェクト */
-    private  Date nextUpdateTime;
+    private Date nextUpdateTime;
 
     /**
      * {@inheritDoc}
@@ -49,13 +62,13 @@ public class DateRotatePolicy implements RotatePolicy {
         if (updateTime != null) {
             String[] splits = updateTime.split(":");
             if (splits.length >= 4 || splits.length == 0) {
-                throw  new IllegalArgumentException("Invalid updateTime");
+                throw new IllegalArgumentException("Invalid updateTime");
             }
 
             if (splits.length == 1) {
-                formattedUpdateTime = updateTime+":00:00";
+                formattedUpdateTime = updateTime + ":00:00";
             } else if (splits.length == 2) {
-                formattedUpdateTime = updateTime +":00";
+                formattedUpdateTime = updateTime + ":00";
             } else {
                 formattedUpdateTime = updateTime;
             }
@@ -70,13 +83,13 @@ public class DateRotatePolicy implements RotatePolicy {
         }
 
         // ファイルが存在している場合、次回ローテーション時刻をファイルの更新時刻から算出する
-        logFilePath  = settings.getRequiredProp("filePath");
+        logFilePath = settings.getRequiredProp("filePath");
         File logFile = new File(logFilePath);
         Date currentDate;
         if (logFile.exists()) {
             long lastModifiedDate = logFile.lastModified();
             if (lastModifiedDate == 0) {
-                throw  new IllegalStateException("failed to read file. file name = [" + logFilePath + "]");
+                throw new IllegalStateException("failed to read file. file name = [" + logFilePath + "]");
             }
             currentDate = new Date(lastModifiedDate);
         } else {
@@ -93,6 +106,7 @@ public class DateRotatePolicy implements RotatePolicy {
      * 上記で算出された次回ローテション時刻を元に、以下の通り次回ローテション時刻を計算する。<br>
      * 1.次回ローテション時刻 >= 現在日時 の場合は、次回ローテーション時刻を返す。<br>
      * 2.次回ローテション時刻 < 現在日時 の場合は、次回ローテション時刻+1日を返す。
+     *
      * @param currentDate 現在日時
      * @return 次回ローテション時刻のDateオブジェクト
      */
@@ -127,7 +141,7 @@ public class DateRotatePolicy implements RotatePolicy {
     @Override
     public boolean needsRotate(String message, Charset charset) {
 
-        Date currentDate =currentDate();
+        Date currentDate = currentDate();
 
         return currentDate.getTime() >= nextUpdateDate.getTime();
     }
@@ -141,11 +155,11 @@ public class DateRotatePolicy implements RotatePolicy {
      */
     @Override
     public String decideRotatedFilePath() {
-        String rotatedFilePath = logFilePath  + "." + new SimpleDateFormat("yyyyMMddHHmmss").format(nextUpdateDate) + ".old";
+        String rotatedFilePath = logFilePath + "." + new SimpleDateFormat("yyyyMMddHHmmss").format(nextUpdateDate) + ".old";
 
         File rotatedFile = new File(rotatedFilePath);
-        if (rotatedFile .exists()) {
-            rotatedFilePath = logFilePath  + "." + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(currentDate()) + ".old";
+        if (rotatedFile.exists()) {
+            rotatedFilePath = logFilePath + "." + new SimpleDateFormat("yyyyMMddHHmmssSSS").format(currentDate()) + ".old";
         }
 
         return rotatedFilePath;
@@ -154,13 +168,14 @@ public class DateRotatePolicy implements RotatePolicy {
     /**
      * {@inheritDoc}
      * リネーム完了後に、 次回ローテション時刻を更新する。
+     *
      * @throws IllegalStateException ログファイルのリネームができない場合
      */
     @Override
     public void rotate(String rotatedFilePath) {
-        if (!new File(logFilePath ).renameTo(new File(rotatedFilePath))) {
+        if (!new File(logFilePath).renameTo(new File(rotatedFilePath))) {
             throw new IllegalStateException(
-                    "renaming failed. File#renameTo returns false. src file = [" + logFilePath  + "], dest file = [" + rotatedFilePath + "]");
+                    "renaming failed. File#renameTo returns false. src file = [" + logFilePath + "], dest file = [" + rotatedFilePath + "]");
         }
 
         nextUpdateDate = calcNextUpdateDate(currentDate());
@@ -176,6 +191,7 @@ public class DateRotatePolicy implements RotatePolicy {
      * UPDATE TIME         = [<更新時刻>]
      * }
      * </pre>
+     *
      * @return 設定情報
      * @see FileLogWriter#getSettings()
      */
@@ -190,6 +206,7 @@ public class DateRotatePolicy implements RotatePolicy {
 
     /**
      * 現在日時を返す。
+     *
      * @return 現在日時
      */
     protected Date currentDate() {
