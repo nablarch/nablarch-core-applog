@@ -62,7 +62,7 @@ public class DateRotatePolicyTest {
 
     @Before
     public void setup() {
-        // 現在時刻から次回更新時刻を算出するため、既に存在する場合はファイルを削除する。
+        // 現在時刻から次回ローテーション日時を算出するため、既に存在する場合はファイルを削除する。
         LogTestUtil.cleanupLog(logFilePath);
 
         Map<String, String> settings = new HashMap<String, String>();
@@ -75,7 +75,7 @@ public class DateRotatePolicyTest {
         return format.parse(textDate);
     }
 
-    /** 現在時刻<次回更新日の場合に、rotate不要と判定を行えること */
+    /** 現在時刻<次回ローテーション日時の場合に、rotate不要と判定を行えること */
     @Test
     public void testNeedsRotateIfNoNeeded() throws ParseException {
         DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
@@ -90,9 +90,9 @@ public class DateRotatePolicyTest {
         assertThat(actual, is(false));
     }
 
-    /** 現在時刻=次回更新日の場合に、rotate必要と判定を行えること */
+    /** 現在時刻=次回ローテーション日時の場合に、rotate必要と判定を行えること */
     @Test
-    public void testNeedsRotateIfCurrentDateEqualsNextUpdateDate() throws ParseException {
+    public void testNeedsRotateIfCurrentDateEqualsNextRotateDateTime() throws ParseException {
         DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
         policy.initialize(objectSettings);
 
@@ -105,7 +105,7 @@ public class DateRotatePolicyTest {
         assertThat(actual, is(true));
     }
 
-    /** 現在時刻>次回更新日の場合に、rotate必要と判定を行えること */
+    /** 現在時刻>次回ローテーション日時の場合に、rotate必要と判定を行えること */
     @Test
     public void testNeedsRotateIfNeeded() throws ParseException {
         DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
@@ -201,7 +201,7 @@ public class DateRotatePolicyTest {
 
         String expectedPath = "./log/testRotate-app.log.old";
 
-        // ロテート前
+        // ローテート前
         // リネーム前のファイルが存在すること
         assertThat(logFile.exists(), is(true));
 
@@ -211,7 +211,7 @@ public class DateRotatePolicyTest {
 
         policy.rotate(expectedPath);
 
-        // ロテート後
+        // ローテート後
         // リネーム前のファイルが存在しないこと
         assertThat(logFile.exists(), is(false));
 
@@ -219,19 +219,19 @@ public class DateRotatePolicyTest {
         assertThat(expectedFile.exists(), is(true));
     }
 
-    /** ローテーション時に、正しくnextUpdateDateが更新できること */
+    /** ローテーション時に、正しくnextRotateDateTimeが更新できること */
     @Test
-    public void testNextUpdateDateInRotate() throws IOException, ParseException {
+    public void testNextRotateDateTimeInRotate() throws IOException, ParseException {
         DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
         policy.initialize(objectSettings);
 
         // ローテーションするファイルを作成
         new File(logFilePath).createNewFile();
 
-        String expectedPath = "./log/testNextUpdateDateInRotate-app.log.old";
+        String expectedPath = "./log/testNextRotateDateTimeInRotate-app.log.old";
 
         policy.setCurrentDate(textToDate("2018-01-02 13:59:59.000"));
-        // 現在日時は2018年1月2日のため、次回更新時刻は2018年の1月3日になっている
+        // 現在日時は2018年1月2日のため、次回ローテーション日時は2018年の1月3日になっている
         policy.rotate(expectedPath);
 
         // 正しくnextUpdateDateが更新できているかの確認
@@ -281,21 +281,21 @@ public class DateRotatePolicyTest {
     };
 
     public static class DateFixture {
-        private final String updateTime;   // 更新時刻
-        private final String expectedNextUpdateTime;    //次回更新時刻
+        private final String rotateTime;   // ローテーション時刻
+        private final String expectedNextRotateDateTime;    //次回ローテーション日時
         private final String currentDate; // 現在時刻
-        private final String expectedUpdateTime; //フォーマット後の更新時刻
+        private final String expectedRotateTime; //フォーマット後のローテーション時刻
 
-        public DateFixture(String updateTime, String expectedNextUpdateTime,
-                           String currentDate, String formattedUpdateTime) {
-            this.updateTime = updateTime;
-            this.expectedNextUpdateTime = expectedNextUpdateTime;
+        public DateFixture(String rotateTime, String expectedNextRotateDateTime,
+                           String currentDate, String formattedRotateTime) {
+            this.rotateTime = rotateTime;
+            this.expectedNextRotateDateTime = expectedNextRotateDateTime;
             this.currentDate = currentDate;
-            this.expectedUpdateTime = formattedUpdateTime;
+            this.expectedRotateTime = formattedRotateTime;
         }
     }
 
-    /** 複数のupdateTimeのパターンで正しく設定情報が取得できること */
+    /** 複数のrotateTimeのパターンで正しく設定情報が取得できること */
     @Theory
     public void testGetSetting(@FromDataPoints("normal") DateFixture dateFixture) throws ParseException {
         String path = "./log/testGetSetting.log";
@@ -303,8 +303,8 @@ public class DateRotatePolicyTest {
         Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", path);
         settings.put("appFile.encoding", "utf-8");
-        if (!dateFixture.updateTime.isEmpty()) {
-            settings.put("appFile.updateTime", dateFixture.updateTime);
+        if (!dateFixture.rotateTime.isEmpty()) {
+            settings.put("appFile.rotateTime", dateFixture.rotateTime);
         }
 
         DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate(dateFixture.currentDate + ".000"));
@@ -312,14 +312,14 @@ public class DateRotatePolicyTest {
 
         String actual = policy.getSettings();
 
-        String expected = "\tNEXT CHANGE DATE    = [" + dateFixture.expectedNextUpdateTime + "]" + Logger.LS
+        String expected = "\tNEXT ROTATE DATE    = [" + dateFixture.expectedNextRotateDateTime + "]" + Logger.LS
                 + "\tCURRENT DATE        = [" + dateFixture.currentDate + "]" + Logger.LS
-                + "\tUPDATE TIME         = [" + dateFixture.expectedUpdateTime + "]" + Logger.LS;
+                + "\tROTATE TIME         = [" + dateFixture.expectedRotateTime + "]" + Logger.LS;
 
         assertThat(actual, is(expected));
     }
 
-    /** 不正なUpdateTimeを指定した場合に、例外が発生すること */
+    /** 不正なrotateTimeを指定した場合に、例外が発生すること */
     @Theory
     public void testInvalidUpdateTime(@FromDataPoints("invalid") DateFixture dateFixture) throws ParseException {
         String path = "./log/testGetSetting.log";
@@ -327,7 +327,7 @@ public class DateRotatePolicyTest {
         final Map<String, String> settings = new HashMap<String, String>();
         settings.put("appFile.filePath", path);
         settings.put("appFile.encoding", "utf-8");
-        settings.put("appFile.updateTime", dateFixture.updateTime);
+        settings.put("appFile.rotateTime", dateFixture.rotateTime);
 
         final DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate(dateFixture.currentDate + ".000"));
 
@@ -337,6 +337,6 @@ public class DateRotatePolicyTest {
                 policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
             }
         });
-        assertThat(exception.getMessage(), is("Invalid updateTime"));
+        assertThat(exception.getMessage(), is("Invalid rotateTime"));
     }
 }
