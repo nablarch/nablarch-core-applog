@@ -128,12 +128,14 @@ public class DateRotatePolicyTest {
         // ファイル更新時刻の設定
         logFile.setLastModified(textToDate("2017-12-31 10:10:10.000").getTime());
 
-        DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
+        DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-01 00:00:00.000"));
         policy.initialize(objectSettings);
 
-        boolean actual = policy.needsRotate(message, ignored);
+        assertThat(policy.needsRotate(message, ignored), is(true));
 
-        assertThat(actual, is(true));
+        policy.setCurrentDate(textToDate("2017-12-31 23:59:59.999"));
+
+        assertThat(policy.needsRotate(message, ignored), is(false));
     }
 
     /** パスにファイルが存在する場合、ファイルの更新時刻が取得できない場合に例外が発生すること */
