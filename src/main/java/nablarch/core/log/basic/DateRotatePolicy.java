@@ -184,7 +184,6 @@ public class DateRotatePolicy implements RotatePolicy {
      * {@code
      * NEXT ROTATE DATE    = [<次回ローテーション日時>]
      * CURRENT DATE        = [<現在時刻>]
-     * ROTATE TIME         = [<ローテーション時刻>]
      * }
      * </pre>
      *
@@ -196,8 +195,7 @@ public class DateRotatePolicy implements RotatePolicy {
         SimpleDateFormat settingDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         SimpleDateFormat rotateHHmmssFormat = new SimpleDateFormat("HH:mm:ss");
         return "\tNEXT ROTATE DATE    = [" + settingDateFormat.format(nextRotateDateTime) + "]" + Logger.LS
-                + "\tCURRENT DATE        = [" + settingDateFormat.format(currentDate()) + "]" + Logger.LS
-                + "\tROTATE TIME         = [" + rotateHHmmssFormat.format(nextRotateTime) + "]" + Logger.LS;
+                + "\tCURRENT DATE        = [" + settingDateFormat.format(currentDate()) + "]" + Logger.LS;
     }
 
     /**
