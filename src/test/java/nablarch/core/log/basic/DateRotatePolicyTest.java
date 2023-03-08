@@ -75,7 +75,7 @@ public class DateRotatePolicyTest {
         return format.parse(textDate);
     }
 
-    /** 現在時刻<次回更新日の場合に、正しくrotateが必要かどうか判定を行えること */
+    /** 現在時刻<次回更新日の場合に、rotate不要と判定を行えること */
     @Test
     public void testNeedsRotateIfNoNeeded() throws ParseException {
         DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
@@ -90,7 +90,7 @@ public class DateRotatePolicyTest {
         assertThat(actual, is(false));
     }
 
-    /** 現在時刻=次回更新日の場合に、正しくrotateが必要かどうか判定を行えること */
+    /** 現在時刻=次回更新日の場合に、rotate必要と判定を行えること */
     @Test
     public void testNeedsRotateIfCurrentDateEqualsNextUpdateDate() throws ParseException {
         DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
@@ -105,7 +105,7 @@ public class DateRotatePolicyTest {
         assertThat(actual, is(true));
     }
 
-    /** 現在時刻>次回更新日の場合に、正しくrotateが必要かどうか判定を行えること */
+    /** 現在時刻>次回更新日の場合に、rotate必要と判定を行えること */
     @Test
     public void testNeedsRotateIfNeeded() throws ParseException {
         DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
@@ -119,7 +119,7 @@ public class DateRotatePolicyTest {
         assertThat(actual, is(true));
     }
 
-    /** パスにファイルが存在する場合、正しくrotateが必要かどうか判定を行えること */
+    /** パスにファイルが存在する場合、ファイルの最終更新日時をもとにrotateが必要かどうか判定を行えること */
     @Test
     public void testNeedsIfFileExists() throws IOException, ParseException {
         File logFile = new File(logFilePath);
