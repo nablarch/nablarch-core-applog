@@ -55,13 +55,13 @@ public class FileSizeRotatePolicyTest {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(objectSettings);
 
-        new File(logFilePath).createNewFile();
+        File logFile = new File(logFilePath);
+        logFile.createNewFile();
 
         String expectedPath = "./log/testFileSizeRotate-app.log.old";
 
         // ローテート前
         // リネーム前のファイルが存在すること
-        File logFile = new File(logFilePath);
         assertThat(logFile.exists(), is(true));
 
         // リネーム後のファイルが存在しないこと
@@ -129,12 +129,12 @@ public class FileSizeRotatePolicyTest {
         assertThat(policy.needsRotate(message, Charset.defaultCharset()), is(false));
     }
 
-    private File newFile(String path, int byteSize) {
+    private File newLogFile(int byteSize) {
         String content = generateZeroPaddingString(byteSize);
 
         FileWriter fileWriter = null;
         try {
-            fileWriter = new FileWriter(path);
+            fileWriter = new FileWriter(logFilePath);
             fileWriter.write(content);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -142,7 +142,7 @@ public class FileSizeRotatePolicyTest {
             FileUtil.closeQuietly(fileWriter);
         }
 
-        return new File(path);
+        return new File(logFilePath);
     }
 
     private String generateZeroPaddingString(int byteSize) {
@@ -161,7 +161,7 @@ public class FileSizeRotatePolicyTest {
         policy.initialize(objectSettings);
 
         // currentFileSizeを19KBに設定
-        File logFile = newFile(logFilePath, 19 * FileLogWriter.KB);
+        File logFile = newLogFile(19 * FileLogWriter.KB);
 
         policy.onOpenFile(logFile);
 
@@ -178,7 +178,7 @@ public class FileSizeRotatePolicyTest {
         policy.initialize(objectSettings);
 
         // currentFileSizeを19KBに設定
-        File logFile = newFile(logFilePath, 19 * FileLogWriter.KB);
+        File logFile = newLogFile(19 * FileLogWriter.KB);
 
         policy.onOpenFile(logFile);
 
@@ -195,7 +195,7 @@ public class FileSizeRotatePolicyTest {
         policy.initialize(objectSettings);
 
         // currentFileSizeを15KBに設定
-        File logFile = newFile(logFilePath, 15 * FileLogWriter.KB);
+        File logFile = newLogFile(15 * FileLogWriter.KB);
 
         policy.onOpenFile(logFile);
 
@@ -219,7 +219,7 @@ public class FileSizeRotatePolicyTest {
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
         // currentFileSizeを15000byteに設定
-        File logFile = newFile(logFilePath, 15 * FileLogWriter.KB);
+        File logFile = newLogFile(15 * FileLogWriter.KB);
 
         policy.onOpenFile(logFile);
 
@@ -257,26 +257,15 @@ public class FileSizeRotatePolicyTest {
         FileSizeRotatePolicy policy = new FileSizeRotatePolicy();
         policy.initialize(objectSettings);
 
-        File logFile = new File(logFilePath);
-        FileWriter filewriter = null;
-        try {
-            filewriter = new FileWriter(logFile);
-            filewriter.write("aiueo");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } finally {
-            FileUtil.closeQuietly(filewriter);
-        }
+        File logFile = newLogFile(5);
 
         policy.onOpenFile(logFile);
-
-        String actual = policy.getSettings();
 
         // MAX FILE SIZEはインスタンス変数にはバイトで保存されているため変換
         String expected = "\tFILE AUTO CHANGE    = [true]" + Logger.LS
                 + "\tMAX FILE SIZE       = [20000]" + Logger.LS
                 + "\tCURRENT FILE SIZE   = [5]" + Logger.LS;
 
-        assertThat(actual, is(expected));
+        assertThat(policy.getSettings(), is(expected));
     }
 }
