@@ -327,7 +327,7 @@ public class DateRotatePolicyTest {
         settings.put("appFile.encoding", "utf-8");
         settings.put("appFile.updateTime", dateFixture.updateTime);
 
-        final DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate(dateFixture.currentDate));
+        final DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate(dateFixture.currentDate + ".000"));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, new ThrowingRunnable() {
             @Override
