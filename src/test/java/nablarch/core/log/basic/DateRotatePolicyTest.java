@@ -59,13 +59,15 @@ public class DateRotatePolicyTest {
     private final String logFilePath = "./log/date-rotate-app.log";
     private ObjectSettings objectSettings;
     private final String message = "dummy-message";
+    
+    private Map<String, String> settings;
 
     @Before
     public void setup() {
         // 現在時刻から次回ローテーション日時を算出するため、既に存在する場合はファイルを削除する。
         LogTestUtil.cleanupLog(logFilePath);
 
-        Map<String, String> settings = new HashMap<String, String>();
+        settings = new HashMap<String, String>();
         settings.put("appFile.filePath", logFilePath);
         objectSettings = new ObjectSettings(new MockLogSettings(settings), "appFile");
     }
@@ -121,12 +123,9 @@ public class DateRotatePolicyTest {
 
     /** パスにファイルが存在する場合、ファイルの最終更新日時をもとにrotateが必要かどうか判定を行えること */
     @Test
-    public void testNeedsIfFileExists() throws IOException, ParseException {
-        File logFile = new File(logFilePath);
-        logFile.createNewFile();
-
+    public void testNeedsIfFileExists() throws ParseException {
         // ファイル更新時刻の設定
-        logFile.setLastModified(textToDate("2017-12-31 10:10:10.000").getTime());
+        newLogFileWithLastModified("2017-12-31 10:10:10.000");
 
         DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-01 00:00:00.000"));
         policy.initialize(objectSettings);
@@ -138,9 +137,131 @@ public class DateRotatePolicyTest {
         assertThat(policy.needsRotate(message, ignored), is(false));
     }
 
+    /**
+     * パスにファイルが存在し、rotateTimeが指定されている場合に次回ローテーション日時が正しく判定できていることのテスト。
+     * <ul>
+     *   <li>システム時刻がrotateTimeより前</li>
+     *   <li>ログファイルの最終更新日付がシステム日付の前日</li>
+     * </ul>
+     */
+    @Test
+    public void testNeedsRotateSystemTimeBeforeThanRotateTimeAndLastModifiedIsYesterday() throws Exception {
+        settings.put("appFile.rotateTime", "02:00:00");
+
+        newLogFileWithLastModified("2018-01-01 10:00:00.000");
+
+        DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-02 01:00:00.000"));
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        assertThat(policy.needsRotate(message, ignored), is(false));
+
+        policy.setCurrentDate(textToDate("2018-01-02 02:00:00.000"));
+
+        assertThat(policy.needsRotate(message, ignored), is(true));
+    }
+
+    /**
+     * パスにファイルが存在し、rotateTimeが指定されている場合に次回ローテーション日時が正しく判定できていることのテスト。
+     * <ul>
+     *   <li>システム時刻がrotateTimeより前</li>
+     *   <li>ログファイルの最終更新日付がシステム日付と同日</li>
+     * </ul>
+     */
+    @Test
+    public void testNeedsRotateSystemTimeBeforeThanRotateTimeAndLastModifiedIsToday() throws Exception {
+        settings.put("appFile.rotateTime", "02:00:00");
+
+        newLogFileWithLastModified("2018-01-02 00:30:00.000");
+
+        DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-02 01:00:00.000"));
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        assertThat(policy.needsRotate(message, ignored), is(false));
+
+        policy.setCurrentDate(textToDate("2018-01-02 02:00:00.000"));
+
+        assertThat(policy.needsRotate(message, ignored), is(true));
+    }
+
+    /**
+     * パスにファイルが存在し、rotateTimeが指定されている場合に次回ローテーション日時が正しく判定できていることのテスト。
+     * <ul>
+     *   <li>システム時刻がrotateTimeより後</li>
+     *   <li>ログファイルの最終更新日付がシステム日付の前日</li>
+     * </ul>
+     */
+    @Test
+    public void testNeedsRotateSystemTimeAfterThanRotateTimeAndLastModifiedIsYesterday() throws Exception {
+        settings.put("appFile.rotateTime", "02:00:00");
+
+        newLogFileWithLastModified("2018-01-01 10:00:00.000");
+
+        DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-02 03:00:00.000"));
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        assertThat(policy.needsRotate(message, ignored), is(true));
+    }
+
+    /**
+     * パスにファイルが存在し、rotateTimeが指定されている場合に次回ローテーション日時が正しく判定できていることのテスト。
+     * <ul>
+     *   <li>システム時刻がrotateTimeより後</li>
+     *   <li>ログファイルの最終更新日付がシステム日付と同日</li>
+     * </ul>
+     */
+    @Test
+    public void testNeedsRotateSystemTimeAfterThanRotateTimeAndLastModifiedIsToday() throws Exception {
+        settings.put("appFile.rotateTime", "02:00:00");
+
+        newLogFileWithLastModified("2018-01-02 01:00:00.000");
+
+        DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-02 03:00:00.000"));
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        assertThat(policy.needsRotate(message, ignored), is(true));
+    }
+
+    /**
+     * パスにファイルが存在し、rotateTimeが指定されている場合に次回ローテーション日時が正しく判定できていることのテスト。
+     * <ul>
+     *   <li>システム時刻がrotateTimeより前</li>
+     *   <li>ログファイルの最終更新日付がシステム日付の2日前</li>
+     * </ul>
+     */
+    @Test
+    public void testNeedsRotateSystemTimeBeforeThanRotateTimeAndLastModifiedIs2DaysAgo() throws Exception {
+        settings.put("appFile.rotateTime", "02:00:00");
+
+        newLogFileWithLastModified("2017-12-31 12:00:00.000");
+
+        DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-02 01:00:00.000"));
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        assertThat(policy.needsRotate(message, ignored), is(true));
+    }
+
+    /**
+     * パスにファイルが存在し、rotateTimeが指定されている場合に次回ローテーション日時が正しく判定できていることのテスト。
+     * <ul>
+     *   <li>システム時刻がrotateTimeより後</li>
+     *   <li>ログファイルの最終更新日付がシステム日付の2日前</li>
+     * </ul>
+     */
+    @Test
+    public void testNeedsRotateSystemTimeAfterThanRotateTimeAndLastModifiedIs2DaysAgo() throws Exception {
+        settings.put("appFile.rotateTime", "02:00:00");
+
+        newLogFileWithLastModified("2017-12-31 12:00:00.000");
+
+        DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-02 03:00:00.000"));
+        policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
+
+        assertThat(policy.needsRotate(message, ignored), is(true));
+    }
+
     /** パスにファイルが存在する場合、ファイルの更新時刻が取得できない場合に例外が発生すること */
     @Test
-    public void testLastModifiedReturnsZero() throws IOException {
+    public void testLastModifiedReturnsZero() {
         new MockUp<File>() {
             @Mock
             public long lastModified() {
@@ -148,8 +269,7 @@ public class DateRotatePolicyTest {
             }
         };
 
-        File logFile = new File(logFilePath);
-        logFile.createNewFile();
+        newLogFile();
 
         final DateRotatePolicy policy = new DateRotatePolicy();
 
@@ -178,12 +298,11 @@ public class DateRotatePolicyTest {
 
     /** 正しくファイルがリネームされること */
     @Test
-    public void testRotate() throws IOException, ParseException {
+    public void testRotate() throws ParseException {
         DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
 
         policy.initialize(objectSettings);
-        File logFile = new File(logFilePath);
-        logFile.createNewFile();
+        File logFile = newLogFile();
 
         String expectedPath = "./log/testRotate-app.log.old";
 
@@ -207,12 +326,12 @@ public class DateRotatePolicyTest {
 
     /** ローテーション時に、正しくnextRotateDateTimeが更新できること */
     @Test
-    public void testNextRotateDateTimeInRotate() throws IOException, ParseException {
+    public void testNextRotateDateTimeInRotate() throws ParseException {
         DateRotatePolicyForTest policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.000"));
         policy.initialize(objectSettings);
 
         // ローテーションするファイルを作成
-        new File(logFilePath).createNewFile();
+        newLogFile();
 
         String expectedPath = "./log/testNextRotateDateTimeInRotate-app.log.old";
 
@@ -324,5 +443,30 @@ public class DateRotatePolicyTest {
             }
         });
         assertThat(exception.getMessage(), is("Invalid rotateTime"));
+    }
+
+    /**
+     * 出力先のログファイルを空ファイルで生成する。
+     */
+    private File newLogFile() {
+        try {
+            final File file = new File(logFilePath);
+            file.createNewFile();
+            return file;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * 出力先のログファイルを空ファイルで生成し、最終更新日時を指定された値に変更する。
+     * @param lastModified 最終更新日時(yyyy-MM-dd HH:mm:ss.SSS)
+     */
+    private void newLogFileWithLastModified(String lastModified) {
+        try {
+            newLogFile().setLastModified(textToDate(lastModified).getTime());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
