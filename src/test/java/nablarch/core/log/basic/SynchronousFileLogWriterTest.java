@@ -141,20 +141,20 @@ public class SynchronousFileLogWriterTest extends LogTestSupport {
 
         String appLog = LogTestUtil.getLog(monitorFile);
         assertTrue(appLog.contains("initialized."));
-        assertTrue(appLog.contains("WRITER NAME        = [monitorFile]"));
+        assertTrue(appLog.contains("WRITER NAME         = [monitorFile]"));
         assertTrue(appLog.contains(
-                "WRITER CLASS       = [nablarch.core.log.basic.SynchronousFileLogWriter]")); // Lockable
+                "WRITER CLASS        = [nablarch.core.log.basic.SynchronousFileLogWriter]")); // Lockable
         assertTrue(appLog.contains(
-                "FORMATTER CLASS    = [" + MockLogFormatter.class.getName()
+                "FORMATTER CLASS     = [" + MockLogFormatter.class.getName()
                         + "]"));
-        assertTrue(appLog.contains("LEVEL              = [INFO]"));
+        assertTrue(appLog.contains("LEVEL               = [INFO]"));
         assertTrue(appLog.contains(
-                "FILE PATH          = [./log/lock-app.log]"));
-        assertTrue(appLog.contains("ENCODING           = [UTF-8]"));
-        assertTrue(appLog.contains("OUTPUT BUFFER SIZE = [10000]"));
-        assertTrue(appLog.contains("FILE AUTO CHANGE   = [true]"));
-        assertTrue(appLog.contains("MAX FILE SIZE      = [50000000]"));
-        assertTrue(appLog.contains("CURRENT FILE SIZE  = [0]"));
+                "FILE PATH           = [./log/lock-app.log]"));
+        assertTrue(appLog.contains("ENCODING            = [UTF-8]"));
+        assertTrue(appLog.contains("OUTPUT BUFFER SIZE  = [10000]"));
+        assertTrue(appLog.contains("FILE AUTO CHANGE    = [true]"));
+        assertTrue(appLog.contains("MAX FILE SIZE       = [50000000]"));
+        assertTrue(appLog.contains("CURRENT FILE SIZE   = [0]"));
         assertTrue(appLog.contains("terminated."));
         assertThat(appLog, containsString("LOCK FILE PATH                      = [./lock/test.lock]"));
         assertTrue(appLog.contains("LOCK RETRY INTERVAL                 = [1]"));
@@ -195,20 +195,20 @@ public class SynchronousFileLogWriterTest extends LogTestSupport {
 
         String appLog = LogTestUtil.getLog(monitorFile);
         assertTrue(appLog.contains("initialized."));
-        assertTrue(appLog.contains("WRITER NAME        = [monitorFile]"));
+        assertTrue(appLog.contains("WRITER NAME         = [monitorFile]"));
         assertTrue(appLog.contains(
-                "WRITER CLASS       = [nablarch.core.log.basic.SynchronousFileLogWriter]")); // Lockable
+                "WRITER CLASS        = [nablarch.core.log.basic.SynchronousFileLogWriter]")); // Lockable
         assertTrue(appLog.contains(
-                "FORMATTER CLASS    = [" + MockLogFormatter.class.getName()
+                "FORMATTER CLASS     = [" + MockLogFormatter.class.getName()
                         + "]"));
-        assertTrue(appLog.contains("LEVEL              = [INFO]"));
+        assertTrue(appLog.contains("LEVEL               = [INFO]"));
         assertTrue(appLog.contains(
-                "FILE PATH          = [./log/lock-app.log]"));
-        assertTrue(appLog.contains("ENCODING           = [UTF-8]"));
-        assertTrue(appLog.contains("OUTPUT BUFFER SIZE = [10000]"));
-        assertTrue(appLog.contains("FILE AUTO CHANGE   = [true]"));
-        assertTrue(appLog.contains("MAX FILE SIZE      = [50000000]"));
-        assertTrue(appLog.contains("CURRENT FILE SIZE  = [0]"));
+                "FILE PATH           = [./log/lock-app.log]"));
+        assertTrue(appLog.contains("ENCODING            = [UTF-8]"));
+        assertTrue(appLog.contains("OUTPUT BUFFER SIZE  = [10000]"));
+        assertTrue(appLog.contains("FILE AUTO CHANGE    = [true]"));
+        assertTrue(appLog.contains("MAX FILE SIZE       = [50000000]"));
+        assertTrue(appLog.contains("CURRENT FILE SIZE   = [0]"));
         assertTrue(appLog.contains("terminated."));
         assertThat(appLog, containsString("LOCK FILE PATH                      = [./lock/test.lock]"));
         assertTrue(appLog.contains("LOCK RETRY INTERVAL                 = [" + String.valueOf(Long.MAX_VALUE) + "]"));
@@ -366,20 +366,20 @@ public class SynchronousFileLogWriterTest extends LogTestSupport {
 
         String appLog = LogTestUtil.getLog(monitorFile);
         assertTrue(appLog.contains("initialized."));
-        assertTrue(appLog.contains("WRITER NAME        = [monitorFile]"));
+        assertTrue(appLog.contains("WRITER NAME         = [monitorFile]"));
         assertTrue(appLog.contains(
-                "WRITER CLASS       = [nablarch.core.log.basic.SynchronousFileLogWriter]")); // Lockable
+                "WRITER CLASS        = [nablarch.core.log.basic.SynchronousFileLogWriter]")); // Lockable
         assertTrue(appLog.contains(
-                "FORMATTER CLASS    = [" + MockLogFormatter.class.getName()
+                "FORMATTER CLASS     = [" + MockLogFormatter.class.getName()
                         + "]"));
-        assertTrue(appLog.contains("LEVEL              = [INFO]"));
+        assertTrue(appLog.contains("LEVEL               = [INFO]"));
         assertTrue(appLog.contains(
-                "FILE PATH          = [./log/lock-app.log]"));
-        assertTrue(appLog.contains("ENCODING           = [UTF-8]"));
-        assertTrue(appLog.contains("OUTPUT BUFFER SIZE = [10000]"));
-        assertTrue(appLog.contains("FILE AUTO CHANGE   = [true]"));
-        assertTrue(appLog.contains("MAX FILE SIZE      = [50000000]"));
-        assertTrue(appLog.contains("CURRENT FILE SIZE  = [0]"));
+                "FILE PATH           = [./log/lock-app.log]"));
+        assertTrue(appLog.contains("ENCODING            = [UTF-8]"));
+        assertTrue(appLog.contains("OUTPUT BUFFER SIZE  = [10000]"));
+        assertTrue(appLog.contains("FILE AUTO CHANGE    = [true]"));
+        assertTrue(appLog.contains("MAX FILE SIZE       = [50000000]"));
+        assertTrue(appLog.contains("CURRENT FILE SIZE   = [0]"));
         assertTrue(appLog.contains("terminated."));
         assertThat(appLog, containsString("LOCK FILE PATH                      = [./lock/test.lock]"));
         assertTrue(appLog.contains("LOCK RETRY INTERVAL                 = [1]"));
