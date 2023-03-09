@@ -99,7 +99,10 @@ public class DateRotatePolicyTest {
         // 現在時刻の変更
         policy.setCurrentDate(textToDate("2018-01-02 00:00:00.000"));
 
-        assertThat(policy.needsRotate(message, ignored), is(true));
+        boolean actual = policy.needsRotate(message,
+                ignored);
+
+        assertThat(actual, is(true));
     }
 
     /** 現在時刻>次回ローテーション日時の場合に、rotate必要と判定を行えること */
@@ -111,7 +114,9 @@ public class DateRotatePolicyTest {
         // 現在時刻の変更
         policy.setCurrentDate(textToDate("2018-01-02 00:00:00.001"));
 
-        assertThat(policy.needsRotate(message, ignored), is(true));
+        boolean actual = policy.needsRotate(message, ignored);
+
+        assertThat(actual, is(true));
     }
 
     /** パスにファイルが存在する場合、ファイルの最終更新日時をもとにrotateが必要かどうか判定を行えること */
@@ -166,7 +171,9 @@ public class DateRotatePolicyTest {
         DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate("2018-01-01 10:10:10.123"));
         policy.initialize(objectSettings);
 
-        assertThat(policy.decideRotatedFilePath(), is(expectedPath));
+        String actual = policy.decideRotatedFilePath();
+
+        assertThat(actual, is(expectedPath));
     }
 
     /** 正しくファイルがリネームされること */
@@ -216,11 +223,15 @@ public class DateRotatePolicyTest {
         // 正しくnextUpdateDateが更新できているかの確認
         policy.setCurrentDate(textToDate("2018-01-02 23:59:59.000"));
 
-        assertThat(policy.needsRotate(message, ignored), is(false));
+        boolean actual = policy.needsRotate(message, ignored);
+
+        assertThat(actual, is(false));
 
         policy.setCurrentDate(textToDate("2018-01-03 00:00:00.000"));
 
-        assertThat(policy.needsRotate(message, ignored), is(true));
+        actual = policy.needsRotate(message, ignored);
+
+        assertThat(actual, is(true));
     }
 
     /** ファイルがリネームできない場合に、IllegalStateExceptionが発生すること */
@@ -243,27 +254,30 @@ public class DateRotatePolicyTest {
 
     @DataPoints("normal")
     public static DateFixture[] testFixtures = {
-            new DateFixture("12", "2018-01-01 12:00:00", "2018-01-01 10:10:10")
-            , new DateFixture("12:12", "2018-01-02 12:12:00", "2018-01-01 13:10:10")
-            , new DateFixture("12:12:12", "2018-01-02 12:12:12", "2018-01-01 13:10:10")
-            , new DateFixture("", "2018-01-02 00:00:00", "2018-01-01 13:10:10")
+            new DateFixture("12", "2018-01-01 12:00:00", "2018-01-01 10:10:10", "12:00:00")
+            , new DateFixture("12:12", "2018-01-02 12:12:00", "2018-01-01 13:10:10", "12:12:00")
+            , new DateFixture("12:12:12", "2018-01-02 12:12:12", "2018-01-01 13:10:10", "12:12:12")
+            , new DateFixture("", "2018-01-02 00:00:00", "2018-01-01 13:10:10", "00:00:00")
     };
 
     @DataPoints("invalid")
     public static DateFixture[] InvalidTestFixtures = {
-            new DateFixture("12:aiueo", null, "2018-01-01 10:10:10")
-            , new DateFixture(":::::", null, "2018-01-01 10:10:10")
+            new DateFixture("12:aiueo", null, "2018-01-01 10:10:10", null)
+            , new DateFixture(":::::", null, "2018-01-01 10:10:10", null)
     };
 
     public static class DateFixture {
         private final String rotateTime;   // ローテーション時刻
         private final String expectedNextRotateDateTime;    //次回ローテーション日時
         private final String currentDate; // 現在時刻
+        private final String expectedRotateTime; //フォーマット後のローテーション時刻
 
-        public DateFixture(String rotateTime, String expectedNextRotateDateTime, String currentDate) {
+        public DateFixture(String rotateTime, String expectedNextRotateDateTime,
+                           String currentDate, String formattedRotateTime) {
             this.rotateTime = rotateTime;
             this.expectedNextRotateDateTime = expectedNextRotateDateTime;
             this.currentDate = currentDate;
+            this.expectedRotateTime = formattedRotateTime;
         }
     }
 
@@ -282,10 +296,13 @@ public class DateRotatePolicyTest {
         DateRotatePolicy policy = new DateRotatePolicyForTest(textToDate(dateFixture.currentDate + ".000"));
         policy.initialize(new ObjectSettings(new MockLogSettings(settings), "appFile"));
 
-        String expected = "\tNEXT ROTATE DATE    = [" + dateFixture.expectedNextRotateDateTime + "]" + Logger.LS
-                + "\tCURRENT DATE        = [" + dateFixture.currentDate + "]" + Logger.LS;
+        String actual = policy.getSettings();
 
-        assertThat(policy.getSettings(), is(expected));
+        String expected = "\tNEXT ROTATE DATE    = [" + dateFixture.expectedNextRotateDateTime + "]" + Logger.LS
+                + "\tCURRENT DATE        = [" + dateFixture.currentDate + "]" + Logger.LS
+                + "\tROTATE TIME         = [" + dateFixture.expectedRotateTime + "]" + Logger.LS;
+
+        assertThat(actual, is(expected));
     }
 
     /** 不正なrotateTimeを指定した場合に、例外が発生すること */
