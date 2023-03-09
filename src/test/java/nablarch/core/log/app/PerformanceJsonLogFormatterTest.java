@@ -8,6 +8,7 @@ import nablarch.core.text.json.JsonSerializationManager;
 import nablarch.core.text.json.JsonSerializationSettings;
 import nablarch.core.text.json.JsonSerializer;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
@@ -44,6 +45,7 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
      * デフォルトの出力項目で正しくフォーマットされること。
      */
     @Test
+    @Ignore("jacoco と jmockit が競合してエラーになるため")
     public void testFormat(@Mocked final PerformanceLogFormatter.PerformanceLogContext context) {
 
         new Expectations() {{
@@ -272,6 +274,7 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
      * 日付フォーマットが指定できることをテスト。
      */
     @Test
+    @Ignore("jacoco と jmockit が競合してエラーになるため")
     public void testDatePattern(@Mocked final PerformanceLogFormatter.PerformanceLogContext context) {
         System.setProperty("performanceLogFormatter.targets", "startTime,endTime");
         System.setProperty("performanceLogFormatter.datePattern", "yyyy/MM/dd HH:mm:ss");
