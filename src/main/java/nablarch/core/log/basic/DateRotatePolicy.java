@@ -197,9 +197,9 @@ public class DateRotatePolicy implements RotatePolicy {
      * 設定情報のフォーマットを下記に示す。<br>
      * <pre>
      * {@code
+     * ROTATE TIME         = [<ローテーション時刻>]
      * NEXT ROTATE DATE    = [<次回ローテーション日時>]
      * CURRENT DATE        = [<現在時刻>]
-     * ROTATE TIME         = [<ローテーション時刻>]
      * }
      * </pre>
      *
@@ -210,9 +210,9 @@ public class DateRotatePolicy implements RotatePolicy {
     public String getSettings() {
         SimpleDateFormat settingDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         SimpleDateFormat rotateHHmmssFormat = new SimpleDateFormat("HH:mm:ss");
-        return "\tNEXT ROTATE DATE    = [" + settingDateFormat.format(nextRotateDateTime) + "]" + Logger.LS
-                + "\tCURRENT DATE        = [" + settingDateFormat.format(currentDate()) + "]" + Logger.LS
-                + "\tROTATE TIME         = [" + rotateHHmmssFormat.format(nextRotateTime) + "]" + Logger.LS;
+        return "\tROTATE TIME         = [" + rotateHHmmssFormat.format(nextRotateTime) + "]" + Logger.LS
+                + "\tNEXT ROTATE DATE    = [" + settingDateFormat.format(nextRotateDateTime) + "]" + Logger.LS
+                + "\tCURRENT DATE        = [" + settingDateFormat.format(currentDate()) + "]" + Logger.LS;
     }
 
     /**

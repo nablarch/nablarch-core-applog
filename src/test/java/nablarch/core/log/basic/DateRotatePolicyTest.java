@@ -298,9 +298,9 @@ public class DateRotatePolicyTest {
 
         String actual = policy.getSettings();
 
-        String expected = "\tNEXT ROTATE DATE    = [" + dateFixture.expectedNextRotateDateTime + "]" + Logger.LS
-                + "\tCURRENT DATE        = [" + dateFixture.currentDate + "]" + Logger.LS
-                + "\tROTATE TIME         = [" + dateFixture.expectedRotateTime + "]" + Logger.LS;
+        String expected = "\tROTATE TIME         = [" + dateFixture.expectedRotateTime + "]" + Logger.LS
+                + "\tNEXT ROTATE DATE    = [" + dateFixture.expectedNextRotateDateTime + "]" + Logger.LS
+                + "\tCURRENT DATE        = [" + dateFixture.currentDate + "]" + Logger.LS;
 
         assertThat(actual, is(expected));
     }
