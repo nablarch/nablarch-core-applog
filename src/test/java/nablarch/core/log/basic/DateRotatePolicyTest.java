@@ -1,7 +1,5 @@
 package nablarch.core.log.basic;
 
-import mockit.Mock;
-import mockit.MockUp;
 import nablarch.core.log.LogTestUtil;
 import nablarch.core.log.Logger;
 import nablarch.core.log.MockLogSettings;
@@ -26,6 +24,7 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 /**
  * {@link DateRotatePolicy}のテスト。
@@ -262,14 +261,10 @@ public class DateRotatePolicyTest {
     /** パスにファイルが存在する場合、ファイルの更新時刻が取得できない場合に例外が発生すること */
     @Test
     public void testLastModifiedReturnsZero() {
-        new MockUp<File>() {
-            @Mock
-            public long lastModified() {
-                return 0;
-            }
-        };
-
-        newLogFile();
+        final File file = newLogFile();
+        
+        // 更新時刻に 0 を設定することで更新時刻を取得できない状態を再現する
+        assertTrue(file.setLastModified(0L));
 
         final DateRotatePolicy policy = new DateRotatePolicy();
 
