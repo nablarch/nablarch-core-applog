@@ -1,16 +1,15 @@
 package nablarch.core.log.app;
 
-import mockit.Expectations;
-import mockit.Mocked;
 import nablarch.core.log.LogTestSupport;
+import nablarch.core.log.app.PerformanceLogFormatter.PerformanceLogContext;
 import nablarch.core.text.json.BasicJsonSerializationManager;
 import nablarch.core.text.json.JsonSerializationManager;
 import nablarch.core.text.json.JsonSerializationSettings;
 import nablarch.core.text.json.JsonSerializer;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
+import org.mockito.MockedConstruction;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -27,6 +26,8 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link PerformanceJsonLogFormatter}のテストクラス。
@@ -45,41 +46,39 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
      * デフォルトの出力項目で正しくフォーマットされること。
      */
     @Test
-    @Ignore("jacoco と jmockit が競合してエラーになるため")
-    public void testFormat(@Mocked final PerformanceLogFormatter.PerformanceLogContext context) {
-
-        new Expectations() {{
-            context.getPoint(); result = "point0001";
-            context.getResult(); result = "success";
-            context.getStartTime(); result = toMilliseconds("2021-11-19 15:30:20.123");
-            context.getEndTime(); result = toMilliseconds("2021-11-19 15:31:20.987");
-            context.getExecutionTime(); result = 200;
-            context.getMaxMemory(); result = 1000000l;
-            context.getStartFreeMemory(); result = 700000;
-            context.getEndFreeMemory(); result = 670000;
-            context.getStartUsedMemory(); result = 300000l;
-            context.getEndUsedMemory(); result = 330000l;
-        }};
-
+    public void testFormat() {
         PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
 
         String point = "point0001";
 
-        formatter.start(point);
-        String message = formatter.end(point, "success");
+        try (final MockedConstruction<PerformanceLogContext> mocked = mockConstruction(PerformanceLogContext.class, (mock, context) -> {
+            when(mock.getPoint()).thenReturn("point0001");
+            when(mock.getResult()).thenReturn("success");
+            when(mock.getStartTime()).thenReturn(toMilliseconds("2021-11-19 15:30:20.123"));
+            when(mock.getEndTime()).thenReturn(toMilliseconds("2021-11-19 15:31:20.987"));
+            when(mock.getExecutionTime()).thenReturn(200L);
+            when(mock.getMaxMemory()).thenReturn(1000000L);
+            when(mock.getStartFreeMemory()).thenReturn(700000L);
+            when(mock.getEndFreeMemory()).thenReturn(670000L);
+            when(mock.getStartUsedMemory()).thenReturn(300000L);
+            when(mock.getEndUsedMemory()).thenReturn(330000L);
+        })) {
+            formatter.start(point);
+            String message = formatter.end(point, "success");
 
-        assertThat(message.startsWith("$JSON$"), is(true));
-        assertThat(message.substring("$JSON$".length()), isJson(allOf(
-                withJsonPath("$", hasEntry("point", "point0001")),
-                withJsonPath("$", hasEntry("result", "success")),
-                withJsonPath("$", hasEntry("startTime", "2021-11-19 15:30:20.123")),
-                withJsonPath("$", hasEntry("endTime", "2021-11-19 15:31:20.987")),
-                withJsonPath("$", hasEntry("executionTime", 200)),
-                withJsonPath("$", hasEntry("maxMemory", 1000000)),
-                withJsonPath("$", hasEntry("startFreeMemory", 700000)),
-                withJsonPath("$", hasEntry("endFreeMemory", 670000)),
-                withJsonPath("$", hasEntry("startUsedMemory", 300000)),
-                withJsonPath("$", hasEntry("endUsedMemory", 330000)))));
+            assertThat(message.startsWith("$JSON$"), is(true));
+            assertThat(message.substring("$JSON$".length()), isJson(allOf(
+                    withJsonPath("$", hasEntry("point", "point0001")),
+                    withJsonPath("$", hasEntry("result", "success")),
+                    withJsonPath("$", hasEntry("startTime", "2021-11-19 15:30:20.123")),
+                    withJsonPath("$", hasEntry("endTime", "2021-11-19 15:31:20.987")),
+                    withJsonPath("$", hasEntry("executionTime", 200)),
+                    withJsonPath("$", hasEntry("maxMemory", 1000000)),
+                    withJsonPath("$", hasEntry("startFreeMemory", 700000)),
+                    withJsonPath("$", hasEntry("endFreeMemory", 670000)),
+                    withJsonPath("$", hasEntry("startUsedMemory", 300000)),
+                    withJsonPath("$", hasEntry("endUsedMemory", 330000)))));
+        }
     }
 
     /**
@@ -145,112 +144,116 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
      * 出力項目にmaxMemoryがあるときメモリの計測が行われログにmaxMemoryが出力されること。
      */
     @Test
-    public void testFormatWithMaxMemory(@Mocked final MemoryUsage memoryUsage) {
-        new Expectations() {{
-            memoryUsage.getMax(); returns(2000L, 99L);
-        }};
-
+    public void testFormatWithMaxMemory() {
         System.setProperty("performanceLogFormatter.targets", "maxMemory,point");
 
         PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
 
         String point = "point0001";
-        formatter.start(point);
-        String message = formatter.end(point, "success");
+        try (final MockedConstruction<MemoryUsage> mocked = mockConstruction(MemoryUsage.class, (mock, context) -> {
+            when(mock.getMax()).thenReturn(2000L, 99L);
+        })) {
+            formatter.start(point);
+            String message = formatter.end(point, "success");
 
-        assertThat(message.substring("$JSON$".length()), isJson(
-            withJsonPath("$", hasEntry("maxMemory", 2000)))
-        );
+            assertThat(message.substring("$JSON$".length()), isJson(
+                    withJsonPath("$", hasEntry("maxMemory", 2000)))
+            );
+        }
     }
 
     /**
      * 出力項目にstartFreeMemoryがあるときメモリの計測が行われログにstartFreeMemoryが出力されること。
      */
     @Test
-    public void testFormatWithStartFreeMemory(@Mocked final MemoryUsage memoryUsage) {
-        new Expectations() {{
-            memoryUsage.getMax(); returns(2000L, 99L);
-            memoryUsage.getUsed(); returns(1500L, 9L);
-        }};
-
+    public void testFormatWithStartFreeMemory() {
         System.setProperty("performanceLogFormatter.targets", "startFreeMemory,point");
 
         PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
 
         String point = "point0001";
-        formatter.start(point);
-        String message = formatter.end(point, "success");
 
-        assertThat(message.substring("$JSON$".length()), isJson(
-            withJsonPath("$", hasEntry("startFreeMemory", 500)))
-        );
+        try (final MockedConstruction<MemoryUsage> mocked = mockConstruction(MemoryUsage.class, (mock, context) -> {
+            when(mock.getMax()).thenReturn(2000L, 99L);
+            when(mock.getUsed()).thenReturn(1500L, 9L);
+        })) {
+            formatter.start(point);
+            String message = formatter.end(point, "success");
+
+            assertThat(message.substring("$JSON$".length()), isJson(
+                    withJsonPath("$", hasEntry("startFreeMemory", 500)))
+            );
+        }
     }
 
     /**
      * 出力項目にendFreeMemoryがあるときメモリの計測が行われログにendFreeMemoryが出力されること。
      */
     @Test
-    public void testFormatWithEndFreeMemory(@Mocked final MemoryUsage memoryUsage) {
-        new Expectations() {{
-            memoryUsage.getMax(); returns(2000L, 99L);
-            memoryUsage.getUsed(); returns(1500L, 9L);
-        }};
-
+    public void testFormatWithEndFreeMemory() {
         System.setProperty("performanceLogFormatter.targets", "endFreeMemory,point");
 
         PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
 
         String point = "point0001";
         formatter.start(point);
-        String message = formatter.end(point, "success");
 
-        assertThat(message.substring("$JSON$".length()), isJson(
-            withJsonPath("$", hasEntry("endFreeMemory", 90)))
-        );
+        try (final MockedConstruction<MemoryUsage> mocked = mockConstruction(MemoryUsage.class, (mock, context) -> {
+            when(mock.getMax()).thenReturn(99L);
+            when(mock.getUsed()).thenReturn(9L);
+        })) {
+            String message = formatter.end(point, "success");
+
+            assertThat(message.substring("$JSON$".length()), isJson(
+                    withJsonPath("$", hasEntry("endFreeMemory", 90)))
+            );
+        }
     }
 
     /**
      * 出力項目にstartUsedMemoryがあるときメモリの計測が行われログにstartUsedMemoryが出力されること。
      */
     @Test
-    public void testFormatWithStartUsedMemory(@Mocked final MemoryUsage memoryUsage) {
-        new Expectations() {{
-            memoryUsage.getUsed(); returns(1500L, 9L);
-        }};
-
+    public void testFormatWithStartUsedMemory() {
         System.setProperty("performanceLogFormatter.targets", "startUsedMemory,point");
 
         PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
 
         String point = "point0001";
-        formatter.start(point);
-        String message = formatter.end(point, "success");
 
-        assertThat(message.substring("$JSON$".length()), isJson(
-            withJsonPath("$", hasEntry("startUsedMemory", 1500)))
-        );
+        try (final MockedConstruction<MemoryUsage> mocked = mockConstruction(MemoryUsage.class, (mock, context) -> {
+            when(mock.getUsed()).thenReturn(1500L, 9L);
+        })) {
+            formatter.start(point);
+            String message = formatter.end(point, "success");
+
+            assertThat(message.substring("$JSON$".length()), isJson(
+                    withJsonPath("$", hasEntry("startUsedMemory", 1500)))
+            );
+        }
     }
 
     /**
      * 出力項目にendUsedMemoryがあるときメモリの計測が行われログにendUsedMemoryが出力されること。
      */
     @Test
-    public void testFormatWithEndUsedMemory(@Mocked final MemoryUsage memoryUsage) {
-        new Expectations() {{
-            memoryUsage.getUsed(); returns(1500L, 9L);
-        }};
-
+    public void testFormatWithEndUsedMemory() {
         System.setProperty("performanceLogFormatter.targets", "endUsedMemory,point");
 
         PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
 
         String point = "point0001";
         formatter.start(point);
-        String message = formatter.end(point, "success");
 
-        assertThat(message.substring("$JSON$".length()), isJson(
-            withJsonPath("$", hasEntry("endUsedMemory", 9)))
-        );
+        try (final MockedConstruction<MemoryUsage> mocked = mockConstruction(MemoryUsage.class, (mock, context) -> {
+            when(mock.getUsed()).thenReturn(9L);
+        })) {
+            String message = formatter.end(point, "success");
+
+            assertThat(message.substring("$JSON$".length()), isJson(
+                    withJsonPath("$", hasEntry("endUsedMemory", 9)))
+            );
+        }
     }
 
     /**
@@ -274,29 +277,28 @@ public class PerformanceJsonLogFormatterTest extends LogTestSupport {
      * 日付フォーマットが指定できることをテスト。
      */
     @Test
-    @Ignore("jacoco と jmockit が競合してエラーになるため")
-    public void testDatePattern(@Mocked final PerformanceLogFormatter.PerformanceLogContext context) {
+    public void testDatePattern() {
         System.setProperty("performanceLogFormatter.targets", "startTime,endTime");
         System.setProperty("performanceLogFormatter.datePattern", "yyyy/MM/dd HH:mm:ss");
-
-        new Expectations() {{
-            context.getStartTime(); result = toMilliseconds("2021-11-19 15:30:20.123");
-            context.getEndTime(); result = toMilliseconds("2021-11-19 15:31:20.987");
-        }};
 
         PerformanceLogFormatter formatter = new PerformanceJsonLogFormatter();
 
         String point = "point0001";
 
-        formatter.start(point);
-        String message = formatter.end(point, "success");
+        try (final MockedConstruction<PerformanceLogContext> mocked = mockConstruction(PerformanceLogContext.class, (mock, context) -> {
+            when(mock.getStartTime()).thenReturn(toMilliseconds("2021-11-19 15:30:20.123"));
+            when(mock.getEndTime()).thenReturn(toMilliseconds("2021-11-19 15:31:20.987"));
+        })) {
+            formatter.start(point);
+            String message = formatter.end(point, "success");
 
-        assertThat(message.startsWith("$JSON$"), is(true));
-        assertThat(message.substring("$JSON$".length()), isJson(allOf(
-                withJsonPath("$.*", hasSize(2)),
-                withJsonPath("$", hasEntry("startTime", "2021/11/19 15:30:20")),
-                withJsonPath("$", hasEntry("endTime", "2021/11/19 15:31:20"))
-        )));
+            assertThat(message.startsWith("$JSON$"), is(true));
+            assertThat(message.substring("$JSON$".length()), isJson(allOf(
+                    withJsonPath("$.*", hasSize(2)),
+                    withJsonPath("$", hasEntry("startTime", "2021/11/19 15:30:20")),
+                    withJsonPath("$", hasEntry("endTime", "2021/11/19 15:31:20"))
+            )));
+        }
     }
 
     /**
