@@ -1,11 +1,12 @@
 package nablarch.core.log.basic;
 
-import mockit.*;
 import nablarch.core.log.LogTestSupport;
 import nablarch.core.log.LogTestUtil;
 import nablarch.core.log.MockLogSettings;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
+import org.mockito.InOrder;
+import org.mockito.MockedConstruction;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -15,7 +16,20 @@ import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * {@link FileLogWriter}のテスト。
@@ -140,7 +154,7 @@ public class FileLogWriterTest extends LogTestSupport {
 
     /** initialize時に、RotatePolicyのインターフェースが正しく呼び出されていること */
     @Test
-    public void testRotatePolicyWhenInitialize(@Capturing final RotatePolicy rotatePolicy) {
+    public void testRotatePolicyWhenInitialize() {
         LogTestUtil.cleanupLog("/testRotatePolicyWhenNoRotation-app.log");
 
         final String utf8 = "UTF-8";
@@ -153,27 +167,25 @@ public class FileLogWriterTest extends LogTestSupport {
 
         FileLogWriter writer = new FileLogWriter();
         final ObjectSettings objectSettings = new ObjectSettings(new MockLogSettings(settings), "appFile");
+        
+        try (final MockedConstruction<FileSizeRotatePolicy> mocked = mockConstruction(FileSizeRotatePolicy.class);) {
+            writer.initialize(objectSettings);
 
-        writer.initialize(objectSettings);
+            // initializeでは、initialize・onOpenFile・getSettings・onWriteが１回ずつ呼びされていることの確認
+            final RotatePolicy rotatePolicy = mocked.constructed().get(0);
 
-        // initializeでは、initialize・onOpenFile・getSettings・onWriteが１回ずつ呼びされていることの確認
-        new FullVerificationsInOrder() {
-            {
-                rotatePolicy.initialize(objectSettings);
-                times = 1;
-                rotatePolicy.onOpenFile(new File(path));
-                times = 1;
-                rotatePolicy.getSettings();
-                times = 1;
-                rotatePolicy.onWrite(anyString,Charset.forName(utf8));
-                times = 1;
-            }
-        };
+            final InOrder inOrder = inOrder(rotatePolicy);
+            inOrder.verify(rotatePolicy).initialize(objectSettings);
+            inOrder.verify(rotatePolicy).onOpenFile(new File(path));
+            inOrder.verify(rotatePolicy).getSettings();
+            inOrder.verify(rotatePolicy).onWrite(anyString(), eq(Charset.forName(utf8)));
+            verifyNoMoreInteractions(rotatePolicy);
+        }
     }
 
     /** ローテーションが不要な場合に、RotatePolicyのインターフェースが正しく呼び出されていること */
     @Test
-    public void testRotatePolicyWhenNoRotation(@Capturing final RotatePolicy rotatePolicy) {
+    public void testRotatePolicyWhenNoRotation() {
         LogTestUtil.cleanupLog("/testRotatePolicyWhenNoRotation-app.log");
 
         final String utf8 = "UTF-8";
@@ -187,33 +199,30 @@ public class FileLogWriterTest extends LogTestSupport {
 
         FileLogWriter writer = new FileLogWriter();
         final ObjectSettings objectSettings = new ObjectSettings(new MockLogSettings(settings), "appFile");
+        
+        try (final MockedConstruction<FileSizeRotatePolicy> mocked = mockConstruction(FileSizeRotatePolicy.class)) {
+            writer.initialize(objectSettings);
+            
+            // initialize の中で RotatePolicy のモックと行われたインタラクションをリセットする
+            final RotatePolicy rotatePolicy = mocked.constructed().get(0);
+            reset(rotatePolicy);
+            when(rotatePolicy.needsRotate(message, Charset.forName(utf8))).thenReturn(false);
+            
+            writer.onWrite("HelloWorld");
 
-        writer.initialize(objectSettings);
-
-        new Expectations() {
-            {
-                rotatePolicy.needsRotate(message, Charset.forName(utf8));
-                result = false;
-            }
-        };
-
-        writer.onWrite("HelloWorld");
-
-        // onWriteでは、needsRotate・onWriteが１回ずつ呼びされていることの確認
-        // その他のメソッドは呼ばれていないことの確認
-        new FullVerificationsInOrder() {
-            {
-                rotatePolicy.needsRotate(message, Charset.forName(utf8));
-                times = 1;
-                rotatePolicy.onWrite(message, Charset.forName(utf8));
-                times = 1;
-            }
-        };
+            // onWriteでは、needsRotate・onWriteが１回ずつ呼びされていることの確認
+            // その他のメソッドは呼ばれていないことの確認
+            final InOrder inOrder = inOrder(rotatePolicy);
+            
+            inOrder.verify(rotatePolicy).needsRotate(message, Charset.forName(utf8));
+            inOrder.verify(rotatePolicy).onWrite(message, Charset.forName(utf8));
+            verifyNoMoreInteractions(rotatePolicy);
+        }
     }
 
     /** ローテーションが必要な場合に、RotatePolicyのインターフェースが正しく呼び出されていること */
     @Test
-    public void testRotatePolicyWhenRotation(@Capturing final RotatePolicy rotatePolicy) {
+    public void testRotatePolicyWhenRotation() {
         LogTestUtil.cleanupLog("/testRotatePolicyWhenRotation-app.log");
 
         final String utf8 = "UTF-8";
@@ -230,42 +239,33 @@ public class FileLogWriterTest extends LogTestSupport {
         FileLogWriter writer = new FileLogWriter();
         final ObjectSettings objectSettings = new ObjectSettings(new MockLogSettings(settings), "appFile");
 
-        writer.initialize(objectSettings);
 
-        new Expectations() {
-            {
-                rotatePolicy.needsRotate(message, Charset.forName(utf8));
-                result = true;
+        try (final MockedConstruction<FileSizeRotatePolicy> mocked = mockConstruction(FileSizeRotatePolicy.class)) {
+            writer.initialize(objectSettings);
+            
+            // initialize の中で RotatePolicy のモックと行われたインタラクションをリセットする
+            final RotatePolicy rotatePolicy = mocked.constructed().get(0);
+            reset(rotatePolicy);
+            
+            when(rotatePolicy.needsRotate(message, Charset.forName(utf8))).thenReturn(true);
+            when(rotatePolicy.decideRotatedFilePath()).thenReturn(rotatedFilePath);
+            
+            writer.onWrite(message);
 
-                rotatePolicy.decideRotatedFilePath();
-                result = rotatedFilePath;
-            }
-        };
+            // onWriteではローテーションが必要な場合に、needsRotate・decideRotatedFilePath・onWrite
+            // rotate・onOpenFile・getSettings・onWriteの順で実装クラスが呼びされていることの確認
+            final InOrder inOrder = inOrder(rotatePolicy);
 
-        writer.onWrite(message);
-
-        // onWriteではローテーションが必要な場合に、needsRotate・decideRotatedFilePath・onWrite
-        // rotate・onOpenFile・getSettings・onWriteの順で実装クラスが呼びされていることの確認
-        new FullVerificationsInOrder() {
-            {
-                rotatePolicy.needsRotate(message, Charset.forName(utf8));
-                times = 1;
-
-                rotatePolicy.decideRotatedFilePath();
-                times = 1;
-                rotatePolicy.onWrite(anyString, Charset.forName(utf8));
-                times = 1;
-                rotatePolicy.rotate(rotatedFilePath);
-                times = 1;
-                rotatePolicy.onOpenFile(new File(path));
-                times = 1;
-                rotatePolicy.getSettings();
-                times = 1;
-
-                rotatePolicy.onWrite(anyString, Charset.forName(utf8));
-                times = 2;
-            }
-        };
+            inOrder.verify(rotatePolicy).needsRotate(message, Charset.forName(utf8));
+            inOrder.verify(rotatePolicy).decideRotatedFilePath();
+            inOrder.verify(rotatePolicy).onWrite(anyString(), eq(Charset.forName(utf8)));
+            inOrder.verify(rotatePolicy).rotate(rotatedFilePath);
+            inOrder.verify(rotatePolicy).onOpenFile(new File(path));
+            inOrder.verify(rotatePolicy).getSettings();
+            inOrder.verify(rotatePolicy, times(2)).onWrite(anyString(), eq(Charset.forName(utf8)));
+            
+            verifyNoMoreInteractions(rotatePolicy);
+        }
     }
 
     /** 
